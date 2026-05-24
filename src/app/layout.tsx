@@ -15,7 +15,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Absolute URL for the OG/Twitter image — social platforms can't resolve relative paths.
+// Include the basePath because the site is deployed under /lampham/ on GitHub Pages.
+const ogImageUrl = `${siteConfig.url}/avatar.jpg`;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.title,
     template: `%s — ${siteConfig.name}`,
@@ -26,11 +31,25 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     type: "website",
     url: siteConfig.url,
+    images: [
+      {
+        url: ogImageUrl,
+        width: 473,
+        height: 480,
+        alt: `${siteConfig.name} — avatar`,
+      },
+    ],
   },
   twitter: {
-    card: "summary_large_image",
+    // Square avatar reads better as `summary` (small thumb) than `summary_large_image`.
+    card: "summary",
     title: siteConfig.title,
     description: siteConfig.description,
+    images: [ogImageUrl],
+  },
+  icons: {
+    icon: ogImageUrl,
+    apple: ogImageUrl,
   },
 };
 
