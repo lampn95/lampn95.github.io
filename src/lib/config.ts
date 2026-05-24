@@ -1,3 +1,16 @@
+// Mirrors `basePath` in next.config.ts. Inlined into the bundle at build time
+// via the standard NODE_ENV replacement, so client + server stay in sync.
+// next/image does NOT auto-prefix basePath when `images.unoptimized: true`,
+// so for static assets we prefix manually via the `asset()` helper below.
+export const basePath =
+  process.env.NODE_ENV === "production" ? "/lampham" : "";
+
+/** Resolve a public/ asset path to a URL that works under the configured basePath. */
+export function asset(path: string): string {
+  if (!path.startsWith("/")) path = `/${path}`;
+  return `${basePath}${path}`;
+}
+
 export const siteConfig = {
   name: "Lam Pham",
   title: "Lam Pham",
