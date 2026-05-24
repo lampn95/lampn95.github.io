@@ -3,12 +3,12 @@ export const siteConfig = {
   title: "Lam Pham",
   description:
     "Backend engineer in Vietnam. I write about systems, AI-assisted engineering, and a few lessons from building with teams.",
-  url: "https://lampham.github.io",
+  url: "https://lampn95.github.io/lampham",
   email: "lampham.aizu@gmail.com",
   phone: "+84 35-291-1223",
   location: "Vietnam",
   socials: {
-    github: "https://github.com/lampham",
+    github: "https://github.com/lampn95",
     linkedin: "https://www.linkedin.com/in/lampham",
     engineerpro: "https://engineerprogurus.com/",
   },

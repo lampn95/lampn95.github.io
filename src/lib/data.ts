@@ -50,6 +50,7 @@ export type Project = {
   summary: string;
   bullets: string[];
   tech: string[];
+  github?: string;
 };
 
 export const projects: Project[] = [
@@ -73,6 +74,7 @@ export const projects: Project[] = [
       "Docker Compose",
       "t-digest",
     ],
+    github: "https://github.com/lampn95/counting-stream-with-flink",
   },
   {
     name: "Crawl News System",
@@ -95,6 +97,7 @@ export const projects: Project[] = [
       "Redis 7",
       "Docker Compose",
     ],
+    github: "https://github.com/lampn95/crawl-news-system",
   },
   {
     name: "Cache Infra with Binlog-Driven Invalidation",
@@ -117,6 +120,7 @@ export const projects: Project[] = [
       "Debezium 2.7",
       "Kubernetes",
     ],
+    github: "https://github.com/lampn95/caching-infra-with-invalidation",
   },
 ];
 
