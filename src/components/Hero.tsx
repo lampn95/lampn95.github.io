@@ -52,8 +52,9 @@ export function Hero() {
               transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
               className="mt-7 max-w-2xl text-base sm:text-lg text-white/65 leading-relaxed"
             >
-              Hiện tại mình làm backend ở <span className="text-white">NVIDIA</span>,
-              trước đây có dịp đi qua <span className="text-white">TikTok</span>,{" "}
+              Hiện tại mình làm Senior Software Engineer ở{" "}
+              <span className="text-white">NVIDIA</span>, trước đây có dịp đi qua{" "}
+              <span className="text-white">TikTok</span>,{" "}
               <span className="text-white">Grab</span>,{" "}
               <span className="text-white">Shopee</span>. Cùng anh em đồng sáng lập{" "}
               <a
