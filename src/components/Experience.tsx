@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { experiences } from "@/lib/data";
 import { SectionHeading } from "./SectionHeading";
+import { CompanyLogo } from "./CompanyLogos";
 
 export function Experience() {
   return (
@@ -27,17 +28,20 @@ export function Experience() {
             <span
               className={`absolute -left-[7px] mt-2 inline-flex h-3 w-3 rounded-full bg-gradient-to-br ${exp.accent} shadow-[0_0_12px_rgba(124,242,255,0.4)]`}
             />
-            <div className="glass rounded-2xl px-5 py-4 sm:px-6 sm:py-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1.5 transition-colors">
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <h3 className="text-base sm:text-lg font-semibold text-white">
-                  {exp.role}
-                </h3>
-                <span className="text-white/30">·</span>
-                <span
-                  className={`text-base sm:text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r ${exp.accent}`}
-                >
-                  {exp.company}
-                </span>
+            <div className="glass rounded-2xl px-5 py-4 sm:px-6 sm:py-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <CompanyLogo company={exp.company} />
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-white">
+                    {exp.role}
+                  </h3>
+                  <span className="text-white/30">·</span>
+                  <span
+                    className={`text-base sm:text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r ${exp.accent}`}
+                  >
+                    {exp.company}
+                  </span>
+                </div>
               </div>
               <div className="text-xs font-mono text-white/45">
                 {exp.location} · {exp.period}
