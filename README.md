@@ -56,8 +56,11 @@ src/
     └── podcasts.ts             # Danh sách podcast episodes
 
 .cursor/skills/
-└── lampham-humble-story/       # Skill: editorial guidelines cho /stories/
-    └── SKILL.md
+├── lampham-humble-story/             # Skill: editorial guidelines cho /stories/
+│   └── SKILL.md
+└── sync-engineerpro-podcasts/        # Skill: pull podcast mới từ Substack
+    ├── SKILL.md
+    └── scripts/fetch-podcasts.mjs    # API crawler + TS-formatted output
 ```
 
 ## Viết story mới — đọc skill này TRƯỚC khi nhờ agent
@@ -115,6 +118,26 @@ coffeeDriveEmbed: "https://drive.google.com/file/d/<ID>/preview",          // if
 Đổi QR mới: upload PDF/ảnh mới lên Drive (Anyone with the link), copy `<FILE_ID>` và
 thay vào 2 link trên.
 
+## Sync podcast mới từ Substack
+
+Khi EngineerPro ra episode mới trên [Substack](https://engineerprovn.substack.com/podcast/archive):
+
+```bash
+make sync-podcasts
+```
+
+Lệnh này chạy `.cursor/skills/sync-engineerpro-podcasts/scripts/fetch-podcasts.mjs` —
+crawl toàn bộ audio episodes qua Substack API (kể cả những cái bị hidden trong UI archive),
+dedup và in ra dưới dạng object TypeScript sẵn sàng paste vào `src/lib/podcasts.ts`.
+
+Workflow chuẩn (nhờ AI agent làm hộ):
+
+> *"Sync podcast mới về"* — agent sẽ đọc skill, chạy `make sync-podcasts`,
+> so với `src/lib/podcasts.ts`, chèn episode mới vào đầu array, rebuild.
+
+Chi tiết workflow + cách xử lý khi API Substack đổi → đọc
+`.cursor/skills/sync-engineerpro-podcasts/SKILL.md`.
+
 ## Cập nhật thông tin cá nhân
 
 - **Email, social, location, coffee link**: `src/lib/config.ts`
@@ -138,4 +161,6 @@ truth cho tone & voice. Khi tone bị drift (vd. trở lại salesy / brag-y), t
 | `make dev` | Dev server tại http://localhost:3000 |
 | `make github` | Build site tĩnh vào `./docs/` cho GitHub Pages |
 | `make build` | Alias của `make github` |
+| `make preview` | Serve `./docs` thật tại http://localhost:8080 |
+| `make sync-podcasts` | In danh sách podcast mới từ Substack API (TS objects) |
 | `make clean` | Xoá `docs/`, `.next/`, cache |
