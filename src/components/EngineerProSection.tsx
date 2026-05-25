@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, GraduationCap, Users, Sparkles } from "lucide-react";
 import { siteConfig } from "@/lib/config";
 import { SectionHeading } from "./SectionHeading";
+import { useT } from "@/lib/i18n";
 
 const mentors = [
   { name: "Đông Trương", role: "Sr SWE @ Shopee" },
@@ -15,13 +16,14 @@ const mentors = [
 ];
 
 export function EngineerProSection() {
+  const t = useT();
   return (
     <section className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20">
       <SectionHeading
         id="engineerpro"
-        eyebrow="EngineerPro"
-        title="EngineerPro — học nền tảng cùng những người đã đi trước."
-        description="Mình cùng anh em xây EngineerPro như một nhóm mentor nhỏ cho kỹ sư Việt Nam. Tụi mình cố gắng gom lại những gì đã học từ công việc thật: DSA, backend, system design, và cách chuẩn bị phỏng vấn một cách bền vững."
+        eyebrow={t("engineerpro.eyebrow")}
+        title={t("engineerpro.title")}
+        description={t("engineerpro.description")}
       />
 
       <motion.div
@@ -41,27 +43,28 @@ export function EngineerProSection() {
             </div>
 
             <h3 className="mt-4 text-2xl sm:text-3xl font-semibold text-white leading-tight">
-              Học chắc nền tảng,{" "}
-              <span className="gradient-text">đi đường dài hơn</span>
+              {t("engineerpro.cardTitleA")}{" "}
+              <span className="gradient-text">{t("engineerpro.cardTitleB")}</span>
               <br />
               <span className="text-white/70 text-xl sm:text-2xl">
-                Cùng mentor theo sát từng giai đoạn.
+                {t("engineerpro.cardSubtitle")}
               </span>
             </h3>
 
             <p className="mt-4 text-white/65 leading-relaxed">
-              Tụi mình thiết kế lộ trình rõ ràng từ <strong className="text-white">Frontend</strong>,{" "}
+              {t("engineerpro.copyLead")}
+              <strong className="text-white">Frontend</strong>,{" "}
               <strong className="text-white">Backend Java / Golang</strong>,{" "}
-              <strong className="text-white">DSA 3 cấp độ</strong>,{" "}
-              <strong className="text-white">CS Fundamentals</strong>, đến{" "}
-              <strong className="text-white">System Design Interview Lv1 & Lv2</strong>.
-              Mỗi bạn có xuất phát điểm khác nhau, nên lộ trình cũng cần đủ linh hoạt và thực tế.
+              <strong className="text-white">DSA</strong>,{" "}
+              <strong className="text-white">CS Fundamentals</strong>,{" "}
+              <strong className="text-white">System Design Interview Lv1 & Lv2</strong>
+              {t("engineerpro.copyTail")}
             </p>
 
             <div className="mt-6 grid grid-cols-3 gap-3 max-w-md">
-              <Mini icon={<Users className="h-4 w-4" />} title="Mentor" sub="đã làm sản phẩm thật" />
-              <Mini icon={<GraduationCap className="h-4 w-4" />} title="Lộ trình" sub="rõ từng bước" />
-              <Mini icon={<Sparkles className="h-4 w-4" />} title="Cộng đồng" sub="học cùng nhau" />
+              <Mini icon={<Users className="h-4 w-4" />} title={t("engineerpro.mini.mentor")} sub={t("engineerpro.mini.mentorSub")} />
+              <Mini icon={<GraduationCap className="h-4 w-4" />} title={t("engineerpro.mini.path")} sub={t("engineerpro.mini.pathSub")} />
+              <Mini icon={<Sparkles className="h-4 w-4" />} title={t("engineerpro.mini.community")} sub={t("engineerpro.mini.communitySub")} />
             </div>
 
             <a
@@ -70,14 +73,14 @@ export function EngineerProSection() {
               rel="noreferrer"
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-white text-black px-5 h-11 text-sm font-medium hover:bg-white/90 transition-colors"
             >
-              Khám phá EngineerPro
+              {t("engineerpro.cta")}
               <ArrowUpRight className="h-4 w-4" />
             </a>
           </div>
 
           <div>
             <div className="text-xs uppercase tracking-[0.18em] text-white/40 font-mono">
-              Một vài mentor
+              {t("engineerpro.mentors")}
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {mentors.map((m, i) => (
@@ -95,7 +98,7 @@ export function EngineerProSection() {
               ))}
             </div>
             <div className="mt-3 text-xs text-white/40 italic">
-              … và vài anh em khác từng làm ở Acronis, Microsoft, TikTok…
+              {t("engineerpro.moreMentors")}
             </div>
           </div>
         </div>

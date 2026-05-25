@@ -4,15 +4,17 @@ import { motion } from "framer-motion";
 import { experiences } from "@/lib/data";
 import { SectionHeading } from "./SectionHeading";
 import { CompanyLogo } from "./CompanyLogos";
+import { useT } from "@/lib/i18n";
 
 export function Experience() {
+  const t = useT();
   return (
     <section className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20">
       <SectionHeading
         id="experience"
-        eyebrow="Work"
-        title="Một vài nơi mình đã ghé qua."
-        description="Mỗi chặng là một dịp để học thêm — về hệ thống, về con người, và về chính mình."
+        eyebrow={t("experience.eyebrow")}
+        title={t("experience.title")}
+        description={t("experience.description")}
       />
 
       <ol className="relative border-l border-white/10 ml-2 space-y-5 sm:space-y-6">

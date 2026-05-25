@@ -3,17 +3,19 @@
 import { motion } from "framer-motion";
 import { BookOpen, ArrowUpRight } from "lucide-react";
 import { SectionHeading } from "./SectionHeading";
+import { useT } from "@/lib/i18n";
 
 const BOOK_URL = "https://engineerpro-team.github.io/coding-book/";
 
 export function Book() {
+  const t = useT();
   return (
     <section className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20">
       <SectionHeading
         id="book"
-        eyebrow="Note · Book"
-        title="Đồng tác giả một cuốn sách nhỏ."
-        description="Cùng anh Lê Quang Hoà biên soạn một cuốn sách miễn phí về DSA coding interview, dưới sự bảo trợ của EngineerPro."
+        eyebrow={t("book.eyebrow")}
+        title={t("book.title")}
+        description={t("book.description")}
       />
 
       <motion.a
@@ -51,28 +53,27 @@ export function Book() {
             </div>
 
             <h3 className="mt-3 text-xl sm:text-2xl font-semibold text-white leading-snug">
-              Coding DSA Interview — kèm lời giải.
+              {t("book.cardTitle")}
             </h3>
 
             <p className="mt-3 text-sm text-white/65 leading-relaxed">
-              Cuốn sách tổng hợp các bài DSA thường gặp trong phỏng vấn kỹ thuật, kèm lời
-              giải Python 3, phân tích độ phức tạp, và các bẫy phỏng vấn. Học theo{" "}
-              <span className="text-white">pattern</span>, không phải học vẹt từng bài.
-              Hoàn toàn miễn phí cho cộng đồng.
+              {t("book.copyLead")}
+              <span className="text-white">{t("book.pattern")}</span>
+              {t("book.copyTail")}
             </p>
 
             <div className="mt-4 grid grid-cols-3 gap-3 max-w-md">
-              <Stat number="288" label="bài tập" />
-              <Stat number="44" label="patterns" />
-              <Stat number="Free" label="mở cho cộng đồng" />
+              <Stat number="288" label={t("book.stat.problems")} />
+              <Stat number="44" label={t("book.stat.patterns")} />
+              <Stat number={t("book.stat.freeLabel")} label={t("book.stat.freeSub")} />
             </div>
 
             <div className="mt-5 inline-flex items-center gap-1.5 text-sm text-violet-200 group-hover:text-white transition-colors">
-              Mở sách <ArrowUpRight className="h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+              {t("book.cta")} <ArrowUpRight className="h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
             </div>
 
             <div className="mt-4 text-xs text-white/45 italic">
-              Đồng tác giả: Phạm Ngọc Lâm · Lê Quang Hoà — 2026.
+              {t("book.credit")}
             </div>
           </div>
         </div>

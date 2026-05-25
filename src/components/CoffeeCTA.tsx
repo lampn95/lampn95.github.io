@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { Coffee, Heart } from "lucide-react";
 import { CoffeeButton } from "./CoffeeButton";
+import { useT } from "@/lib/i18n";
 
 export function CoffeeCTA() {
+  const t = useT();
   return (
     <section className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20">
       <motion.div
@@ -22,11 +24,10 @@ export function CoffeeCTA() {
           </div>
 
           <h3 className="mt-5 text-2xl sm:text-3xl font-semibold text-white">
-            Nội dung free, nhưng cà phê thì có giá.
+            {t("coffeeCta.title")}
           </h3>
           <p className="mt-3 max-w-xl mx-auto text-white/65 leading-relaxed">
-            Nếu một story, một project, hay một ý ở đây giúp được bạn — bạn có thể mời mình
-            một ly cà phê qua QR banking VN. Mọi đóng góp đều rất rất quý.
+            {t("coffeeCta.description")}
           </p>
 
           <div className="mt-7 flex items-center justify-center">
@@ -35,7 +36,7 @@ export function CoffeeCTA() {
 
           <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-white/45">
             <Heart className="h-3 w-3 text-rose-300" />
-            Cảm ơn bạn đã ghé qua.
+            {t("coffeeCta.closing")}
           </div>
         </div>
       </motion.div>

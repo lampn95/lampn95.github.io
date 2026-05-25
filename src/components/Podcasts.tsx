@@ -10,22 +10,22 @@ import {
   podcasts,
 } from "@/lib/podcasts";
 import { SectionHeading } from "./SectionHeading";
+import { useT } from "@/lib/i18n";
 
 const INITIAL = 5;
 
 export function Podcasts() {
   const [expanded, setExpanded] = useState(false);
+  const t = useT();
   const visible = expanded ? podcasts : podcasts.slice(0, INITIAL);
 
   return (
     <section className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20">
       <SectionHeading
         id="podcast"
-        eyebrow="Podcast · Ghi chép bằng giọng nói"
-        title="Coffee with Lam."
-        description={
-          `Series podcast mình ghi lại trên kênh EngineerPro — lúc thì bình luận đề phỏng vấn kỹ thuật, lúc thì bàn về văn hoá engineering, system design, monitoring, e2e encryption… Hiện có ${podcasts.length} episode trên Spotify và Substack.`
-        }
+        eyebrow={t("podcast.eyebrow")}
+        title={t("podcast.title")}
+        description={`${t("podcast.descriptionPrefix")}${t("podcast.totalLabel")} ${podcasts.length} ${t("podcast.descriptionTail")}`}
       />
 
       <motion.div
@@ -100,8 +100,8 @@ export function Podcasts() {
               className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`}
             />
             {expanded
-              ? "Thu gọn"
-              : `Xem thêm ${podcasts.length - INITIAL} episode`}
+              ? t("podcast.collapse")
+              : t("podcast.showMore", { n: podcasts.length - INITIAL })}
           </button>
         )}
 

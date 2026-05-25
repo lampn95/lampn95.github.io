@@ -1,8 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
 import { CoffeeButton } from "./CoffeeButton";
+import { useT } from "@/lib/i18n";
+import type { TranslationKey } from "@/lib/translations";
+
+const navStoriesKey: TranslationKey = "nav.stories";
 
 export function Footer() {
+  const t = useT();
   return (
     <footer className="border-t border-white/10 mt-24">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 py-12 flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
@@ -14,9 +21,7 @@ export function Footer() {
             <span className="font-semibold text-white">{siteConfig.name}</span>
           </div>
           <p className="mt-3 text-sm text-white/50 max-w-md">
-            Backend engineer ở Việt Nam. Viết một chút về hệ thống,
-            AI-assisted engineering, và vài bài học khi làm việc với team. Cùng
-            anh em xây{" "}
+            {t("footer.tagline")}
             <a
               href={siteConfig.socials.engineerpro}
               target="_blank"
@@ -25,7 +30,7 @@ export function Footer() {
             >
               EngineerPro
             </a>
-            . Built with Next.js & một lượng kha khá cà phê sữa đá.
+            {t("footer.taglineTail")}
           </p>
         </div>
 
@@ -40,7 +45,7 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/stories" className="text-white/60 hover:text-white">
-              Stories
+              {t(navStoriesKey)}
             </Link>
             <span className="text-white/20">·</span>
             <a
@@ -58,7 +63,7 @@ export function Footer() {
 
       <div className="border-t border-white/5">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-5 text-xs text-white/40 flex items-center justify-between">
-          <span>© {new Date().getFullYear()} Lam Pham. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Lam Pham. {t("footer.copyright")}</span>
           <span className="font-mono">v1.0</span>
         </div>
       </div>

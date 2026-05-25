@@ -5,8 +5,53 @@ import { motion } from "framer-motion";
 import { ArrowRight, MapPin, Sparkles } from "lucide-react";
 import { CoffeeButton } from "./CoffeeButton";
 import { asset, siteConfig } from "@/lib/config";
+import { useLang, useT } from "@/lib/i18n";
 
 export function Hero() {
+  const t = useT();
+  const { lang } = useLang();
+
+  // Description has inline links / spans that change per language.
+  const description =
+    lang === "en" ? (
+      <>
+        I&apos;m a Senior Software Engineer at{" "}
+        <span className="text-white">NVIDIA</span>. Previously I had the chance
+        to work at <span className="text-white">TikTok</span>,{" "}
+        <span className="text-white">Grab</span>,{" "}
+        <span className="text-white">Shopee</span>. With a few friends I
+        co-founded{" "}
+        <a
+          href={siteConfig.socials.engineerpro}
+          target="_blank"
+          rel="noreferrer"
+          className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4 decoration-cyan-300/40"
+        >
+          EngineerPro
+        </a>
+        {" "}— a small place where we share what we&apos;ve learned with folks
+        on their way into the industry.
+      </>
+    ) : (
+      <>
+        Hiện tại mình làm Senior Software Engineer ở{" "}
+        <span className="text-white">NVIDIA</span>, trước đây có dịp đi qua{" "}
+        <span className="text-white">TikTok</span>,{" "}
+        <span className="text-white">Grab</span>,{" "}
+        <span className="text-white">Shopee</span>. Cùng anh em đồng sáng lập{" "}
+        <a
+          href={siteConfig.socials.engineerpro}
+          target="_blank"
+          rel="noreferrer"
+          className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4 decoration-cyan-300/40"
+        >
+          EngineerPro
+        </a>
+        {" "}— một chỗ nhỏ để tụi mình chia sẻ lại những gì đã học, với các bạn
+        đang trên đường vào ngành.
+      </>
+    );
+
   return (
     <section id="about" className="relative overflow-hidden">
       <div className="absolute inset-0 bg-aurora" />
@@ -26,7 +71,7 @@ export function Hero() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
               </span>
-              Open to interesting conversations
+              {t("hero.statusPill")}
               <span className="mx-1 text-white/30">·</span>
               <MapPin className="h-3 w-3" />
               <span>{siteConfig.location}</span>
@@ -38,11 +83,11 @@ export function Hero() {
               transition={{ duration: 0.7, delay: 0.05, ease: "easeOut" }}
               className="mt-6 text-4xl sm:text-6xl md:text-7xl font-semibold tracking-tight text-white leading-[1.05]"
             >
-              Hi, mình là{" "}
+              {t("hero.greeting")}{" "}
               <span className="gradient-text">Lam Pham</span>.
               <br />
               <span className="text-white/70 text-3xl sm:text-5xl md:text-6xl">
-                Một software engineer, đang học mỗi ngày.
+                {t("hero.subtitle")}
               </span>
             </motion.h1>
 
@@ -52,21 +97,7 @@ export function Hero() {
               transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
               className="mt-7 max-w-2xl text-base sm:text-lg text-white/65 leading-relaxed"
             >
-              Hiện tại mình làm Senior Software Engineer ở{" "}
-              <span className="text-white">NVIDIA</span>, trước đây có dịp đi qua{" "}
-              <span className="text-white">TikTok</span>,{" "}
-              <span className="text-white">Grab</span>,{" "}
-              <span className="text-white">Shopee</span>. Cùng anh em đồng sáng lập{" "}
-              <a
-                href={siteConfig.socials.engineerpro}
-                target="_blank"
-                rel="noreferrer"
-                className="text-cyan-300 hover:text-cyan-200 underline underline-offset-4 decoration-cyan-300/40"
-              >
-                EngineerPro
-              </a>
-              {" "}— một chỗ nhỏ để tụi mình chia sẻ lại những gì đã học, với các bạn đang
-              trên đường vào ngành.
+              {description}
             </motion.p>
 
             <motion.div
@@ -80,7 +111,7 @@ export function Hero() {
                 className="group inline-flex items-center gap-2 rounded-full bg-white text-black px-5 h-11 text-sm font-medium hover:bg-white/90 transition-colors"
               >
                 <Sparkles className="h-4 w-4" />
-                Đọc Stories
+                {t("hero.cta.stories")}
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <CoffeeButton size="lg" />
@@ -88,7 +119,7 @@ export function Hero() {
                 href={`mailto:${siteConfig.email}`}
                 className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-5 h-11 text-sm text-white/80 hover:text-white hover:border-white/30 hover:bg-white/[0.06] transition-colors"
               >
-                Liên hệ
+                {t("hero.cta.contact")}
               </a>
             </motion.div>
           </div>
@@ -131,7 +162,7 @@ export function Hero() {
               {/* Floating mini-badge */}
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/70 px-3 py-1.5 text-xs text-white/80 backdrop-blur shadow-[0_8px_24px_rgba(0,0,0,0.5)]">
                 <span className="inline-flex h-2 w-2 rounded-full bg-amber-300" />
-                <span className="font-medium">Hà Nội, Vietnam</span>
+                <span className="font-medium">{t("hero.locationBadge")}</span>
               </div>
             </div>
           </motion.div>

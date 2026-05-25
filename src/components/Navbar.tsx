@@ -3,19 +3,23 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CoffeeButton } from "./CoffeeButton";
+import { LanguageToggle } from "./LanguageToggle";
+import { useT } from "@/lib/i18n";
+import type { TranslationKey } from "@/lib/translations";
 
-const links = [
-  { href: "/#about", label: "About" },
-  { href: "/#experience", label: "Experience" },
-  { href: "/#projects", label: "Projects" },
-  { href: "/#engineerpro", label: "EngineerPro" },
-  { href: "/#book", label: "Book" },
-  { href: "/#podcast", label: "Podcast" },
-  { href: "/stories", label: "Stories" },
+const links: Array<{ href: string; key: TranslationKey }> = [
+  { href: "/#about",       key: "nav.about" },
+  { href: "/#experience",  key: "nav.experience" },
+  { href: "/#projects",    key: "nav.projects" },
+  { href: "/#engineerpro", key: "nav.engineerpro" },
+  { href: "/#book",        key: "nav.book" },
+  { href: "/#podcast",     key: "nav.podcast" },
+  { href: "/stories",      key: "nav.stories" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -32,7 +36,7 @@ export function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 h-16 flex items-center justify-between">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8 h-16 flex items-center justify-between gap-3">
         <Link href="/" className="group flex items-center gap-2">
           <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 via-fuchsia-400 to-amber-300 text-black font-bold text-sm shadow-[0_0_24px_rgba(124,242,255,0.35)]">
             L
@@ -42,19 +46,20 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1 text-sm">
+        <nav className="hidden lg:flex items-center gap-1 text-sm">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               className="px-3 py-2 rounded-md text-white/70 hover:text-white hover:bg-white/5 transition-colors"
             >
-              {l.label}
+              {t(l.key)}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <CoffeeButton variant="ghost" />
         </div>
       </div>

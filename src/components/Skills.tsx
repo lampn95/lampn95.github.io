@@ -4,13 +4,15 @@ import { motion } from "framer-motion";
 import { skills, education } from "@/lib/data";
 import { SectionHeading } from "./SectionHeading";
 import { GraduationCap } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export function Skills() {
+  const t = useT();
   return (
     <section className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20">
       <SectionHeading
-        eyebrow="Skills & Education"
-        title="Stack & nền tảng."
+        eyebrow={t("skills.eyebrow")}
+        title={t("skills.title")}
       />
 
       <div className="grid gap-5 md:grid-cols-3">

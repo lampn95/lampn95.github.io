@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { projects } from "@/lib/data";
 import { SectionHeading } from "./SectionHeading";
+import { useT } from "@/lib/i18n";
 
 function GithubIcon({ className = "" }: { className?: string }) {
   return (
@@ -23,13 +24,14 @@ function GithubIcon({ className = "" }: { className?: string }) {
 }
 
 export function Projects() {
+  const t = useT();
   return (
     <section className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20">
       <SectionHeading
         id="projects"
-        eyebrow="Selected Projects"
-        title="Những thứ mình build ngoài giờ."
-        description="Mỗi project là một dịp để thử một idea, một stack mới, hoặc kiểm chứng một niềm tin về kiến trúc. Tất cả đều paired với Claude (design + impl) và Codex (code review)."
+        eyebrow={t("projects.eyebrow")}
+        title={t("projects.title")}
+        description={t("projects.description")}
       />
 
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -103,7 +105,7 @@ export function Projects() {
               target="_blank"
               rel="noopener noreferrer"
               className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 rounded-2xl"
-              aria-label={`${p.name} — Mở source trên GitHub`}
+              aria-label={`${p.name} — ${t("projects.openSource")}`}
             >
               {card}
             </a>
