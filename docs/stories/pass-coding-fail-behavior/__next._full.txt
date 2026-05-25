@@ -1,53 +1,141 @@
 1:"$Sreact.fragment"
-2:I[45678,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"Navbar"]
-3:I[39756,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-4:I[37457,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-5:I[22016,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],""]
-f:I[68027,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default",1]
-:HL["/lampham/_next/static/chunks/0ygiecc75zlwp.css","style"]
+2:I[33499,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"LanguageProvider"]
+3:I[45678,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[13642,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"Footer"]
+8:I[97367,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/lampham/_next/static/chunks/0lgexlx1qtw~3.css","style"]
 :HL["/lampham/_next/static/media/797e433ab948586e-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/lampham/_next/static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"P":null,"c":["","stories","pass-coding-fail-behavior",""],"q":"","i":false,"f":[[["",{"children":["stories",{"children":[["slug","pass-coding-fail-behavior","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0ygiecc75zlwp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/lampham/_next/static/chunks/0lpsil3_dcbjf.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/lampham/_next/static/chunks/0d3shmwh5_nmn.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-background text-foreground","children":[["$","$L2",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","footer",null,{"className":"border-t border-white/10 mt-24","children":[["$","div",null,{"className":"mx-auto max-w-6xl px-5 sm:px-8 py-12 flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between","children":[["$","div",null,{"children":[["$","div",null,{"className":"flex items-center gap-2","children":[["$","span",null,{"className":"inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 via-fuchsia-400 to-amber-300 text-black font-bold text-sm","children":"L"}],["$","span",null,{"className":"font-semibold text-white","children":"Lam Pham"}]]}],["$","p",null,{"className":"mt-3 text-sm text-white/50 max-w-md","children":["Backend engineer ở Việt Nam. Viết một chút về hệ thống, AI-assisted engineering, và vài bài học khi làm việc với team. Cùng anh em xây"," ",["$","a",null,{"href":"https://engineerprogurus.com/","target":"_blank","rel":"noreferrer","className":"text-cyan-300 hover:text-cyan-200","children":"EngineerPro"}],". Built with Next.js & một lượng kha khá cà phê sữa đá."]}]]}],["$","div",null,{"className":"flex flex-col gap-3 sm:items-end","children":[["$","div",null,{"className":"flex items-center gap-3 text-sm","children":["$","a",null,{"href":"mailto:lampham.aizu@gmail.com","className":"text-white/60 hover:text-white","children":"lampham.aizu@gmail.com"}]}],["$","div",null,{"className":"flex items-center gap-3 text-sm","children":[["$","$L5",null,{"href":"/stories","className":"text-white/60 hover:text-white","children":"Stories"}],["$","span",null,{"className":"text-white/20","children":"·"}],["$","a",null,{"href":"https://engineerprogurus.com/","target":"_blank","rel":"noreferrer","className":"text-white/60 hover:text-white","children":"EngineerPro"}]]}],["$","$L5",null,{"href":"/coffee/","className":"group relative inline-flex items-center gap-2 rounded-full font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-300 active:scale-[0.97] h-10 px-4 text-sm text-black font-semibold bg-gradient-to-r from-amber-300 via-orange-300 to-amber-200 shadow-[0_8px_30px_rgba(255,184,107,0.35)] hover:shadow-[0_8px_40px_rgba(255,184,107,0.55)] hover:-translate-y-0.5 ","aria-label":"Mời tác giả một ly cà phê","children":["$L6","$L7","$L8"]}]]}]]}],"$L9"]}]]}]}]]}],{"children":["$La",{"children":["$Lb",{"children":["$Lc",{},null,false,null]},null,false,"$@d"]},null,false,"$@d"]},null,false,null],"$Le",false]],"m":"$undefined","G":["$f",["$L10"]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"pAXUd55JnetY5AbO5NbgZ"}
-11:I[5014,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-13:I[97367,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-14:"$Sreact.suspense"
-17:I[97367,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"ViewportBoundary"]
-19:I[97367,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"MetadataBoundary"]
-6:["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"M10 2v2","key":"7u0qdc"}],["path",{"d":"M14 2v2","key":"6buw04"}],["path",{"d":"M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1","key":"pwadti"}],["path",{"d":"M6 2v2","key":"colzsn"}]],"className":"lucide-coffee h-4 w-4 group-hover:rotate-12 transition-transform"}]
-7:["$","span",null,{"children":"Mời mình 1 ly cà phê"}]
-8:["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full overflow-hidden","children":["$","span",null,{"className":"absolute inset-0 shimmer rounded-full"}]}]
-9:["$","div",null,{"className":"border-t border-white/5","children":["$","div",null,{"className":"mx-auto max-w-6xl px-5 sm:px-8 py-5 text-xs text-white/40 flex items-center justify-between","children":[["$","span",null,{"children":["© ",2026," Lam Pham. All rights reserved."]}],["$","span",null,{"className":"font-mono","children":"v1.0"}]]}]}]
-a:["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}]
-b:["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}]
-c:["$","$1","c",{"children":["$L12",null,["$","$L13",null,{"children":["$","$14",null,{"name":"Next.MetadataOutlet","children":"$@15"}]}]]}]
-16:[]
-d:"$W16"
-e:["$","$1","h",{"children":[null,["$","$L17",null,{"children":"$L18"}],["$","div",null,{"hidden":true,"children":["$","$L19",null,{"children":["$","$14",null,{"name":"Next.Metadata","children":"$L1a"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}]
-10:["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0ygiecc75zlwp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]
-12:["$","div",null,{"className":"relative","children":[["$","div",null,{"className":"absolute inset-0 bg-aurora pointer-events-none"}],["$","article",null,{"className":"relative mx-auto max-w-2xl px-5 sm:px-8 pt-16 sm:pt-24 pb-20","children":[["$","$L5",null,{"href":"/stories","className":"inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors","children":[["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"m12 19-7-7 7-7","key":"1l729n"}],["path",{"d":"M19 12H5","key":"x3x0zl"}]],"className":"lucide-arrow-left h-4 w-4"}],"All stories"]}],["$","div",null,{"className":"mt-8","children":[["$","div",null,{"className":"flex flex-wrap items-center gap-3 text-xs font-mono text-white/45","children":[["$","span",null,{"className":"inline-flex items-center gap-1.5","children":[["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"M8 2v4","key":"1cmpym"}],["path",{"d":"M16 2v4","key":"4m81vk"}],["rect",{"width":"18","height":"18","x":"3","y":"4","rx":"2","key":"1hopcy"}],["path",{"d":"M3 10h18","key":"8toen8"}]],"className":"lucide-calendar h-3 w-3"}],"3 tháng 2, 2026"]}],["$","span",null,{"children":"·"}],["$","span",null,{"className":"inline-flex items-center gap-1.5","children":[["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"M12 7v14","key":"1akyts"}],["path",{"d":"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z","key":"ruj8y"}]],"className":"lucide-book-open h-3 w-3"}],"5 min"]}],["$","span",null,{"children":"·"}],["$","span",null,{"className":"flex flex-wrap gap-1.5","children":[["$","span","Interview",{"className":"text-cyan-300/80","children":["#","Interview"]}],["$","span","Behavioral",{"className":"text-cyan-300/80","children":["#","Behavioral"]}],["$","span","Reflection",{"className":"text-cyan-300/80","children":["#","Reflection"]}]]}]]}],["$","h1",null,{"className":"mt-4 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white leading-[1.15]","children":"Behavioral interview — phần nhỏ nhưng dễ bị xem nhẹ"}],["$","p",null,{"className":"mt-4 text-lg text-white/65 leading-relaxed italic","children":"Mình gặp khá nhiều case bạn rất giỏi code, system design ổn, nhưng vẫn lỡ offer chỉ vì vòng behavioral. Vài quan sát rất cá nhân, mong hữu ích."}]]}],["$","hr",null,{"className":"my-10 border-white/10"}],["$","div",null,{"className":"prose-story","children":[["$","p","p-0",{"children":["Có một điều mình hay quan sát thấy khi đi phỏng vấn người khác: ",["$","strong","strong-0",{"children":"không ít bạn trượt không phải vì code, mà vì vòng behavioral"}],"."]}],"\n",["$","p","p-1",{"children":"Mình từng nghĩ điều này chỉ xảy ra với các bạn mới ra trường. Nhưng có những case mình gặp, ứng viên đã đi làm khá lâu, từng qua những môi trường lớn, mà vẫn lỡ vòng này. Và mỗi lần như vậy, mình lại tự hỏi: tại sao một kỹ năng quan trọng như thế lại dễ bị xem nhẹ?"}],"\n",["$","hr","hr-0",{}],"\n",["$","h2","h2-0",{"children":"Kịch bản lặp đi lặp lại"}],"\n",["$","p","p-2",{"children":"Qua những buổi mình tham gia phỏng vấn ứng viên — cả với vai trò interviewer, cả khi đi mentor — mình thấy một pattern rất quen:"}],"\n",["$","ul","ul-0",{"children":["\n",["$","li","li-0",{"children":["Các bạn dành ",["$","strong","strong-0",{"children":"80–90% thời gian ôn thuật toán và system design"}],"."]}],"\n",["$","li","li-1",{"children":["Phần behavioral, nếu có ôn, thì rất hời hợt — kiểu ",["$","em","em-0",{"children":"\"tới đâu trả lời tới đó\""}],"."]}],"\n"]}],"\n",["$","p","p-3",{"children":"Rồi khi vào phỏng vấn, gặp những câu nghe tưởng đơn giản:"}],"\n",["$","blockquote","blockquote-0",{"children":["\n",["$","p","p-0",{"children":["$","em","em-0",{"children":"\"Hãy kể về một lần bạn phải làm việc với một đồng nghiệp khó tính.\""}]}],"\n",["$","p","p-1",{"children":["$","em","em-0",{"children":"\"Khi bạn gặp một mâu thuẫn trong team, bạn xử lý thế nào?\""}]}],"\n",["$","p","p-2",{"children":["$","em","em-0",{"children":"\"Một lần bạn phải đưa ra quyết định khó khăn, kết quả ra sao?\""}]}],"\n"]}],"\n",["$","p","p-4",{"children":["Câu hỏi nhẹ nhàng, nhưng đa phần ứng viên trả lời lan man, thiếu cấu trúc, hoặc rơi vào trạng thái kể quá nhiều về cái tôi cá nhân. Các bạn quên rằng phỏng vấn không phải nơi để ","$L1b",". Người phỏng vấn muốn thấy ","$L1c","."]}],"\n","$L1d","\n","$L1e","\n","$L1f","\n","$L20","\n","$L21","\n","$L22","\n","$L23","\n","$L24","\n","$L25","\n","$L26","\n","$L27","\n","$L28","\n","$L29","\n","$L2a","\n","$L2b","\n","$L2c","\n","$L2d"]}],"$L2e","$L2f","$L30"]}]]}]
-1b:["$","em","em-0",{"children":"freestyle"}]
-1c:["$","strong","strong-0",{"children":"logic, sự tự nhận thức, khả năng self-reflection, và cách xử lý vấn đề có hệ thống"}]
-1d:["$","h2","h2-1",{"children":"Một ví dụ: Amazon"}]
-1e:["$","p","p-5",{"children":["Mình hay nói với các bạn mentee: ",["$","strong","strong-0",{"children":"phỏng vấn cũng giống đi thi đại học"}]," — không thể chỉ học mỗi Toán rồi bỏ qua Lý, Hóa mà mong đỗ. Behavioral chính là một trong những \"môn thi\" như vậy."]}]
-1f:["$","p","p-6",{"children":["Đặc biệt ở những công ty như Amazon. Họ nổi tiếng với 17 Leadership Principles. Không phải để học thuộc lòng, mà để luyện cách trả lời sao cho phản ánh đúng trải nghiệm thực của mình. Nếu không chuẩn bị, ",["$","strong","strong-0",{"children":"rất dễ bị \"soi\" ra ngay từ câu hỏi đầu"}],"."]}]
-20:["$","p","p-7",{"children":"Trong số các bạn mình từng quan sát, hiếm ai pass được phần này nếu chỉ dựa vào \"ứng biến tại chỗ\"."}]
-21:["$","h2","h2-2",{"children":"\"Em nói thật là được rồi mà?\""}]
-22:["$","p","p-8",{"children":"Đây là câu mình nghe nhiều nhất:"}]
-23:["$","blockquote","blockquote-1",{"children":["\n",["$","p","p-0",{"children":["$","em","em-0",{"children":"\"Em giỏi code rồi, behavioral chỉ cần nói thật thôi, chắc không sao đâu.\""}]}],"\n"]}]
-24:["$","p","p-9",{"children":["Sự thật thì ",["$","strong","strong-0",{"children":"nói thật không đủ"}],". Bạn cần:"]}]
-25:["$","ul","ul-1",{"children":["\n",["$","li","li-0",{"children":[["$","strong","strong-0",{"children":"Chọn đúng câu chuyện"}]," — không phải câu chuyện nào cũng phù hợp với câu hỏi."]}],"\n",["$","li","li-1",{"children":[["$","strong","strong-0",{"children":"Trả lời theo cấu trúc"}]," — STAR (Situation–Task–Action–Result) hoặc PARA. Nghe khô khan, nhưng giúp người phỏng vấn theo dõi được."]}],"\n",["$","li","li-2",{"children":[["$","strong","strong-0",{"children":"Thể hiện chính mình mà không biến buổi phỏng vấn thành buổi tự sự"}],"."]}],"\n"]}]
-26:["$","p","p-10",{"children":["Chỉ khi làm được như vậy, người phỏng vấn mới thấy bạn là ",["$","strong","strong-0",{"children":"người có tư duy hệ thống, có khả năng giao tiếp"}]," — chứ không chỉ là một coder giỏi."]}]
-27:["$","h2","h2-3",{"children":"3 lời khuyên rất thật"}]
-28:["$","ol","ol-0",{"children":["\n",["$","li","li-0",{"children":[["$","strong","strong-0",{"children":"Nhìn thẳng vào điểm yếu."}]," Nếu bạn đã mạnh về technical, hãy bớt thời gian cho phần đó và dành cho behavioral."]}],"\n",["$","li","li-1",{"children":[["$","strong","strong-0",{"children":"Đừng xem nhẹ."}]," Behavioral khó hơn bạn nghĩ. Nó hoàn toàn có thể khiến bạn mất cơ hội, kể cả khi code của bạn rất mượt."]}],"\n",["$","li","li-2",{"children":[["$","strong","strong-0",{"children":"Có người luyện cùng thì tốt hơn."}]," Mock interview với người đã từng đi qua những vòng này — hoặc đã ngồi phỏng vấn người khác — giúp bạn tiết kiệm rất nhiều thời gian, và tránh được những thất bại không đáng."]}],"\n"]}]
-29:["$","h2","h2-4",{"children":"Một quan sát cuối"}]
-2a:["$","p","p-11",{"children":["Thực tế, mình thấy hầu hết các bạn chỉ thật sự nghiêm túc với behavioral ",["$","strong","strong-0",{"children":"sau khi đã trượt vài lần"}],". Mình có thể nhắc nhở bao nhiêu cũng được, nhưng chỉ khi tự mình trải qua thất bại, các bạn mới thấm."]}]
-2b:["$","p","p-12",{"children":"Và sau khi thấm rồi, các bạn luyện tập kỹ hơn, có hệ thống hơn — rồi đạt kết quả tốt."}]
-2c:["$","p","p-13",{"children":["Sau một thời gian đi mentor, điều khiến mình vui nhất không phải là kết quả cụ thể, mà là ",["$","strong","strong-0",{"children":"những khoảnh khắc các bạn tự tin hơn khi nói về chính mình"}]," — biết nhìn lại, biết cải thiện từng kỹ năng nhỏ, kể cả những kỹ năng tưởng chừng vụn vặt như behavioral."]}]
-2d:["$","p","p-14",{"children":"Vì với mình, kỹ năng này không chỉ giúp bạn vượt qua phỏng vấn. Nó giúp bạn trở thành một kỹ sư, một đồng nghiệp, và một người lãnh đạo tốt hơn."}]
-2e:["$","hr",null,{"className":"my-12 border-white/10"}]
-2f:["$","div",null,{"className":"rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] p-6 text-center","children":[["$","p",null,{"className":"text-sm text-white/70 leading-relaxed","children":["Nếu bài viết hữu ích với bạn — mời mình một ly cà phê nhé.",["$","br",null,{}],"Đây là động lực để mình viết tiếp."]}],["$","div",null,{"className":"mt-4 flex justify-center","children":["$","$L5",null,{"href":"/coffee/","className":"group relative inline-flex items-center gap-2 rounded-full font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-300 active:scale-[0.97] h-12 px-5 text-base text-black font-semibold bg-gradient-to-r from-amber-300 via-orange-300 to-amber-200 shadow-[0_8px_30px_rgba(255,184,107,0.35)] hover:shadow-[0_8px_40px_rgba(255,184,107,0.55)] hover:-translate-y-0.5 ","aria-label":"Mời tác giả một ly cà phê","children":[["$","$L11",null,{"ref":"$undefined","iconNode":"$6:props:iconNode","className":"lucide-coffee h-4 w-4 group-hover:rotate-12 transition-transform"}],["$","span",null,{"children":"Mời mình 1 ly cà phê"}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full overflow-hidden","children":["$","span",null,{"className":"absolute inset-0 shimmer rounded-full"}]}]]}]}]]}]
-30:["$","div",null,{"className":"mt-10 flex items-center justify-between text-sm","children":[["$","$L5",null,{"href":"/stories","className":"inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors","children":[["$","$L11",null,{"ref":"$undefined","iconNode":"$12:props:children:1:props:children:0:props:children:0:props:iconNode","className":"lucide-arrow-left h-4 w-4"}],"All stories"]}],["$","$L5",null,{"href":"/","className":"text-white/60 hover:text-white transition-colors","children":"Home →"}]]}]
-18:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-31:I[27201,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"IconMark"]
-15:null
-1a:[["$","title","0",{"children":"Behavioral interview — phần nhỏ nhưng dễ bị xem nhẹ — Lam Pham"}],["$","meta","1",{"name":"description","content":"Mình gặp khá nhiều case bạn rất giỏi code, system design ổn, nhưng vẫn lỡ offer chỉ vì vòng behavioral. Vài quan sát rất cá nhân, mong hữu ích."}],["$","meta","2",{"property":"og:title","content":"Lam Pham"}],["$","meta","3",{"property":"og:description","content":"Backend engineer in Vietnam. I write about systems, AI-assisted engineering, and a few lessons from building with teams."}],["$","meta","4",{"property":"og:url","content":"https://lampn95.github.io/lampham/"}],["$","meta","5",{"property":"og:image","content":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","meta","6",{"property":"og:image:width","content":"473"}],["$","meta","7",{"property":"og:image:height","content":"480"}],["$","meta","8",{"property":"og:image:alt","content":"Lam Pham — avatar"}],["$","meta","9",{"property":"og:type","content":"website"}],["$","meta","10",{"name":"twitter:card","content":"summary"}],["$","meta","11",{"name":"twitter:title","content":"Lam Pham"}],["$","meta","12",{"name":"twitter:description","content":"Backend engineer in Vietnam. I write about systems, AI-assisted engineering, and a few lessons from building with teams."}],["$","meta","13",{"name":"twitter:image","content":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","link","14",{"rel":"icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","link","15",{"rel":"apple-touch-icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","$L31","16",{}]]
+0:{"P":null,"c":["","stories","pass-coding-fail-behavior",""],"q":"","i":false,"f":[[["",{"children":["stories",{"children":[["slug","pass-coding-fail-behavior","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0lgexlx1qtw~3.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/lampham/_next/static/chunks/0ra9f3_e5xikr.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/lampham/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-background text-foreground","children":["$","$L2",null,{"children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}]]}]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L7",[["$","script","script-0",{"src":"/lampham/_next/static/chunks/0r3-j8926gzr-.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/lampham/_next/static/chunks/0u3o-.lgi~nsd.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$1","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0lgexlx1qtw~3.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"luWMF86xKY2U_xv2DutUk"}
+11:[]
+b:"$W11"
+12:I[56479,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js","/lampham/_next/static/chunks/0r3-j8926gzr-.js","/lampham/_next/static/chunks/0u3o-.lgi~nsd.js"],"StoryView"]
+13:Tf15,One thing I keep noticing whenever I'm on the interviewer side: **a lot of people don't get rejected on code — they get rejected at the behavioral round**.
+
+I used to think this only happened to fresh grads. But I've seen cases where the candidate had been working for years, had been through large environments, and still got tripped up here. Every time, I find myself wondering: why does such an important skill get treated so lightly?
+
+---
+
+## The same script, over and over
+
+Across the interviews I've sat in on — both as interviewer and as a mentor — I see a very familiar pattern:
+
+- People spend **80–90% of their prep time on algorithms and system design**.
+- The behavioral part, if studied at all, gets studied very loosely — the *"I'll just answer as it comes"* approach.
+
+Then in the room they hit questions that sound deceptively simple:
+
+> *"Tell me about a time you had to work with a difficult coworker."*
+>
+> *"When there's conflict in the team, how do you handle it?"*
+>
+> *"Tell me about a hard decision you had to make and how it turned out."*
+
+The questions sound gentle, but most candidates answer in long rambles, with no structure, or fall into telling too much about themselves personally. They forget that an interview isn't a place to *freestyle*. The interviewer wants to see **logic, self-awareness, self-reflection, and a systematic way of handling problems**.
+
+## One example: Amazon
+
+I often tell mentees: **interviews are a lot like the university entrance exam** — you can't only study math and skip physics and chemistry and expect to pass. Behavioral is one of those "subjects".
+
+This is especially true at places like Amazon. They're famously built around 17 Leadership Principles. Not to memorize — to practice framing your answers in a way that actually reflects your real experience. Without preparation, **you can get found out very fast, often on the first question**.
+
+Among the people I've watched, very few pass this round just by winging it on the day.
+
+## "I'll just be honest, right?"
+
+The line I hear most often:
+
+> *"My coding's strong; behavioral I'll just be honest — should be fine, right?"*
+
+Honestly? **Honesty isn't enough.** You need:
+
+- **The right story** — not every story fits every question.
+- **A structure** — STAR (Situation–Task–Action–Result) or PARA. Sounds dry, but it gives the interviewer something to follow.
+- **A way to present yourself without turning the interview into a memoir.**
+
+Only when these click does the interviewer see you as **someone who thinks systematically, who can communicate** — not just a strong coder.
+
+## Three honest pieces of advice
+
+1. **Look your weak spot in the eye.** If you're already strong on the technical side, spend less time there and more on behavioral.
+2. **Don't downplay it.** Behavioral is harder than it looks. It can absolutely cost you the offer, even with smooth code.
+3. **A practice partner helps.** A mock interview with someone who's been through these rounds — or who has sat on the other side — saves you a lot of time, and a lot of needless failures.
+
+## One final observation
+
+Honestly, most people only take behavioral seriously **after failing a few times**. I can remind them as much as I want — the lesson really lands only when they've lived the failure themselves.
+
+After that, they practice more carefully, more systematically — and the results follow.
+
+After a while of mentoring, what makes me happiest isn't any specific outcome — it's **the moments when people grow more confident talking about themselves**, learning to look at themselves honestly, and to improve the small skills, including the ones people tend to underrate, like behavioral.
+
+For me, this skill isn't only about passing an interview. It's about becoming a better engineer, a better colleague, and a better leader.14:T12b8,Có một điều mình hay quan sát thấy khi đi phỏng vấn người khác: **không ít bạn trượt không phải vì code, mà vì vòng behavioral**.
+
+Mình từng nghĩ điều này chỉ xảy ra với các bạn mới ra trường. Nhưng có những case mình gặp, ứng viên đã đi làm khá lâu, từng qua những môi trường lớn, mà vẫn lỡ vòng này. Và mỗi lần như vậy, mình lại tự hỏi: tại sao một kỹ năng quan trọng như thế lại dễ bị xem nhẹ?
+
+---
+
+## Kịch bản lặp đi lặp lại
+
+Qua những buổi mình tham gia phỏng vấn ứng viên — cả với vai trò interviewer, cả khi đi mentor — mình thấy một pattern rất quen:
+
+- Các bạn dành **80–90% thời gian ôn thuật toán và system design**.
+- Phần behavioral, nếu có ôn, thì rất hời hợt — kiểu *"tới đâu trả lời tới đó"*.
+
+Rồi khi vào phỏng vấn, gặp những câu nghe tưởng đơn giản:
+
+> *"Hãy kể về một lần bạn phải làm việc với một đồng nghiệp khó tính."*
+>
+> *"Khi bạn gặp một mâu thuẫn trong team, bạn xử lý thế nào?"*
+>
+> *"Một lần bạn phải đưa ra quyết định khó khăn, kết quả ra sao?"*
+
+Câu hỏi nhẹ nhàng, nhưng đa phần ứng viên trả lời lan man, thiếu cấu trúc, hoặc rơi vào trạng thái kể quá nhiều về cái tôi cá nhân. Các bạn quên rằng phỏng vấn không phải nơi để *freestyle*. Người phỏng vấn muốn thấy **logic, sự tự nhận thức, khả năng self-reflection, và cách xử lý vấn đề có hệ thống**.
+
+## Một ví dụ: Amazon
+
+Mình hay nói với các bạn mentee: **phỏng vấn cũng giống đi thi đại học** — không thể chỉ học mỗi Toán rồi bỏ qua Lý, Hóa mà mong đỗ. Behavioral chính là một trong những "môn thi" như vậy.
+
+Đặc biệt ở những công ty như Amazon. Họ nổi tiếng với 17 Leadership Principles. Không phải để học thuộc lòng, mà để luyện cách trả lời sao cho phản ánh đúng trải nghiệm thực của mình. Nếu không chuẩn bị, **rất dễ bị "soi" ra ngay từ câu hỏi đầu**.
+
+Trong số các bạn mình từng quan sát, hiếm ai pass được phần này nếu chỉ dựa vào "ứng biến tại chỗ".
+
+## "Em nói thật là được rồi mà?"
+
+Đây là câu mình nghe nhiều nhất:
+
+> *"Em giỏi code rồi, behavioral chỉ cần nói thật thôi, chắc không sao đâu."*
+
+Sự thật thì **nói thật không đủ**. Bạn cần:
+
+- **Chọn đúng câu chuyện** — không phải câu chuyện nào cũng phù hợp với câu hỏi.
+- **Trả lời theo cấu trúc** — STAR (Situation–Task–Action–Result) hoặc PARA. Nghe khô khan, nhưng giúp người phỏng vấn theo dõi được.
+- **Thể hiện chính mình mà không biến buổi phỏng vấn thành buổi tự sự**.
+
+Chỉ khi làm được như vậy, người phỏng vấn mới thấy bạn là **người có tư duy hệ thống, có khả năng giao tiếp** — chứ không chỉ là một coder giỏi.
+
+## 3 lời khuyên rất thật
+
+1. **Nhìn thẳng vào điểm yếu.** Nếu bạn đã mạnh về technical, hãy bớt thời gian cho phần đó và dành cho behavioral.
+2. **Đừng xem nhẹ.** Behavioral khó hơn bạn nghĩ. Nó hoàn toàn có thể khiến bạn mất cơ hội, kể cả khi code của bạn rất mượt.
+3. **Có người luyện cùng thì tốt hơn.** Mock interview với người đã từng đi qua những vòng này — hoặc đã ngồi phỏng vấn người khác — giúp bạn tiết kiệm rất nhiều thời gian, và tránh được những thất bại không đáng.
+
+## Một quan sát cuối
+
+Thực tế, mình thấy hầu hết các bạn chỉ thật sự nghiêm túc với behavioral **sau khi đã trượt vài lần**. Mình có thể nhắc nhở bao nhiêu cũng được, nhưng chỉ khi tự mình trải qua thất bại, các bạn mới thấm.
+
+Và sau khi thấm rồi, các bạn luyện tập kỹ hơn, có hệ thống hơn — rồi đạt kết quả tốt.
+
+Sau một thời gian đi mentor, điều khiến mình vui nhất không phải là kết quả cụ thể, mà là **những khoảnh khắc các bạn tự tin hơn khi nói về chính mình** — biết nhìn lại, biết cải thiện từng kỹ năng nhỏ, kể cả những kỹ năng tưởng chừng vụn vặt như behavioral.
+
+Vì với mình, kỹ năng này không chỉ giúp bạn vượt qua phỏng vấn. Nó giúp bạn trở thành một kỹ sư, một đồng nghiệp, và một người lãnh đạo tốt hơn.7:["$","$L12",null,{"story":{"slug":"pass-coding-fail-behavior","title":{"en":"Behavioral interview — the small part that's easily underrated","vi":"Behavioral interview — phần nhỏ nhưng dễ bị xem nhẹ"},"excerpt":{"en":"I keep meeting candidates who code really well and handle system design fine, but still lose the offer at the behavioral round. A few very personal observations, hopefully useful.","vi":"Mình gặp khá nhiều case bạn rất giỏi code, system design ổn, nhưng vẫn lỡ offer chỉ vì vòng behavioral. Vài quan sát rất cá nhân, mong hữu ích."},"date":"2026-02-03","readingTime":"5 min","tags":["Interview","Behavioral","Reflection"],"content":{"en":"$13","vi":"$14"}}}]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+15:I[27201,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"Behavioral interview — the small part that's easily underrated — Lam Pham"}],["$","meta","1",{"name":"description","content":"I keep meeting candidates who code really well and handle system design fine, but still lose the offer at the behavioral round. A few very personal observations, hopefully useful."}],["$","link","2",{"rel":"canonical","href":"https://lampn95.github.io/lampham/stories/pass-coding-fail-behavior/"}],["$","meta","3",{"property":"og:title","content":"Behavioral interview — the small part that's easily underrated"}],["$","meta","4",{"property":"og:description","content":"I keep meeting candidates who code really well and handle system design fine, but still lose the offer at the behavioral round. A few very personal observations, hopefully useful."}],["$","meta","5",{"property":"og:url","content":"https://lampn95.github.io/lampham/stories/pass-coding-fail-behavior/"}],["$","meta","6",{"property":"og:type","content":"article"}],["$","meta","7",{"property":"article:published_time","content":"2026-02-03"}],["$","meta","8",{"property":"article:tag","content":"Interview"}],["$","meta","9",{"property":"article:tag","content":"Behavioral"}],["$","meta","10",{"property":"article:tag","content":"Reflection"}],["$","meta","11",{"name":"twitter:card","content":"summary"}],["$","meta","12",{"name":"twitter:title","content":"Behavioral interview — the small part that's easily underrated"}],["$","meta","13",{"name":"twitter:description","content":"I keep meeting candidates who code really well and handle system design fine, but still lose the offer at the behavioral round. A few very personal observations, hopefully useful."}],["$","link","14",{"rel":"icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","link","15",{"rel":"apple-touch-icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","$L15","16",{}]]

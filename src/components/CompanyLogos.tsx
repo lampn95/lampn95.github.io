@@ -64,7 +64,7 @@ const COMPANY_LOGO_MAP: Record<string, React.ComponentType<Props>> = {
 };
 
 // Subtle Tailwind tint per company — keeps the logo readable on the dark glass card
-// while hinting at brand colour without screaming.
+// while hinting at brand color without screaming.
 const COMPANY_TINT: Record<string, string> = {
   NVIDIA: "text-emerald-300",
   TikTok: "text-pink-200",

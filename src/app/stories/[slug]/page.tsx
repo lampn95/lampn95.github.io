@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllStorySlugs, getStoryBySlug } from "@/lib/stories";
+import { siteConfig } from "@/lib/config";
 import { StoryView } from "@/components/StoryView";
 
 type Params = { slug: string };
@@ -17,9 +18,31 @@ export async function generateMetadata({
   const { slug } = await params;
   const story = getStoryBySlug(slug);
   if (!story) return { title: "Story not found" };
+
+  // Server-rendered metadata uses the default language (EN); the client view
+  // swaps the on-page title/excerpt on hydration. Social-card crawlers only
+  // see the EN version — that's intentional for a single canonical preview.
+  const url = `${siteConfig.url}/stories/${story.slug}/`;
+  const title = story.title.en;
+  const description = story.excerpt.en;
+
   return {
-    title: story.title,
-    description: story.excerpt,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url,
+      publishedTime: story.date,
+      tags: story.tags,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 

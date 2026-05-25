@@ -1,7 +1,6 @@
 "use client";
 
-import { useLang } from "@/lib/i18n";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 
 type Props = {
   size?: "sm" | "md";

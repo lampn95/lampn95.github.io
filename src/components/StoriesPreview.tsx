@@ -38,10 +38,10 @@ export function StoriesPreview() {
               <span>{s.readingTime}</span>
             </div>
             <h3 className="mt-3 text-lg font-semibold text-white leading-snug group-hover:text-cyan-300 transition-colors">
-              <Link href={`/stories/${s.slug}`}>{s.title}</Link>
+              <Link href={`/stories/${s.slug}`}>{s.title[lang]}</Link>
             </h3>
             <p className="mt-2 text-sm text-white/60 leading-relaxed flex-1">
-              {s.excerpt}
+              {s.excerpt[lang]}
             </p>
             <div className="mt-4 flex flex-wrap gap-1.5">
               {s.tags.map((tag) => (

@@ -48,12 +48,15 @@ src/
 │   └── stories/
 │       ├── page.tsx            # Danh sách story
 │       └── [slug]/page.tsx     # Trang chi tiết story
-├── components/                 # Hero, Experience, Projects, EngineerPro, Book, Podcasts, ...
+├── components/                 # Hero, Experience, Projects, EngineerPro, Book, Podcasts,
+│                               # LanguageToggle, CompanyLogos, *View pages, ...
 └── lib/
-    ├── config.ts               # Tên, email, social, link coffee
+    ├── config.ts               # Tên, email, social, coffee links, basePath, asset()
     ├── data.ts                 # Dữ liệu CV (experiences, skills, education)
-    ├── stories.ts              # Nội dung bài viết (markdown)
-    └── podcasts.ts             # Danh sách podcast episodes
+    ├── stories.ts              # Nội dung bài viết song ngữ (en + vi)
+    ├── podcasts.ts             # Danh sách podcast episodes
+    ├── translations.ts         # Flat key → {en, vi} dictionary cho UI
+    └── i18n.tsx                # LanguageProvider + useLang + useT hooks
 
 .cursor/skills/
 ├── lampham-humble-story/             # Skill: editorial guidelines cho /stories/
@@ -81,27 +84,37 @@ Skill này encode đầy đủ:
 
 Nhờ agent kiểu: *"Crawl bài X từ Substack rồi viết lại theo `.cursor/skills/lampham-humble-story/SKILL.md`"* → agent sẽ tuân thủ tone.
 
-Còn về mặt kỹ thuật, mỗi story là một object trong `src/lib/stories.ts`:
+Còn về mặt kỹ thuật, mỗi story là một object **song ngữ (en + vi)** trong `src/lib/stories.ts`:
 
 ```ts
 {
   slug: "ten-bai-viet",
-  title: "Tiêu đề",
-  excerpt: "Mô tả ngắn xuất hiện ở trang list.",
+  title:   { en: "English title",   vi: "Tiêu đề" },
+  excerpt: { en: "Short hook in EN.", vi: "Mô tả ngắn tiếng Việt." },
   date: "2026-05-24",
-  readingTime: "5 min",
-  tags: ["Career"],
-  content: `
-Nội dung Markdown ở đây.
+  readingTime: "5 min",        // language-neutral
+  tags: ["Career"],            // language-neutral
+  content: {
+    en: `
+Markdown body in English.
+
+## Heading
+
+**bold**, *italic*, [link](https://...), code blocks, lists...
+    `.trim(),
+    vi: `
+Nội dung Markdown tiếng Việt.
 
 ## Heading
 
 **bold**, *italic*, [link](https://...), code blocks, danh sách...
-  `.trim(),
+    `.trim(),
+  },
 }
 ```
 
-Chạy `make github` → bài tự xuất hiện ở `/stories/` với URL `/stories/ten-bai-viet/`.
+Chạy `make github` → bài tự xuất hiện ở `/stories/` với URL `/stories/ten-bai-viet/`. Trang
+chi tiết tự pick phiên bản theo language toggle ở navbar (default EN).
 
 ## Nút "Buy me a coffee" (QR banking VN)
 
@@ -137,6 +150,26 @@ Workflow chuẩn (nhờ AI agent làm hộ):
 
 Chi tiết workflow + cách xử lý khi API Substack đổi → đọc
 `.cursor/skills/sync-engineerpro-podcasts/SKILL.md`.
+
+## Thêm / sửa text (i18n)
+
+Site có toggle **EN / VI** ở navbar (default EN, persist trong `localStorage`). Tất cả UI
+chrome đi qua một dictionary phẳng:
+
+- `src/lib/translations.ts` — thêm key mới ở đây:
+  ```ts
+  "section.my-key": { en: "English string", vi: "Chuỗi tiếng Việt" },
+  ```
+- Trong component (client):
+  ```tsx
+  import { useT } from "@/lib/i18n";
+  const t = useT();
+  return <h2>{t("section.my-key")}</h2>;
+  ```
+- Hỗ trợ placeholder: `t("podcast.showMore", { n: 5 })` thay `{n}` thành `5`.
+
+Server-side metadata (title / OG image / description) dùng EN làm default — không đổi
+theo client lang vì static export đã render sẵn HTML.
 
 ## Cập nhật thông tin cá nhân
 

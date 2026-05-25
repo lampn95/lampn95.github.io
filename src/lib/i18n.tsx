@@ -81,7 +81,9 @@ export function useT() {
   const { lang } = useLang();
   return useCallback(
     (key: TranslationKey, vars?: Record<string, string | number>): string => {
-      let str = translations[key][lang];
+      // `translations` is `as const`, so the read produces a literal-string union.
+      // Widen to plain `string` before mutating via `replaceAll`.
+      let str: string = translations[key][lang];
       if (vars) {
         for (const [k, v] of Object.entries(vars)) {
           str = str.replaceAll(`{${k}}`, String(v));

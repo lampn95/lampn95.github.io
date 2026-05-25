@@ -1,23 +1,109 @@
+import type { Lang } from "./translations";
+
+export type LocalizedText = { en: string; vi: string };
+
 export type Story = {
   slug: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  readingTime: string;
-  tags: string[];
-  content: string;
+  title: LocalizedText;
+  excerpt: LocalizedText;
+  date: string;          // ISO YYYY-MM-DD
+  readingTime: string;   // "6 min" — language-neutral
+  tags: string[];        // language-neutral
+  content: LocalizedText;
 };
+
+/** Convenience accessor — `pick(story.title, lang)` returns the right string. */
+export function pick<T extends string>(text: { en: T; vi: T }, lang: Lang): T {
+  return text[lang];
+}
 
 export const stories: Story[] = [
   {
     slug: "from-aizu-to-nvidia",
-    title: "Vài ghi chép về văn hoá Big Tech — và cách mình học để không bị cuốn đi",
-    excerpt:
-      "Không phải bí kíp đậu phỏng vấn. Chỉ là một vài quan sát rất cá nhân về văn hoá ở các công ty công nghệ lớn — và những thứ giúp mình đứng vững khi mới vào.",
+    title: {
+      en: "A few notes on Big Tech culture — and how I learned not to get swept away",
+      vi: "Vài ghi chép về văn hoá Big Tech — và cách mình học để không bị cuốn đi",
+    },
+    excerpt: {
+      en: "Not an interview playbook. Just a few personal observations on the culture of large tech companies — and the things that helped me stand on my own feet when I was new.",
+      vi: "Không phải bí kíp đậu phỏng vấn. Chỉ là một vài quan sát rất cá nhân về văn hoá ở các công ty công nghệ lớn — và những thứ giúp mình đứng vững khi mới vào.",
+    },
     date: "2026-04-12",
     readingTime: "6 min",
     tags: ["Career", "Big Tech", "Reflection"],
-    content: `
+    content: {
+      en: `
+The first time I walked into a big tech company, it felt like getting lost in a city where I didn't speak the language. Everyone around me spoke the same language I did, used the same IDE — but something was *different*. A different rhythm, a different way of thinking.
+
+It took me a long time to put a name on that "different". And longer still to learn how to live with it without losing myself.
+
+This isn't a playbook. Just a few things I've noticed — hopefully useful for anyone preparing to step in, or already in and quietly wondering whether they belong here.
+
+---
+
+## 1. Every decision needs a reason
+
+The first culture shock for me was design docs. A change that looked small — tweaking a DB field, flipping a config — could still need a few pages explaining *why*, *what trade-offs were considered*, *what the rollback plan was*.
+
+I was annoyed at first. *"If the code runs, we're done — why write so much?"*
+
+Eventually I saw it differently: at scale, a small decision can have consequences you don't notice right away. **Writing the reasoning out isn't a flex — it's so that six months later, when someone asks "why does this part work this way?", there's still a decent answer waiting for them.**
+
+How I got past the friction: I made a habit of writing down my thinking *before* coding. Doesn't have to be pretty or long. Just enough that I, a week later, can still understand it.
+
+## 2. Silence isn't humility
+
+A lot of us grow up with: *"if you know, speak with care; if you don't, lean on the pillar and listen."* Carry that habit into a discussion-heavy environment, and it's easy to go too quiet.
+
+I once sat through a whole meeting without saying a word — not because I didn't understand, but because I was afraid of being wrong. My manager pinged me afterwards: *"What did you think about that? When you don't say anything, no one knows whether you agree or not."*
+
+That stung. But it was a big lesson: **if you don't speak, people can't tell what you're thinking.** Usually no one needs you to say something brilliant — they just need you engaged enough to help work the problem out.
+
+How I got past it: I started with small lines. *"I'm not sure I followed part X — could someone walk through it again?"* — a simple sentence, but very valuable. It doesn't show weakness; it shows you're engaged.
+
+## 3. Failing is fine, failing silently isn't
+
+In large tech environments you'll often hear: *"It's OK to fail."* And it's true. Production incidents, missed deadlines, bad designs — all forgivable.
+
+The harder thing to forgive is **failing without learning anything** — or worse, **failing without telling anyone**.
+
+I once deployed something that caused an incident. My first instinct was… to try and fix it quietly. That was the biggest mistake of the day. When the truth came out (and it always does), what upset people wasn't the bug — it was the hiding.
+
+How I got past it: when something breaks, **post in the team channel within five minutes**. One line is enough: *"Looking into it — seems related to X, will update in 30 minutes."* That's plenty. Blameless postmortems are real — but only if you spoke up in time.
+
+## 4. Promo isn't the goal, it's a consequence
+
+Big companies have a clear job ladder: SWE → Senior → Staff → Principal. A lot of people come in with the goal *"reach Senior in X years."* I get it — I used to think about it a lot myself.
+
+But after watching plenty of people get recognized (and plenty not), I slowly noticed:
+
+> The ones promoted quickly aren't the ones racing for it. They're promoted because they were already doing the next level's work — *before* being given the title.
+
+People racing for promo often get stuck, because they pick what scores easily over what's right. People focused on doing the right thing get recognized a bit later — but the ground stays firmer.
+
+How I got past it: I stopped checking the ladder every month. Instead, each quarter I ask myself: *"Who did I help? What did I solve that was bigger than my own scope?"*
+
+## 5. You are not your job
+
+This is probably the lesson that took me the longest.
+
+Large environments are very good at making you believe *you = your title = your company*. Big salary, nice badge, shiny brand. The day you get laid off, leave voluntarily, or your project simply gets cancelled — you'll be shaken to the core.
+
+I've seen plenty of people (both abroad and back home) lose their entire identity when they lose a job at one of these places. Sleepless nights, lost confidence, cut off from friends.
+
+How I got past it: **build an identity outside of work**. A hobby. A community. A side project. A relationship. Anything that makes you still you — even on the morning you no longer have an ID badge.
+
+---
+
+## One last thought
+
+Big Tech isn't paradise, and it isn't hell. It's a workplace — like any other. Some people fit, some don't. There are great stretches and rough ones.
+
+If you're on your way in, don't be too anxious. If you're already inside, don't forget to look up and around once in a while.
+
+And most of all — call your mom. That part's always true, wherever you are.
+      `.trim(),
+      vi: `
 Lần đầu mình bước chân vào một công ty công nghệ lớn, cảm giác giống như đi lạc vào một thành phố mà mình không biết tiếng. Mọi người xung quanh nói cùng ngôn ngữ với mình, dùng cùng IDE với mình — nhưng có một thứ gì đó *khác*. Một nhịp khác, một cách nghĩ khác.
 
 Phải mất khá lâu mình mới gọi tên được cái "khác" đó. Và mất lâu hơn nữa để học cách sống chung với nó mà không đánh mất chính mình.
@@ -87,17 +173,73 @@ Môi trường công nghệ lớn không phải thiên đường, cũng không p
 Nếu bạn đang trên đường vào, đừng quá hồi hộp. Nếu bạn đã ở trong, đừng quên ngẩng đầu nhìn xung quanh thỉnh thoảng.
 
 Và quan trọng nhất — gọi điện về cho mẹ. Cái này luôn đúng, dù ở đâu.
-    `.trim(),
+      `.trim(),
+    },
   },
   {
     slug: "co-founder-engineerpro",
-    title: "Vì sao mình bắt đầu EngineerPro",
-    excerpt:
-      "Không có gì to tát. Chỉ là mình từng vất vả với mấy vòng phỏng vấn kỹ thuật, và muốn các bạn đi sau bớt vất vả hơn một chút.",
+    title: {
+      en: "Why I started EngineerPro",
+      vi: "Vì sao mình bắt đầu EngineerPro",
+    },
+    excerpt: {
+      en: "Nothing grand. I just struggled with technical interview rounds for a while, and I'd like the people coming after to struggle a little less.",
+      vi: "Không có gì to tát. Chỉ là mình từng vất vả với mấy vòng phỏng vấn kỹ thuật, và muốn các bạn đi sau bớt vất vả hơn một chút.",
+    },
     date: "2026-03-20",
     readingTime: "4 min",
     tags: ["EngineerPro", "Mentorship"],
-    content: `
+    content: {
+      en: `
+I remember my first interview at a big tech company very clearly. The question wasn't that hard. I had prepared. But in the room my hands shook, I kept stumbling over my words, my thoughts kept breaking off — and I failed.
+
+After that, I failed a few more rounds at a few more companies.
+
+Each rejection, the biggest thing I lost wasn't an offer. It was **confidence**. That quiet feeling: *"Maybe I'm just not good enough for this field."*
+
+I know a lot of people are sitting in that exact feeling right now.
+
+---
+
+## What was missing wasn't knowledge
+
+Looking back, most of the times I failed an interview, it wasn't because I didn't know things. It was because:
+
+- I didn't know **what the interviewer was looking for** in an answer.
+- I didn't know the **communication format** of a technical interview.
+- I didn't know the **common traps** — the kind only someone who's been on the other side of the table notices.
+- I had no one to **practice with**, to **correct me**, to **tell me where I was going wrong**.
+
+It's a very specific gap. And it's the gap that — after a few years of working and interviewing many people — I believe we can help close a little.
+
+## Why EngineerPro
+
+[EngineerPro](https://engineerprogurus.com/) started small. A few friends who'd been through different tech companies sat down together, all asking one thing:
+
+> "If someone had walked us through this stuff earlier, how much pain would we have saved?"
+
+That's the whole idea. We don't think we're the best, and we don't think we're the only ones who can teach. We've just walked this path ourselves, and we want the next folks to fumble in the dark a little less.
+
+## What we focus on
+
+Simple: helping people **prepare better for technical interviews**. Specifically:
+
+- **DSA / Coding**: not grinding 500 Leetcode problems, but practicing by **pattern**, so when an unfamiliar problem shows up, you still recognize it.
+- **System Design**: practicing trade-off thinking and how to communicate an idea in 45 minutes.
+- **CS Fundamentals**: brushing up on the basics interviews keep asking about — OS, networking, DBs.
+- **Mock interviews**: this is the most important one. Practice in something close to the real environment, with a mentor pointing out the weak spots to fix.
+
+All of it is stuff I **wish someone had walked me through, back then**.
+
+---
+
+## One quiet line
+
+I don't think EngineerPro is going to change the industry. The goal is much smaller: if one person reads this story, walks into their interview a little less shaky, knows which traps to dodge, knows which questions to ask back — for us that's already enough.
+
+If you're preparing for an interview and feel lost, just message us. Not to sell a course. Just to point a direction — the way someone once pointed one for us.
+      `.trim(),
+      vi: `
 Mình nhớ rất rõ lần đầu phỏng vấn ở một công ty công nghệ lớn. Câu hỏi không quá khó. Mình cũng đã ôn tập. Nhưng vào phòng, tay run, nói lắp, tư duy đứt đoạn — và rớt.
 
 Sau đó, mình rớt thêm vài vòng nữa, ở vài công ty khác.
@@ -145,17 +287,81 @@ Tất cả đều là những thứ mình **ước có người chỉ cho mình 
 Mình không nghĩ EngineerPro thay đổi được ngành. Mục tiêu nhỏ hơn nhiều: nếu một bạn đọc được story này, đi phỏng vấn bớt run một chút, biết bẫy nào để tránh, biết câu nào nên hỏi lại — thì với tụi mình đã là đủ.
 
 Nếu bạn đang chuẩn bị phỏng vấn và thấy lạc lối — cứ nhắn tụi mình một câu. Không phải để bán khoá học. Chỉ để chỉ đường, như cách ngày xưa có người đã chỉ cho tụi mình.
-    `.trim(),
+      `.trim(),
+    },
   },
   {
     slug: "gap-lai-hoc-tro-trong-phong-van",
-    title: "Một lần shadow phỏng vấn, gặp lại học trò cũ",
-    excerpt:
-      "Có những khoảnh khắc mà bao nhiêu công sức giảng dạy bỗng nhiên có ý nghĩa rất rõ. Với mình, đó là khi ngồi im quan sát học trò cũ pass System Design ngay trước mặt.",
+    title: {
+      en: "Shadowing an interview — and meeting a former student again",
+      vi: "Một lần shadow phỏng vấn, gặp lại học trò cũ",
+    },
+    excerpt: {
+      en: "There are moments when years of teaching suddenly feel very meaningful. For me, that was sitting quietly while a former student passed a System Design round right in front of me.",
+      vi: "Có những khoảnh khắc mà bao nhiêu công sức giảng dạy bỗng nhiên có ý nghĩa rất rõ. Với mình, đó là khi ngồi im quan sát học trò cũ pass System Design ngay trước mặt.",
+    },
     date: "2026-02-22",
     readingTime: "5 min",
     tags: ["Mentorship", "System Design", "Reflection"],
-    content: `
+    content: {
+      en: `
+There are some moments that, even after several years of working, I still feel something special when I look back on them — happiness, pride, a sudden clarity that the teaching I'd been doing actually meant something.
+
+One of those moments happened in late 2024, just after I'd joined a new company.
+
+---
+
+## Sitting quietly in a corner
+
+That day I sat in on a hiring interview, but not in the main seat. I was a **shadow interviewer** — observing, sitting quietly in a corner, not asking questions, not scoring. A purely "outside" role.
+
+The candidate walked in, and I recognized him — a former student from the **System Design** course that I, along with two friends (anh Việt and anh Hoà), had taught earlier.
+
+The feeling in that moment was hard to put into words. Happy to see a former student again, in a completely different setting. A little nervous too — *"If he doesn't do well, is this going to be awkward?"*
+
+## The System Design gate
+
+The interview went normally — technical questions, experience questions, situational questions. I sat there, observing quietly.
+
+Things went steadily until the hardest part — **System Design**. This is always the gate a lot of people dread, because it doesn't only test knowledge — it tests **systems thinking, communication, and how you steer a problem**.
+
+The prompt came up. And that's when I saw the difference.
+
+He started off very steadily:
+
+- **Asked clarifying questions first.** About scale. About the system's goals. About the constraints to consider. That approach showed both care and an ability to look at a problem from multiple angles.
+- **Broke the problem down** and built each architectural layer. At every step, he explained why he picked an option, what its pros and cons were, and how it would scale up.
+- **Stayed coherent.** There were moments he had to pause and think, but he never lost his composure or got pulled into trivial details.
+
+I could see it clearly: what he had learned in the course was no longer theory. It had become a **field-tested skill**. He used it naturally — no forced phrasing, no rote answers.
+
+## The teacher off-stage
+
+From the observer's seat, there was nothing I could do to help. But I felt at ease.
+
+Like a teacher watching a student perform confidently from offstage. Knowing I'd only contributed a small part to his journey — but enough to feel a quiet warmth.
+
+The interview ended. I wasn't the scorer, but seeing the lead interviewer's satisfied expression, I knew he had made a strong impression.
+
+About two weeks later I got a message:
+
+> *"Anh, I passed. I just got the offer!"*
+
+I sat still for a while after reading that. Not the loud kind of happy — the **quiet kind, that feels like something has come full circle**.
+
+---
+
+## A small belief, reaffirmed
+
+That story reaffirmed something for me: **System Design isn't a CV decoration, and it isn't something to study just to say you did.** It's a real key — it opens the hardest interview round, the one that asks not just for knowledge, but for thinking, communication, and calm under pressure.
+
+And more than that, System Design lets an engineer prove they don't **only know how to code** — that they understand and can steer how large systems actually work. A quality every company looks for.
+
+Whenever I look back on that day, I still see him sitting there, working through the problem step by step with a steady voice and focused eyes. An ordinary interview. But for me, it was the moment both teacher and student got paid back for the effort.
+
+And it reminded me — sometimes a course, **studied properly and applied fully**, can become a launch pad for a new chapter in someone's career.
+      `.trim(),
+      vi: `
 Có những khoảnh khắc mà sau nhiều năm đi làm, mỗi khi nhớ lại mình vẫn thấy một thứ cảm xúc rất đặc biệt — vừa vui, vừa tự hào, vừa thấy công việc giảng dạy của mình bỗng có ý nghĩa rõ ràng.
 
 Một trong những khoảnh khắc đó xảy ra cuối 2024, khi mình mới chuyển sang một công ty mới.
@@ -211,17 +417,86 @@ Và hơn thế, System Design giúp các bạn kỹ sư chứng minh rằng mìn
 Mỗi khi nhớ lại ngày hôm đó, mình vẫn thấy rõ hình ảnh bạn ngồi trước mặt, từng bước giải đề với giọng nói chắc chắn và ánh mắt tập trung. Một buổi phỏng vấn rất bình thường. Nhưng với mình, đó là khoảnh khắc mà công sức của cả thầy lẫn trò được đền đáp.
 
 Và là khoảnh khắc nhắc mình rằng — đôi khi, một khoá học **nếu học đúng cách và áp dụng trọn vẹn** — có thể trở thành bệ phóng cho cả một giai đoạn mới trong sự nghiệp của ai đó.
-    `.trim(),
+      `.trim(),
+    },
   },
   {
     slug: "pass-coding-fail-behavior",
-    title: "Behavioral interview — phần nhỏ nhưng dễ bị xem nhẹ",
-    excerpt:
-      "Mình gặp khá nhiều case bạn rất giỏi code, system design ổn, nhưng vẫn lỡ offer chỉ vì vòng behavioral. Vài quan sát rất cá nhân, mong hữu ích.",
+    title: {
+      en: "Behavioral interview — the small part that's easily underrated",
+      vi: "Behavioral interview — phần nhỏ nhưng dễ bị xem nhẹ",
+    },
+    excerpt: {
+      en: "I keep meeting candidates who code really well and handle system design fine, but still lose the offer at the behavioral round. A few very personal observations, hopefully useful.",
+      vi: "Mình gặp khá nhiều case bạn rất giỏi code, system design ổn, nhưng vẫn lỡ offer chỉ vì vòng behavioral. Vài quan sát rất cá nhân, mong hữu ích.",
+    },
     date: "2026-02-03",
     readingTime: "5 min",
     tags: ["Interview", "Behavioral", "Reflection"],
-    content: `
+    content: {
+      en: `
+One thing I keep noticing whenever I'm on the interviewer side: **a lot of people don't get rejected on code — they get rejected at the behavioral round**.
+
+I used to think this only happened to fresh grads. But I've seen cases where the candidate had been working for years, had been through large environments, and still got tripped up here. Every time, I find myself wondering: why does such an important skill get treated so lightly?
+
+---
+
+## The same script, over and over
+
+Across the interviews I've sat in on — both as interviewer and as a mentor — I see a very familiar pattern:
+
+- People spend **80–90% of their prep time on algorithms and system design**.
+- The behavioral part, if studied at all, gets studied very loosely — the *"I'll just answer as it comes"* approach.
+
+Then in the room they hit questions that sound deceptively simple:
+
+> *"Tell me about a time you had to work with a difficult coworker."*
+>
+> *"When there's conflict in the team, how do you handle it?"*
+>
+> *"Tell me about a hard decision you had to make and how it turned out."*
+
+The questions sound gentle, but most candidates answer in long rambles, with no structure, or fall into telling too much about themselves personally. They forget that an interview isn't a place to *freestyle*. The interviewer wants to see **logic, self-awareness, self-reflection, and a systematic way of handling problems**.
+
+## One example: Amazon
+
+I often tell mentees: **interviews are a lot like the university entrance exam** — you can't only study math and skip physics and chemistry and expect to pass. Behavioral is one of those "subjects".
+
+This is especially true at places like Amazon. They're famously built around 17 Leadership Principles. Not to memorize — to practice framing your answers in a way that actually reflects your real experience. Without preparation, **you can get found out very fast, often on the first question**.
+
+Among the people I've watched, very few pass this round just by winging it on the day.
+
+## "I'll just be honest, right?"
+
+The line I hear most often:
+
+> *"My coding's strong; behavioral I'll just be honest — should be fine, right?"*
+
+Honestly? **Honesty isn't enough.** You need:
+
+- **The right story** — not every story fits every question.
+- **A structure** — STAR (Situation–Task–Action–Result) or PARA. Sounds dry, but it gives the interviewer something to follow.
+- **A way to present yourself without turning the interview into a memoir.**
+
+Only when these click does the interviewer see you as **someone who thinks systematically, who can communicate** — not just a strong coder.
+
+## Three honest pieces of advice
+
+1. **Look your weak spot in the eye.** If you're already strong on the technical side, spend less time there and more on behavioral.
+2. **Don't downplay it.** Behavioral is harder than it looks. It can absolutely cost you the offer, even with smooth code.
+3. **A practice partner helps.** A mock interview with someone who's been through these rounds — or who has sat on the other side — saves you a lot of time, and a lot of needless failures.
+
+## One final observation
+
+Honestly, most people only take behavioral seriously **after failing a few times**. I can remind them as much as I want — the lesson really lands only when they've lived the failure themselves.
+
+After that, they practice more carefully, more systematically — and the results follow.
+
+After a while of mentoring, what makes me happiest isn't any specific outcome — it's **the moments when people grow more confident talking about themselves**, learning to look at themselves honestly, and to improve the small skills, including the ones people tend to underrate, like behavioral.
+
+For me, this skill isn't only about passing an interview. It's about becoming a better engineer, a better colleague, and a better leader.
+      `.trim(),
+      vi: `
 Có một điều mình hay quan sát thấy khi đi phỏng vấn người khác: **không ít bạn trượt không phải vì code, mà vì vòng behavioral**.
 
 Mình từng nghĩ điều này chỉ xảy ra với các bạn mới ra trường. Nhưng có những case mình gặp, ứng viên đã đi làm khá lâu, từng qua những môi trường lớn, mà vẫn lỡ vòng này. Và mỗi lần như vậy, mình lại tự hỏi: tại sao một kỹ năng quan trọng như thế lại dễ bị xem nhẹ?
@@ -282,7 +557,8 @@ Và sau khi thấm rồi, các bạn luyện tập kỹ hơn, có hệ thống h
 Sau một thời gian đi mentor, điều khiến mình vui nhất không phải là kết quả cụ thể, mà là **những khoảnh khắc các bạn tự tin hơn khi nói về chính mình** — biết nhìn lại, biết cải thiện từng kỹ năng nhỏ, kể cả những kỹ năng tưởng chừng vụn vặt như behavioral.
 
 Vì với mình, kỹ năng này không chỉ giúp bạn vượt qua phỏng vấn. Nó giúp bạn trở thành một kỹ sư, một đồng nghiệp, và một người lãnh đạo tốt hơn.
-    `.trim(),
+      `.trim(),
+    },
   },
 ];
 

@@ -1,61 +1,159 @@
 1:"$Sreact.fragment"
-2:I[45678,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"Navbar"]
-3:I[39756,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-4:I[37457,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-5:I[22016,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],""]
-f:I[68027,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default",1]
-:HL["/lampham/_next/static/chunks/0ygiecc75zlwp.css","style"]
+2:I[33499,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"LanguageProvider"]
+3:I[45678,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[13642,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"Footer"]
+8:I[97367,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/lampham/_next/static/chunks/0lgexlx1qtw~3.css","style"]
 :HL["/lampham/_next/static/media/797e433ab948586e-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/lampham/_next/static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"P":null,"c":["","stories","from-aizu-to-nvidia",""],"q":"","i":false,"f":[[["",{"children":["stories",{"children":[["slug","from-aizu-to-nvidia","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0ygiecc75zlwp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/lampham/_next/static/chunks/0lpsil3_dcbjf.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/lampham/_next/static/chunks/0d3shmwh5_nmn.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-background text-foreground","children":[["$","$L2",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","footer",null,{"className":"border-t border-white/10 mt-24","children":[["$","div",null,{"className":"mx-auto max-w-6xl px-5 sm:px-8 py-12 flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between","children":[["$","div",null,{"children":[["$","div",null,{"className":"flex items-center gap-2","children":[["$","span",null,{"className":"inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 via-fuchsia-400 to-amber-300 text-black font-bold text-sm","children":"L"}],["$","span",null,{"className":"font-semibold text-white","children":"Lam Pham"}]]}],["$","p",null,{"className":"mt-3 text-sm text-white/50 max-w-md","children":["Backend engineer ở Việt Nam. Viết một chút về hệ thống, AI-assisted engineering, và vài bài học khi làm việc với team. Cùng anh em xây"," ",["$","a",null,{"href":"https://engineerprogurus.com/","target":"_blank","rel":"noreferrer","className":"text-cyan-300 hover:text-cyan-200","children":"EngineerPro"}],". Built with Next.js & một lượng kha khá cà phê sữa đá."]}]]}],["$","div",null,{"className":"flex flex-col gap-3 sm:items-end","children":[["$","div",null,{"className":"flex items-center gap-3 text-sm","children":["$","a",null,{"href":"mailto:lampham.aizu@gmail.com","className":"text-white/60 hover:text-white","children":"lampham.aizu@gmail.com"}]}],["$","div",null,{"className":"flex items-center gap-3 text-sm","children":[["$","$L5",null,{"href":"/stories","className":"text-white/60 hover:text-white","children":"Stories"}],["$","span",null,{"className":"text-white/20","children":"·"}],["$","a",null,{"href":"https://engineerprogurus.com/","target":"_blank","rel":"noreferrer","className":"text-white/60 hover:text-white","children":"EngineerPro"}]]}],["$","$L5",null,{"href":"/coffee/","className":"group relative inline-flex items-center gap-2 rounded-full font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-300 active:scale-[0.97] h-10 px-4 text-sm text-black font-semibold bg-gradient-to-r from-amber-300 via-orange-300 to-amber-200 shadow-[0_8px_30px_rgba(255,184,107,0.35)] hover:shadow-[0_8px_40px_rgba(255,184,107,0.55)] hover:-translate-y-0.5 ","aria-label":"Mời tác giả một ly cà phê","children":["$L6","$L7","$L8"]}]]}]]}],"$L9"]}]]}]}]]}],{"children":["$La",{"children":["$Lb",{"children":["$Lc",{},null,false,null]},null,false,"$@d"]},null,false,"$@d"]},null,false,null],"$Le",false]],"m":"$undefined","G":["$f",["$L10"]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"pAXUd55JnetY5AbO5NbgZ"}
-11:I[5014,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-13:I[97367,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-14:"$Sreact.suspense"
-17:I[97367,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"ViewportBoundary"]
-19:I[97367,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"MetadataBoundary"]
-6:["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"M10 2v2","key":"7u0qdc"}],["path",{"d":"M14 2v2","key":"6buw04"}],["path",{"d":"M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1","key":"pwadti"}],["path",{"d":"M6 2v2","key":"colzsn"}]],"className":"lucide-coffee h-4 w-4 group-hover:rotate-12 transition-transform"}]
-7:["$","span",null,{"children":"Mời mình 1 ly cà phê"}]
-8:["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full overflow-hidden","children":["$","span",null,{"className":"absolute inset-0 shimmer rounded-full"}]}]
-9:["$","div",null,{"className":"border-t border-white/5","children":["$","div",null,{"className":"mx-auto max-w-6xl px-5 sm:px-8 py-5 text-xs text-white/40 flex items-center justify-between","children":[["$","span",null,{"children":["© ",2026," Lam Pham. All rights reserved."]}],["$","span",null,{"className":"font-mono","children":"v1.0"}]]}]}]
-a:["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}]
-b:["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}]
-c:["$","$1","c",{"children":["$L12",null,["$","$L13",null,{"children":["$","$14",null,{"name":"Next.MetadataOutlet","children":"$@15"}]}]]}]
-16:[]
-d:"$W16"
-e:["$","$1","h",{"children":[null,["$","$L17",null,{"children":"$L18"}],["$","div",null,{"hidden":true,"children":["$","$L19",null,{"children":["$","$14",null,{"name":"Next.Metadata","children":"$L1a"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}]
-10:["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0ygiecc75zlwp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]
-12:["$","div",null,{"className":"relative","children":[["$","div",null,{"className":"absolute inset-0 bg-aurora pointer-events-none"}],["$","article",null,{"className":"relative mx-auto max-w-2xl px-5 sm:px-8 pt-16 sm:pt-24 pb-20","children":[["$","$L5",null,{"href":"/stories","className":"inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors","children":[["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"m12 19-7-7 7-7","key":"1l729n"}],["path",{"d":"M19 12H5","key":"x3x0zl"}]],"className":"lucide-arrow-left h-4 w-4"}],"All stories"]}],["$","div",null,{"className":"mt-8","children":[["$","div",null,{"className":"flex flex-wrap items-center gap-3 text-xs font-mono text-white/45","children":[["$","span",null,{"className":"inline-flex items-center gap-1.5","children":[["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"M8 2v4","key":"1cmpym"}],["path",{"d":"M16 2v4","key":"4m81vk"}],["rect",{"width":"18","height":"18","x":"3","y":"4","rx":"2","key":"1hopcy"}],["path",{"d":"M3 10h18","key":"8toen8"}]],"className":"lucide-calendar h-3 w-3"}],"12 tháng 4, 2026"]}],["$","span",null,{"children":"·"}],["$","span",null,{"className":"inline-flex items-center gap-1.5","children":[["$","$L11",null,{"ref":"$undefined","iconNode":[["path",{"d":"M12 7v14","key":"1akyts"}],["path",{"d":"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z","key":"ruj8y"}]],"className":"lucide-book-open h-3 w-3"}],"6 min"]}],["$","span",null,{"children":"·"}],["$","span",null,{"className":"flex flex-wrap gap-1.5","children":[["$","span","Career",{"className":"text-cyan-300/80","children":["#","Career"]}],["$","span","Big Tech",{"className":"text-cyan-300/80","children":["#","Big Tech"]}],["$","span","Reflection",{"className":"text-cyan-300/80","children":["#","Reflection"]}]]}]]}],["$","h1",null,{"className":"mt-4 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white leading-[1.15]","children":"Vài ghi chép về văn hoá Big Tech — và cách mình học để không bị cuốn đi"}],["$","p",null,{"className":"mt-4 text-lg text-white/65 leading-relaxed italic","children":"Không phải bí kíp đậu phỏng vấn. Chỉ là một vài quan sát rất cá nhân về văn hoá ở các công ty công nghệ lớn — và những thứ giúp mình đứng vững khi mới vào."}]]}],["$","hr",null,{"className":"my-10 border-white/10"}],["$","div",null,{"className":"prose-story","children":[["$","p","p-0",{"children":["Lần đầu mình bước chân vào một công ty công nghệ lớn, cảm giác giống như đi lạc vào một thành phố mà mình không biết tiếng. Mọi người xung quanh nói cùng ngôn ngữ với mình, dùng cùng IDE với mình — nhưng có một thứ gì đó ",["$","em","em-0",{"children":"khác"}],". Một nhịp khác, một cách nghĩ khác."]}],"\n",["$","p","p-1",{"children":"Phải mất khá lâu mình mới gọi tên được cái \"khác\" đó. Và mất lâu hơn nữa để học cách sống chung với nó mà không đánh mất chính mình."}],"\n",["$","p","p-2",{"children":"Bài viết này không phải là bí kíp. Chỉ là vài điều mình quan sát được, mong hữu ích cho bạn nào đang chuẩn bị bước chân vào — hoặc đang loay hoay tự hỏi liệu mình có thuộc về nơi đây không."}],"\n",["$","hr","hr-0",{}],"\n",["$","h2","h2-0",{"children":"1. Mọi quyết định đều phải có lý do"}],"\n",["$","p","p-3",{"children":["Văn hoá đầu tiên mình bị \"shock\" là chuyện viết design doc. Một thay đổi tưởng nhỏ — sửa một field DB, đổi một config — cũng có thể yêu cầu vài trang giấy giải thích: ",["$","em","em-0",{"children":"vì sao"}],", ",["$","em","em-1",{"children":"trade-off nào đã cân nhắc"}],", ",["$","em","em-2",{"children":"plan rollback ra sao"}],"."]}],"\n",["$","p","p-4",{"children":"Lúc đầu mình khó chịu lắm. Mình nghĩ: code chạy được là xong rồi, viết dài làm gì."}],"\n",["$","p","p-5",{"children":["Sau này mới hiểu: ở scale lớn, một quyết định nhỏ có thể kéo theo nhiều hệ quả mình không thấy ngay. ",["$","strong","strong-0",{"children":"Viết rõ lý do không phải để khoe — mà để 6 tháng sau, khi có người hỏi \"tại sao chỗ này lại làm thế này?\", vẫn còn một câu trả lời tử tế."}]]}],"\n","$L1b","\n","$L1c","\n","$L1d","\n","$L1e","\n","$L1f","\n","$L20","\n","$L21","\n","$L22","\n","$L23","\n","$L24","\n","$L25","\n","$L26","\n","$L27","\n","$L28","\n","$L29","\n","$L2a","\n","$L2b","\n","$L2c","\n","$L2d","\n","$L2e","\n","$L2f","\n","$L30","\n","$L31","\n","$L32","\n","$L33","\n","$L34","\n","$L35"]}],"$L36","$L37","$L38"]}]]}]
-1b:["$","p","p-6",{"children":["Cách vượt qua: tập thói quen viết ra suy nghĩ của mình ",["$","em","em-0",{"children":"trước khi"}]," code. Không cần đẹp, không cần dài. Chỉ cần đủ để chính mình tuần sau đọc lại còn hiểu."]}]
-1c:["$","h2","h2-1",{"children":"2. Im lặng không phải là khiêm tốn"}]
-1d:["$","p","p-7",{"children":"Người Việt mình hay được dạy: \"biết thì thưa thốt, không biết thì dựa cột mà nghe\". Mang thói quen đó vào một môi trường nhiều thảo luận, mình rất dễ im lặng quá mức."}]
-1e:["$","p","p-8",{"children":["Mình từng ngồi cả buổi meeting không nói câu nào, không phải vì không hiểu — mà vì sợ nói sai. Sau đó manager nhắn riêng: ",["$","em","em-0",{"children":"\"Anh nghĩ gì về cái đó? Anh không nói, mọi người không biết anh có đồng ý hay không.\""}]]}]
-1f:["$","p","p-9",{"children":["Cú đó đau. Nhưng đó là bài học lớn: ",["$","strong","strong-0",{"children":"không nói ra thì mọi người khó biết mình đang nghĩ gì"}],". Thường người ta không cần mình nói thật hay; họ cần mình tham gia đủ để cùng làm rõ vấn đề."]}]
-20:["$","p","p-10",{"children":["Cách vượt qua: bắt đầu từ những câu nhỏ. ",["$","em","em-0",{"children":"\"Em chưa hiểu chỗ X, mọi người giải thích lại được không?\""}]," — câu đơn giản nhưng cực kỳ giá trị. Nó không thể hiện sự yếu, mà thể hiện sự engaged."]}]
-21:["$","h2","h2-2",{"children":"3. Fail không sao, fail im lặng thì có"}]
-22:["$","p","p-11",{"children":["Ở các môi trường công nghệ lớn, người ta hay nói với bạn: ",["$","em","em-0",{"children":"\"It's OK to fail.\""}]," Và đúng là vậy. Production incident, missed deadline, bad design — tất cả đều có thể tha thứ."]}]
-23:["$","p","p-12",{"children":["Cái khó xử lý nhất là: ",["$","strong","strong-0",{"children":"fail mà không học ra cái gì"}],", hoặc tệ hơn — ",["$","strong","strong-1",{"children":"fail mà không nói cho ai biết"}],"."]}]
-24:["$","p","p-13",{"children":"Mình từng deploy một thứ gây ra sự cố. Phản ứng đầu tiên của mình là... cố tự fix âm thầm. Đó là sai lầm lớn nhất ngày hôm đó. Khi sự việc ra ánh sáng (vì kiểu gì cũng ra), điều khiến mọi người bực không phải là cái lỗi — mà là việc mình giấu."}]
-25:["$","p","p-14",{"children":["Cách vượt qua: khi có sự cố, ",["$","strong","strong-0",{"children":"mở chat team trong vòng 5 phút"}],". Một câu thôi: ",["$","em","em-0",{"children":"\"Em đang điều tra, có vẻ liên quan đến X, sẽ update lại trong 30 phút.\""}]," Vậy là đủ. Văn hoá blameless postmortem có thật, nhưng chỉ áp dụng khi bạn lên tiếng kịp thời."]}]
-26:["$","h2","h2-3",{"children":"4. Promo không phải mục tiêu, mà là hệ quả"}]
-27:["$","p","p-15",{"children":["Các công ty lớn có job ladder khá rõ: SWE → Senior → Staff → Principal. Nhiều bạn vào với mục tiêu ",["$","em","em-0",{"children":"\"trong X năm phải lên Senior\""}],". Mình hiểu, vì mình cũng từng nghĩ khá nhiều về chuyện đó."]}]
-28:["$","p","p-16",{"children":"Nhưng sau khi quan sát nhiều người được ghi nhận (và nhiều người chưa được), mình dần thấy:"}]
-29:["$","blockquote","blockquote-0",{"children":["\n",["$","p","p-0",{"children":["Những người được promo nhanh không phải vì họ chạy đua promo. Họ được promo vì họ làm tốt việc của cấp tiếp theo — ",["$","em","em-0",{"children":"trước khi"}]," được giao chức danh đó."]}],"\n"]}]
-2a:["$","p","p-17",{"children":"Người chạy đua promo thường dễ bị \"stuck\", vì họ chọn việc dễ ghi điểm thay vì việc đúng. Người làm việc đúng thường được ghi nhận chậm hơn một chút, nhưng bền hơn."}]
-2b:["$","p","p-18",{"children":["Cách vượt qua: ngừng nhìn vào job ladder mỗi tháng. Thay vào đó, mỗi quý tự hỏi: ",["$","em","em-0",{"children":"\"Mình đã giúp được ai chưa? Mình đã giải quyết được vấn đề gì lớn hơn scope của mình chưa?\""}]]}]
-2c:["$","h2","h2-4",{"children":"5. Bạn không phải là việc của bạn"}]
-2d:["$","p","p-19",{"children":"Đây có lẽ là bài học mình mất nhiều thời gian nhất để học."}]
-2e:["$","p","p-20",{"children":["Các môi trường lớn rất giỏi trong việc khiến bạn tin rằng ",["$","em","em-0",{"children":"bạn = chức danh = công ty"}],". Lương cao, badge đẹp, brand thơm. Đến lúc bị layoff, hoặc tự nguyện rời đi, hoặc đơn giản là dự án bị cancel — bạn sẽ bị rung lắc tới tận gốc."]}]
-2f:["$","p","p-21",{"children":"Mình đã thấy nhiều người (cả nước ngoài và VN) khi mất job ở những nơi như vậy là mất luôn cả identity. Mất ngủ, mất tự tin, mất kết nối với bạn bè."}]
-30:["$","p","p-22",{"children":["Cách vượt qua: ",["$","strong","strong-0",{"children":"xây identity của mình ngoài công việc"}],". Một sở thích. Một cộng đồng. Một dự án phụ. Một mối quan hệ. Bất cứ thứ gì khiến bạn vẫn còn là chính bạn — kể cả khi mai bạn không còn ID badge nữa."]}]
-31:["$","hr","hr-1",{}]
-32:["$","h2","h2-5",{"children":"Một câu cuối"}]
-33:["$","p","p-23",{"children":"Môi trường công nghệ lớn không phải thiên đường, cũng không phải địa ngục. Nó là một môi trường — như bao môi trường khác. Có người hợp, có người không. Có giai đoạn thăng, có giai đoạn trầm."}]
-34:["$","p","p-24",{"children":"Nếu bạn đang trên đường vào, đừng quá hồi hộp. Nếu bạn đã ở trong, đừng quên ngẩng đầu nhìn xung quanh thỉnh thoảng."}]
-35:["$","p","p-25",{"children":"Và quan trọng nhất — gọi điện về cho mẹ. Cái này luôn đúng, dù ở đâu."}]
-36:["$","hr",null,{"className":"my-12 border-white/10"}]
-37:["$","div",null,{"className":"rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] p-6 text-center","children":[["$","p",null,{"className":"text-sm text-white/70 leading-relaxed","children":["Nếu bài viết hữu ích với bạn — mời mình một ly cà phê nhé.",["$","br",null,{}],"Đây là động lực để mình viết tiếp."]}],["$","div",null,{"className":"mt-4 flex justify-center","children":["$","$L5",null,{"href":"/coffee/","className":"group relative inline-flex items-center gap-2 rounded-full font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-300 active:scale-[0.97] h-12 px-5 text-base text-black font-semibold bg-gradient-to-r from-amber-300 via-orange-300 to-amber-200 shadow-[0_8px_30px_rgba(255,184,107,0.35)] hover:shadow-[0_8px_40px_rgba(255,184,107,0.55)] hover:-translate-y-0.5 ","aria-label":"Mời tác giả một ly cà phê","children":[["$","$L11",null,{"ref":"$undefined","iconNode":"$6:props:iconNode","className":"lucide-coffee h-4 w-4 group-hover:rotate-12 transition-transform"}],["$","span",null,{"children":"Mời mình 1 ly cà phê"}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full overflow-hidden","children":["$","span",null,{"className":"absolute inset-0 shimmer rounded-full"}]}]]}]}]]}]
-38:["$","div",null,{"className":"mt-10 flex items-center justify-between text-sm","children":[["$","$L5",null,{"href":"/stories","className":"inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors","children":[["$","$L11",null,{"ref":"$undefined","iconNode":"$12:props:children:1:props:children:0:props:children:0:props:iconNode","className":"lucide-arrow-left h-4 w-4"}],"All stories"]}],["$","$L5",null,{"href":"/","className":"text-white/60 hover:text-white transition-colors","children":"Home →"}]]}]
-18:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-39:I[27201,["/lampham/_next/static/chunks/0lpsil3_dcbjf.js","/lampham/_next/static/chunks/0d3shmwh5_nmn.js"],"IconMark"]
-15:null
-1a:[["$","title","0",{"children":"Vài ghi chép về văn hoá Big Tech — và cách mình học để không bị cuốn đi — Lam Pham"}],["$","meta","1",{"name":"description","content":"Không phải bí kíp đậu phỏng vấn. Chỉ là một vài quan sát rất cá nhân về văn hoá ở các công ty công nghệ lớn — và những thứ giúp mình đứng vững khi mới vào."}],["$","meta","2",{"property":"og:title","content":"Lam Pham"}],["$","meta","3",{"property":"og:description","content":"Backend engineer in Vietnam. I write about systems, AI-assisted engineering, and a few lessons from building with teams."}],["$","meta","4",{"property":"og:url","content":"https://lampn95.github.io/lampham/"}],["$","meta","5",{"property":"og:image","content":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","meta","6",{"property":"og:image:width","content":"473"}],["$","meta","7",{"property":"og:image:height","content":"480"}],["$","meta","8",{"property":"og:image:alt","content":"Lam Pham — avatar"}],["$","meta","9",{"property":"og:type","content":"website"}],["$","meta","10",{"name":"twitter:card","content":"summary"}],["$","meta","11",{"name":"twitter:title","content":"Lam Pham"}],["$","meta","12",{"name":"twitter:description","content":"Backend engineer in Vietnam. I write about systems, AI-assisted engineering, and a few lessons from building with teams."}],["$","meta","13",{"name":"twitter:image","content":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","link","14",{"rel":"icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","link","15",{"rel":"apple-touch-icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","$L39","16",{}]]
+0:{"P":null,"c":["","stories","from-aizu-to-nvidia",""],"q":"","i":false,"f":[[["",{"children":["stories",{"children":[["slug","from-aizu-to-nvidia","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0lgexlx1qtw~3.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/lampham/_next/static/chunks/0ra9f3_e5xikr.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/lampham/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-background text-foreground","children":["$","$L2",null,{"children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}]]}]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L7",[["$","script","script-0",{"src":"/lampham/_next/static/chunks/0r3-j8926gzr-.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/lampham/_next/static/chunks/0u3o-.lgi~nsd.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$1","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/lampham/_next/static/chunks/0lgexlx1qtw~3.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"luWMF86xKY2U_xv2DutUk"}
+11:[]
+b:"$W11"
+12:I[56479,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js","/lampham/_next/static/chunks/0r3-j8926gzr-.js","/lampham/_next/static/chunks/0u3o-.lgi~nsd.js"],"StoryView"]
+13:T141a,The first time I walked into a big tech company, it felt like getting lost in a city where I didn't speak the language. Everyone around me spoke the same language I did, used the same IDE — but something was *different*. A different rhythm, a different way of thinking.
+
+It took me a long time to put a name on that "different". And longer still to learn how to live with it without losing myself.
+
+This isn't a playbook. Just a few things I've noticed — hopefully useful for anyone preparing to step in, or already in and quietly wondering whether they belong here.
+
+---
+
+## 1. Every decision needs a reason
+
+The first culture shock for me was design docs. A change that looked small — tweaking a DB field, flipping a config — could still need a few pages explaining *why*, *what trade-offs were considered*, *what the rollback plan was*.
+
+I was annoyed at first. *"If the code runs, we're done — why write so much?"*
+
+Eventually I saw it differently: at scale, a small decision can have consequences you don't notice right away. **Writing the reasoning out isn't a flex — it's so that six months later, when someone asks "why does this part work this way?", there's still a decent answer waiting for them.**
+
+How I got past the friction: I made a habit of writing down my thinking *before* coding. Doesn't have to be pretty or long. Just enough that I, a week later, can still understand it.
+
+## 2. Silence isn't humility
+
+A lot of us grow up with: *"if you know, speak with care; if you don't, lean on the pillar and listen."* Carry that habit into a discussion-heavy environment, and it's easy to go too quiet.
+
+I once sat through a whole meeting without saying a word — not because I didn't understand, but because I was afraid of being wrong. My manager pinged me afterwards: *"What did you think about that? When you don't say anything, no one knows whether you agree or not."*
+
+That stung. But it was a big lesson: **if you don't speak, people can't tell what you're thinking.** Usually no one needs you to say something brilliant — they just need you engaged enough to help work the problem out.
+
+How I got past it: I started with small lines. *"I'm not sure I followed part X — could someone walk through it again?"* — a simple sentence, but very valuable. It doesn't show weakness; it shows you're engaged.
+
+## 3. Failing is fine, failing silently isn't
+
+In large tech environments you'll often hear: *"It's OK to fail."* And it's true. Production incidents, missed deadlines, bad designs — all forgivable.
+
+The harder thing to forgive is **failing without learning anything** — or worse, **failing without telling anyone**.
+
+I once deployed something that caused an incident. My first instinct was… to try and fix it quietly. That was the biggest mistake of the day. When the truth came out (and it always does), what upset people wasn't the bug — it was the hiding.
+
+How I got past it: when something breaks, **post in the team channel within five minutes**. One line is enough: *"Looking into it — seems related to X, will update in 30 minutes."* That's plenty. Blameless postmortems are real — but only if you spoke up in time.
+
+## 4. Promo isn't the goal, it's a consequence
+
+Big companies have a clear job ladder: SWE → Senior → Staff → Principal. A lot of people come in with the goal *"reach Senior in X years."* I get it — I used to think about it a lot myself.
+
+But after watching plenty of people get recognized (and plenty not), I slowly noticed:
+
+> The ones promoted quickly aren't the ones racing for it. They're promoted because they were already doing the next level's work — *before* being given the title.
+
+People racing for promo often get stuck, because they pick what scores easily over what's right. People focused on doing the right thing get recognized a bit later — but the ground stays firmer.
+
+How I got past it: I stopped checking the ladder every month. Instead, each quarter I ask myself: *"Who did I help? What did I solve that was bigger than my own scope?"*
+
+## 5. You are not your job
+
+This is probably the lesson that took me the longest.
+
+Large environments are very good at making you believe *you = your title = your company*. Big salary, nice badge, shiny brand. The day you get laid off, leave voluntarily, or your project simply gets cancelled — you'll be shaken to the core.
+
+I've seen plenty of people (both abroad and back home) lose their entire identity when they lose a job at one of these places. Sleepless nights, lost confidence, cut off from friends.
+
+How I got past it: **build an identity outside of work**. A hobby. A community. A side project. A relationship. Anything that makes you still you — even on the morning you no longer have an ID badge.
+
+---
+
+## One last thought
+
+Big Tech isn't paradise, and it isn't hell. It's a workplace — like any other. Some people fit, some don't. There are great stretches and rough ones.
+
+If you're on your way in, don't be too anxious. If you're already inside, don't forget to look up and around once in a while.
+
+And most of all — call your mom. That part's always true, wherever you are.14:T18d9,Lần đầu mình bước chân vào một công ty công nghệ lớn, cảm giác giống như đi lạc vào một thành phố mà mình không biết tiếng. Mọi người xung quanh nói cùng ngôn ngữ với mình, dùng cùng IDE với mình — nhưng có một thứ gì đó *khác*. Một nhịp khác, một cách nghĩ khác.
+
+Phải mất khá lâu mình mới gọi tên được cái "khác" đó. Và mất lâu hơn nữa để học cách sống chung với nó mà không đánh mất chính mình.
+
+Bài viết này không phải là bí kíp. Chỉ là vài điều mình quan sát được, mong hữu ích cho bạn nào đang chuẩn bị bước chân vào — hoặc đang loay hoay tự hỏi liệu mình có thuộc về nơi đây không.
+
+---
+
+## 1. Mọi quyết định đều phải có lý do
+
+Văn hoá đầu tiên mình bị "shock" là chuyện viết design doc. Một thay đổi tưởng nhỏ — sửa một field DB, đổi một config — cũng có thể yêu cầu vài trang giấy giải thích: *vì sao*, *trade-off nào đã cân nhắc*, *plan rollback ra sao*.
+
+Lúc đầu mình khó chịu lắm. Mình nghĩ: code chạy được là xong rồi, viết dài làm gì.
+
+Sau này mới hiểu: ở scale lớn, một quyết định nhỏ có thể kéo theo nhiều hệ quả mình không thấy ngay. **Viết rõ lý do không phải để khoe — mà để 6 tháng sau, khi có người hỏi "tại sao chỗ này lại làm thế này?", vẫn còn một câu trả lời tử tế.**
+
+Cách vượt qua: tập thói quen viết ra suy nghĩ của mình *trước khi* code. Không cần đẹp, không cần dài. Chỉ cần đủ để chính mình tuần sau đọc lại còn hiểu.
+
+## 2. Im lặng không phải là khiêm tốn
+
+Người Việt mình hay được dạy: "biết thì thưa thốt, không biết thì dựa cột mà nghe". Mang thói quen đó vào một môi trường nhiều thảo luận, mình rất dễ im lặng quá mức.
+
+Mình từng ngồi cả buổi meeting không nói câu nào, không phải vì không hiểu — mà vì sợ nói sai. Sau đó manager nhắn riêng: *"Anh nghĩ gì về cái đó? Anh không nói, mọi người không biết anh có đồng ý hay không."*
+
+Cú đó đau. Nhưng đó là bài học lớn: **không nói ra thì mọi người khó biết mình đang nghĩ gì**. Thường người ta không cần mình nói thật hay; họ cần mình tham gia đủ để cùng làm rõ vấn đề.
+
+Cách vượt qua: bắt đầu từ những câu nhỏ. *"Em chưa hiểu chỗ X, mọi người giải thích lại được không?"* — câu đơn giản nhưng cực kỳ giá trị. Nó không thể hiện sự yếu, mà thể hiện sự engaged.
+
+## 3. Fail không sao, fail im lặng thì có
+
+Ở các môi trường công nghệ lớn, người ta hay nói với bạn: *"It's OK to fail."* Và đúng là vậy. Production incident, missed deadline, bad design — tất cả đều có thể tha thứ.
+
+Cái khó xử lý nhất là: **fail mà không học ra cái gì**, hoặc tệ hơn — **fail mà không nói cho ai biết**.
+
+Mình từng deploy một thứ gây ra sự cố. Phản ứng đầu tiên của mình là... cố tự fix âm thầm. Đó là sai lầm lớn nhất ngày hôm đó. Khi sự việc ra ánh sáng (vì kiểu gì cũng ra), điều khiến mọi người bực không phải là cái lỗi — mà là việc mình giấu.
+
+Cách vượt qua: khi có sự cố, **mở chat team trong vòng 5 phút**. Một câu thôi: *"Em đang điều tra, có vẻ liên quan đến X, sẽ update lại trong 30 phút."* Vậy là đủ. Văn hoá blameless postmortem có thật, nhưng chỉ áp dụng khi bạn lên tiếng kịp thời.
+
+## 4. Promo không phải mục tiêu, mà là hệ quả
+
+Các công ty lớn có job ladder khá rõ: SWE → Senior → Staff → Principal. Nhiều bạn vào với mục tiêu *"trong X năm phải lên Senior"*. Mình hiểu, vì mình cũng từng nghĩ khá nhiều về chuyện đó.
+
+Nhưng sau khi quan sát nhiều người được ghi nhận (và nhiều người chưa được), mình dần thấy:
+
+> Những người được promo nhanh không phải vì họ chạy đua promo. Họ được promo vì họ làm tốt việc của cấp tiếp theo — *trước khi* được giao chức danh đó.
+
+Người chạy đua promo thường dễ bị "stuck", vì họ chọn việc dễ ghi điểm thay vì việc đúng. Người làm việc đúng thường được ghi nhận chậm hơn một chút, nhưng bền hơn.
+
+Cách vượt qua: ngừng nhìn vào job ladder mỗi tháng. Thay vào đó, mỗi quý tự hỏi: *"Mình đã giúp được ai chưa? Mình đã giải quyết được vấn đề gì lớn hơn scope của mình chưa?"*
+
+## 5. Bạn không phải là việc của bạn
+
+Đây có lẽ là bài học mình mất nhiều thời gian nhất để học.
+
+Các môi trường lớn rất giỏi trong việc khiến bạn tin rằng *bạn = chức danh = công ty*. Lương cao, badge đẹp, brand thơm. Đến lúc bị layoff, hoặc tự nguyện rời đi, hoặc đơn giản là dự án bị cancel — bạn sẽ bị rung lắc tới tận gốc.
+
+Mình đã thấy nhiều người (cả nước ngoài và VN) khi mất job ở những nơi như vậy là mất luôn cả identity. Mất ngủ, mất tự tin, mất kết nối với bạn bè.
+
+Cách vượt qua: **xây identity của mình ngoài công việc**. Một sở thích. Một cộng đồng. Một dự án phụ. Một mối quan hệ. Bất cứ thứ gì khiến bạn vẫn còn là chính bạn — kể cả khi mai bạn không còn ID badge nữa.
+
+---
+
+## Một câu cuối
+
+Môi trường công nghệ lớn không phải thiên đường, cũng không phải địa ngục. Nó là một môi trường — như bao môi trường khác. Có người hợp, có người không. Có giai đoạn thăng, có giai đoạn trầm.
+
+Nếu bạn đang trên đường vào, đừng quá hồi hộp. Nếu bạn đã ở trong, đừng quên ngẩng đầu nhìn xung quanh thỉnh thoảng.
+
+Và quan trọng nhất — gọi điện về cho mẹ. Cái này luôn đúng, dù ở đâu.7:["$","$L12",null,{"story":{"slug":"from-aizu-to-nvidia","title":{"en":"A few notes on Big Tech culture — and how I learned not to get swept away","vi":"Vài ghi chép về văn hoá Big Tech — và cách mình học để không bị cuốn đi"},"excerpt":{"en":"Not an interview playbook. Just a few personal observations on the culture of large tech companies — and the things that helped me stand on my own feet when I was new.","vi":"Không phải bí kíp đậu phỏng vấn. Chỉ là một vài quan sát rất cá nhân về văn hoá ở các công ty công nghệ lớn — và những thứ giúp mình đứng vững khi mới vào."},"date":"2026-04-12","readingTime":"6 min","tags":["Career","Big Tech","Reflection"],"content":{"en":"$13","vi":"$14"}}}]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+15:I[27201,["/lampham/_next/static/chunks/0ra9f3_e5xikr.js","/lampham/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"A few notes on Big Tech culture — and how I learned not to get swept away — Lam Pham"}],["$","meta","1",{"name":"description","content":"Not an interview playbook. Just a few personal observations on the culture of large tech companies — and the things that helped me stand on my own feet when I was new."}],["$","link","2",{"rel":"canonical","href":"https://lampn95.github.io/lampham/stories/from-aizu-to-nvidia/"}],["$","meta","3",{"property":"og:title","content":"A few notes on Big Tech culture — and how I learned not to get swept away"}],["$","meta","4",{"property":"og:description","content":"Not an interview playbook. Just a few personal observations on the culture of large tech companies — and the things that helped me stand on my own feet when I was new."}],["$","meta","5",{"property":"og:url","content":"https://lampn95.github.io/lampham/stories/from-aizu-to-nvidia/"}],["$","meta","6",{"property":"og:type","content":"article"}],["$","meta","7",{"property":"article:published_time","content":"2026-04-12"}],["$","meta","8",{"property":"article:tag","content":"Career"}],["$","meta","9",{"property":"article:tag","content":"Big Tech"}],["$","meta","10",{"property":"article:tag","content":"Reflection"}],["$","meta","11",{"name":"twitter:card","content":"summary"}],["$","meta","12",{"name":"twitter:title","content":"A few notes on Big Tech culture — and how I learned not to get swept away"}],["$","meta","13",{"name":"twitter:description","content":"Not an interview playbook. Just a few personal observations on the culture of large tech companies — and the things that helped me stand on my own feet when I was new."}],["$","link","14",{"rel":"icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","link","15",{"rel":"apple-touch-icon","href":"https://lampn95.github.io/lampham/avatar.jpg"}],["$","$L15","16",{}]]

@@ -52,23 +52,17 @@ export function StoryView({ story }: { story: Story }) {
           </div>
 
           <h1 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white leading-[1.15]">
-            {story.title}
+            {story.title[lang]}
           </h1>
           <p className="mt-4 text-lg text-white/65 leading-relaxed italic">
-            {story.excerpt}
+            {story.excerpt[lang]}
           </p>
-
-          {lang === "en" && (
-            <div className="mt-5 rounded-xl border border-cyan-300/20 bg-cyan-300/[0.04] px-4 py-2.5 text-xs text-cyan-100/90 leading-relaxed">
-              {t("storyDetail.viBanner")}
-            </div>
-          )}
         </div>
 
         <hr className="my-10 border-white/10" />
 
         <div className="prose-story">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{story.content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{story.content[lang]}</ReactMarkdown>
         </div>
 
         <hr className="my-12 border-white/10" />

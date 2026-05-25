@@ -51,16 +51,11 @@ export function StoriesListView() {
                     </span>
                   ))}
                 </span>
-                {lang === "en" && (
-                  <span className="ml-auto rounded-full border border-white/15 bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/55">
-                    {t("storiesList.viNote")}
-                  </span>
-                )}
               </div>
               <h2 className="mt-3 text-xl sm:text-2xl font-semibold text-white leading-snug group-hover:text-cyan-300 transition-colors">
-                {s.title}
+                {s.title[lang]}
               </h2>
-              <p className="mt-2 text-sm text-white/60 leading-relaxed">{s.excerpt}</p>
+              <p className="mt-2 text-sm text-white/60 leading-relaxed">{s.excerpt[lang]}</p>
               <div className="mt-4 inline-flex items-center gap-1.5 text-sm text-cyan-300 group-hover:text-cyan-200">
                 {t("storiesList.read")}
                 <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
