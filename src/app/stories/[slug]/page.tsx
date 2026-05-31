@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getAllStorySlugs, getStoryBySlug } from "@/lib/stories";
 import { siteConfig } from "@/lib/config";
 import { StoryView } from "@/components/StoryView";
+import { JsonLd } from "@/components/JsonLd";
 
 type Params = { slug: string };
 
@@ -54,5 +55,38 @@ export default async function StoryPage({
   const { slug } = await params;
   const story = getStoryBySlug(slug);
   if (!story) notFound();
-  return <StoryView story={story} />;
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: story.title.en,
+    description: story.excerpt.en,
+    image: `${siteConfig.url}/avatar.jpg`,
+    datePublished: story.date,
+    dateModified: story.date,
+    author: {
+      "@type": "Person",
+      "@id": `${siteConfig.url}#person`,
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    publisher: {
+      "@type": "Person",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteConfig.url}/stories/${story.slug}/`,
+    },
+    keywords: story.tags.join(", "),
+    inLanguage: ["en", "vi"],
+  };
+
+  return (
+    <>
+      <JsonLd data={articleJsonLd} />
+      <StoryView story={story} />
+    </>
+  );
 }

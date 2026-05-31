@@ -17,7 +17,6 @@ const geistMono = Geist_Mono({
 });
 
 // Absolute URL for the OG/Twitter image — social platforms can't resolve relative paths.
-// Include the basePath because the site is deployed under /lampham/ on GitHub Pages.
 const ogImageUrl = `${siteConfig.url}/avatar.jpg`;
 
 export const metadata: Metadata = {
@@ -27,11 +26,52 @@ export const metadata: Metadata = {
     template: `%s — ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  applicationName: `${siteConfig.name} — portfolio`,
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  keywords: [
+    "Lam Pham",
+    "Phạm Ngọc Lâm",
+    "lampham",
+    "backend engineer",
+    "software engineer",
+    "Vietnam",
+    "NVIDIA",
+    "TikTok",
+    "Grab",
+    "Shopee",
+    "EngineerPro",
+    "system design",
+    "DSA",
+    "Big Tech interview",
+    "AI-assisted engineering",
+  ],
+  alternates: {
+    canonical: siteConfig.url,
+    languages: {
+      en: siteConfig.url,
+      vi: siteConfig.url,
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     title: siteConfig.title,
     description: siteConfig.description,
     type: "website",
     url: siteConfig.url,
+    siteName: `${siteConfig.name} — portfolio`,
+    locale: "en_US",
+    alternateLocale: ["vi_VN"],
     images: [
       {
         url: ogImageUrl,
@@ -47,11 +87,13 @@ export const metadata: Metadata = {
     title: siteConfig.title,
     description: siteConfig.description,
     images: [ogImageUrl],
+    creator: "@lampham",
   },
   icons: {
     icon: ogImageUrl,
     apple: ogImageUrl,
   },
+  category: "technology",
 };
 
 export default function RootLayout({

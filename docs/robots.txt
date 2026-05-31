@@ -1,0 +1,7 @@
+User-Agent: *
+Allow: /
+Disallow: /_next/
+Disallow: /404
+
+Host: https://lampn95.github.io
+Sitemap: https://lampn95.github.io/sitemap.xml
