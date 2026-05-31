@@ -4,8 +4,14 @@ import { stories } from "@/lib/stories";
 
 export const dynamic = "force-static";
 
+// Drop milliseconds from ISO timestamps. Some sitemap validators (and search
+// engines' XSD-strict checks) prefer the simpler "YYYY-MM-DDTHH:MM:SSZ" form.
+function isoNoMs(d: Date): string {
+  return d.toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date().toISOString();
+  const now = isoNoMs(new Date());
   const base = siteConfig.url;
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -31,7 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const storyRoutes: MetadataRoute.Sitemap = stories.map((s) => ({
     url: `${base}/stories/${s.slug}/`,
-    lastModified: new Date(s.date).toISOString(),
+    lastModified: isoNoMs(new Date(s.date)),
     changeFrequency: "yearly",
     priority: 0.7,
     // Tell crawlers each story exists in two languages on the same URL.
