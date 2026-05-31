@@ -2,10 +2,10 @@ import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === "production";
 
-// Deployed at https://lamthao1995.github.io/lampham/ — project page needs basePath.
-// If you ever switch to a personal page (<username>.github.io) or a custom domain,
-// set BASE_PATH="" (or remove the env var) before running `make github`.
-const basePath = process.env.BASE_PATH ?? (isProd ? "/lampham" : "");
+// Deployed at https://lampn95.github.io/ — a personal page, so no basePath.
+// If you later move to a project page (e.g. lampn95.github.io/some-repo/), set
+// BASE_PATH="/some-repo" before running `make github`.
+const basePath = process.env.BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   output: "export",
