@@ -94,6 +94,9 @@ export const metadata: Metadata = {
     apple: ogImageUrl,
   },
   category: "technology",
+  verification: {
+    google: "jcy8CqdSO0Nc0lM5y0K4IQ30CQd0ajy7CIOzt8dMlBQ",
+  },
 };
 
 export default function RootLayout({
