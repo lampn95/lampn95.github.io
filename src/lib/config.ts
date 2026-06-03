@@ -34,4 +34,6 @@ export const siteConfig = {
     "https://drive.google.com/file/d/1l6qznwNGmMRjz4UAsDOwx8DEexUOSqyG/view?usp=sharing",
   coffeeDriveEmbed:
     "https://drive.google.com/file/d/1l6qznwNGmMRjz4UAsDOwx8DEexUOSqyG/preview",
+  // Google Analytics 4 Measurement ID. Leave empty to disable analytics.
+  googleAnalyticsId: "G-4SXWM514YY",
 } as const;
