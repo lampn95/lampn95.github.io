@@ -638,10 +638,13 @@ export function TankBattleGame() {
             if (bulletHitsTank(b, e)) {
               consumed = true;
               freeOwnerBullet(b);
-              // Armored enemies absorb hits until armor reaches 1.
+              // Armored enemies absorb hits until armor reaches 1. The
+              // characteristic "creak" of plating shrugging off a bullet is
+              // upstream's enemy_hit.ogg (soundconfig.h ENEMY_HIT) — distinct
+              // from a brick break or a kill.
               if (e.armor > 1) {
                 e.armor -= 1;
-                sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
+                sound.play(TANK_SOUNDS.enemyHit.id, TANK_SOUNDS.enemyHit.vol);
                 spawnBulletFx(effectsRef.current, b);
                 break;
               }

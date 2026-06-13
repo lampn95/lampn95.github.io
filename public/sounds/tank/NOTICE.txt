@@ -13,6 +13,7 @@ Files included:
 - bullet_hit_stone.ogg
 - bullet_hit_bullet.ogg
 - enemy_destroyed.ogg
+- enemy_hit.ogg
 - player_destroyed.ogg
 - eagle_destroyed.ogg
 - bonus_obtained.ogg
