@@ -1134,10 +1134,12 @@ function freeOwnerBullet(b: Bullet) {
   }
 }
 
-/** Check the cell(s) the bullet's *leading edge* occupies, not its center —
- *  this matches the original behaviour where a bullet stops the moment its tip
- *  touches a wall. For axis-aligned motion we also sample the perpendicular
- *  extent so a bullet can never slip diagonally past a one-tile gap. */
+/** Check the cell(s) the bullet's *leading edge* touches and destroy at
+ *  most ONE — the cell whose center is closer to the bullet's perpendicular
+ *  center. The bullet's hitbox may straddle two cells when the tank is mid-
+ *  lane, but in classic Battle City a single shot only ever destroys one
+ *  brick; we still sample the second cell so the bullet can't slip past
+ *  a tile-wide gap, but only the primary cell is broken. */
 function checkBulletTerrain(b: Bullet, map: TileKind[]): "brick" | "steel" | null {
   const v = DIR_VEC[b.dir];
   // Leading-edge coordinates along the motion axis.
@@ -1150,36 +1152,56 @@ function checkBulletTerrain(b: Bullet, map: TileKind[]): "brick" | "steel" | nul
     : v.y < 0 ? b.y
     : b.y + BULLET_HITBOX / 2;
 
-  // Sample the two tiles the bullet's perpendicular extent might touch.
-  const samples: { tx: number; ty: number }[] = v.y !== 0
-    ? [
-        { tx: Math.floor(b.x / TILE),                       ty: Math.floor(tipY / TILE) },
-        { tx: Math.floor((b.x + BULLET_HITBOX - 1) / TILE), ty: Math.floor(tipY / TILE) },
-      ]
-    : [
-        { tx: Math.floor(tipX / TILE), ty: Math.floor(b.y / TILE) },
-        { tx: Math.floor(tipX / TILE), ty: Math.floor((b.y + BULLET_HITBOX - 1) / TILE) },
-      ];
+  // Build the ordered list of cells the bullet's leading edge might touch.
+  // Index 0 = "primary" (closer to the bullet center), index 1 = the
+  // adjacent cell. When the hitbox sits entirely inside one tile there's
+  // only the primary.
+  let cells: { tx: number; ty: number }[];
+  if (v.y !== 0) {
+    const ty = Math.floor(tipY / TILE);
+    const txLo = Math.floor(b.x / TILE);
+    const txHi = Math.floor((b.x + BULLET_HITBOX - 1) / TILE);
+    if (txLo === txHi) {
+      cells = [{ tx: txLo, ty }];
+    } else {
+      const bcx = b.x + BULLET_HITBOX / 2;
+      const cxLo = txLo * TILE + TILE / 2;
+      const cxHi = txHi * TILE + TILE / 2;
+      cells = Math.abs(bcx - cxLo) <= Math.abs(bcx - cxHi)
+        ? [{ tx: txLo, ty }, { tx: txHi, ty }]
+        : [{ tx: txHi, ty }, { tx: txLo, ty }];
+    }
+  } else {
+    const tx = Math.floor(tipX / TILE);
+    const tyLo = Math.floor(b.y / TILE);
+    const tyHi = Math.floor((b.y + BULLET_HITBOX - 1) / TILE);
+    if (tyLo === tyHi) {
+      cells = [{ tx, ty: tyLo }];
+    } else {
+      const bcy = b.y + BULLET_HITBOX / 2;
+      const cyLo = tyLo * TILE + TILE / 2;
+      const cyHi = tyHi * TILE + TILE / 2;
+      cells = Math.abs(bcy - cyLo) <= Math.abs(bcy - cyHi)
+        ? [{ tx, ty: tyLo }, { tx, ty: tyHi }]
+        : [{ tx, ty: tyHi }, { tx, ty: tyLo }];
+    }
+  }
 
-  let result: "brick" | "steel" | null = null;
-  const cellsToErase: { i: number; kind: TileKind }[] = [];
-  for (let i = 0; i < samples.length; i++) {
-    const s = samples[i];
-    // Deduplicate (both samples may land in the same cell when not on a boundary).
-    if (i === 1 && samples[0].tx === s.tx && samples[0].ty === s.ty) break;
+  // First hit wins — destroy that single cell (or ricochet off steel).
+  for (const s of cells) {
     if (!inBounds(s.tx, s.ty)) continue;
     const k = idx(s.tx, s.ty);
     const tile = map[k];
-    if (tile === "brick") { cellsToErase.push({ i: k, kind: "brick" }); result = result === "steel" ? "steel" : "brick"; }
-    else if (tile === "steel") { cellsToErase.push({ i: k, kind: "steel" }); result = "steel"; }
+    if (tile === "brick") {
+      map[k] = "empty";
+      return "brick";
+    }
+    if (tile === "steel") {
+      if (b.power > 0) map[k] = "empty";
+      return "steel";
+    }
   }
-  if (!result) return null;
-  // Apply damage. Bricks always shatter; steel only if the bullet is starred.
-  for (const c of cellsToErase) {
-    if (c.kind === "brick") map[c.i] = "empty";
-    else if (c.kind === "steel" && b.power > 0) map[c.i] = "empty";
-  }
-  return result;
+  return null;
 }
 
 function bulletHitsTank(b: Bullet, t: Tank): boolean {
