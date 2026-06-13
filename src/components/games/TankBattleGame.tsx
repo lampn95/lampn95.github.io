@@ -689,6 +689,9 @@ export function TankBattleGame() {
                   y: spot.y * TILE,
                   bornAt: now,
                 };
+                // Upstream Game::generateBonus line 571 — distinctive "ding"
+                // when a fresh bonus drops onto the map.
+                sound.play(TANK_SOUNDS.bonusAppeared.id, TANK_SOUNDS.bonusAppeared.vol);
               }
               break;
             }
@@ -774,6 +777,13 @@ export function TankBattleGame() {
           cur.y < b.y + TILE * 2 &&
           cur.y + TANK_SIZE > b.y
         ) {
+          // Every bonus pickup awards a flat 300 points up front (upstream
+          // checkCollisionPlayerWithBonus line 357), then each kind has its
+          // own effect & score on top.
+          let pickupScore = 300;
+          // The Tank bonus has its own sound; every other bonus shares the
+          // standard "bonus_obtained" jingle.
+          let pickupSound: { id: string; vol: number } = TANK_SOUNDS.bonusObtained;
           switch (b.kind) {
             case "helmet":
               cur.shield = SHIELD_TIME_MS;
@@ -782,13 +792,16 @@ export function TankBattleGame() {
               cur.starLevel = Math.min(MAX_STAR_LEVEL, cur.starLevel + 1);
               break;
             case "gun":
-              // Instantly maxes the star meter ⇒ same as "three stars".
+              // Instantly maxes the star meter ⇒ same as "three stars"
+              // (upstream Game::checkCollisionPlayerWithBonus line 398
+              // calls changeStarCountBy(3) which clamps to 3).
               cur.starLevel = MAX_STAR_LEVEL;
               break;
             case "tank": {
               const newLives = livesRef.current + 1;
               livesRef.current = newLives;
               setLives(newLives);
+              pickupSound = TANK_SOUNDS.lifeUp;
               break;
             }
             case "clock":
@@ -802,43 +815,55 @@ export function TankBattleGame() {
               cur.hasBoat = true;
               break;
             case "grenade": {
-              // Wipe every alive enemy on the map. Score adds up per-type.
+              // Wipe every alive enemy on the map. Each kill from a grenade
+              // awards a flat 200 (upstream line 365) — not the per-type
+              // bullet-kill score.
               const killed = enemiesRef.current.length;
-              let earned = 0;
               for (const e of enemiesRef.current) {
                 spawnTankFx(effectsRef.current, e.x, e.y);
-                earned += ENEMY_PROFILES[e.type!].score;
               }
               enemiesRef.current = [];
+              pickupScore += killed * 200;
               if (killed > 0) {
                 sound.play(TANK_SOUNDS.enemyDestroyed.id, TANK_SOUNDS.enemyDestroyed.vol);
                 setEnemiesLeft((x) => x - killed);
-                setScore((s) => {
-                  const ns = s + earned;
-                  scoreRef.current = ns;
-                  return ns;
-                });
               }
               break;
             }
           }
           bonusRef.current = null;
-          sound.play(TANK_SOUNDS.bonusObtained.id, TANK_SOUNDS.bonusObtained.vol);
-          // Small score bump for the pickup itself.
+          sound.play(pickupSound.id, pickupSound.vol);
           setScore((s) => {
-            const ns = s + 1;
+            const ns = s + pickupScore;
             scoreRef.current = ns;
             return ns;
           });
         }
       }
 
-      // 6b. Shovel expiry — restore the eagle's perimeter to its original
-      //     tiles once the 15-second buff is up.
-      if (shovelUntilRef.current > 0 && now > shovelUntilRef.current) {
-        restoreShovel(mapRef.current, brickStatesRef.current, shovelSavedRef.current);
-        shovelSavedRef.current = [];
-        shovelUntilRef.current = 0;
+      // 6b. Shovel buff — in the LAST 25 % of its window upstream alternates
+      //     the eagle perimeter between steel and brick (every bonus_blink_time
+      //     = 350 ms) so the player gets a visual warning that the buff is
+      //     about to expire. After expiry the cells revert to brick for good.
+      if (shovelUntilRef.current > 0) {
+        const elapsed = SHOVEL_FORTIFY_MS - (shovelUntilRef.current - now);
+        if (now > shovelUntilRef.current) {
+          restoreShovel(mapRef.current, brickStatesRef.current, shovelSavedRef.current);
+          shovelSavedRef.current = [];
+          shovelUntilRef.current = 0;
+        } else if (elapsed > SHOVEL_FORTIFY_MS * 0.75) {
+          // Toggle the saved cells between steel (protected) and brick
+          // (warning). Each cell tracks its current visual via the actual
+          // tile kind, so we just flip every BONUS_BLINK_MS.
+          const showSteel = Math.floor(elapsed / BONUS_BLINK_MS) % 2 === 0;
+          const desired: TileKind = showSteel ? "steel" : "brick";
+          for (const c of shovelSavedRef.current) {
+            if (mapRef.current[c.i] !== desired) {
+              mapRef.current[c.i] = desired;
+              brickStatesRef.current[c.i] = 0;
+            }
+          }
+        }
       }
 
       // 7. Stage clear check

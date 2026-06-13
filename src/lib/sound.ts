@@ -106,10 +106,12 @@ export const TANK_SOUNDS = {
   playerDestroyed:{ id: "tank.playerDestroyed",src: "/sounds/tank/player_destroyed.ogg",   vol: 0.7 },
   eagleDestroyed: { id: "tank.eagle",          src: "/sounds/tank/eagle_destroyed.ogg",    vol: 0.9 },
   bonusObtained:  { id: "tank.bonus",          src: "/sounds/tank/bonus_obtained.ogg",     vol: 0.7 },
+  bonusAppeared:  { id: "tank.bonusAppeared",  src: "/sounds/tank/bonus_appeared.ogg",     vol: 0.6 },
   stageStart:     { id: "tank.stageStart",     src: "/sounds/tank/stage_start_up.ogg",     vol: 0.6 },
   bulletVsBullet: { id: "tank.bvb",            src: "/sounds/tank/bullet_hit_bullet.ogg",  vol: 0.5 },
   playerHit:      { id: "tank.playerHit",      src: "/sounds/tank/player_hit.ogg",         vol: 0.7 },
   enemyHit:       { id: "tank.enemyHit",       src: "/sounds/tank/enemy_hit.ogg",          vol: 0.6 },
+  lifeUp:         { id: "tank.lifeUp",         src: "/sounds/tank/player_life_up.ogg",     vol: 0.8 },
 } as const;
 
 let __tankRegistered = false;
