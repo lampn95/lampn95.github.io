@@ -41,8 +41,13 @@ const TREAD_FRAME_MS = 60;            // tread animation period
 const SPAWN_ANIM_MS = 900;            // duration of the create-flash before
                                       // a tank becomes alive (≈9 frames @100ms)
 const SPAWN_ANIM_FRAMES = 10;         // matches upstream ST_CREATE.frames_count
-const MAX_STAR_LEVEL = 2;             // 0 = base, 1 = quick bullets, 2 = breaks
-                                      // steel — matches classic Battle City
+// Classic NES Battle-City star progression (matches upstream player.cpp):
+//   0 stars: base bullet, 1 in flight
+//   1 star : 1.3× faster bullet, still 1 in flight
+//   2 stars: ↑ + up to 2 bullets in flight at once ("double tap")
+//   3 stars: ↑ + bullets break steel ("breaker tank")
+const MAX_STAR_LEVEL = 3;
+const STAR_BULLET_SPEED_MUL = 1.3;
 
 type TileKind = "empty" | "brick" | "steel" | "bush" | "water" | "ice";
 type Dir = "up" | "right" | "down" | "left";
@@ -139,10 +144,10 @@ type Tank = {
   isPlayer: boolean;
   type?: EnemyType;        // enemies only
   cooldown: number;        // ms (absolute timestamp) until next fire allowed
-  hasBullet: boolean;
+  bulletCount: number;     // bullets currently in flight that this tank owns
   spawnInvuln: number;     // ms remaining
   shield: number;          // ms remaining (helmet bonus)
-  starLevel: number;       // player only: 0..2 (2 = bullets break steel)
+  starLevel: number;       // player only: 0..3 (see MAX_STAR_LEVEL)
   speedMul: number;
   aiNextTurnAt: number;
   aiNextFireAt: number;
@@ -158,7 +163,8 @@ type Bullet = {
   dir: Dir;
   ownerId: number;
   fromPlayer: boolean;
-  power: 0 | 1;            // player star upgrade
+  power: 0 | 1;            // 1 = breaks steel (3-star player bullet)
+  speedMul: number;        // 1.0 base, 1.3 for 1+ star player bullets
 };
 
 type Bonus = {
@@ -301,9 +307,11 @@ export function TankBattleGame() {
   // ──────────────── tank helpers ────────────────
   const tryFire = useCallback((tank: Tank, now: number) => {
     if (tank.cooldown > now) return;
-    if (tank.hasBullet) return;
+    // Player can keep 2 bullets in flight at 2+ stars; everything else is 1.
+    const limit = tank.isPlayer && tank.starLevel >= 2 ? 2 : 1;
+    if (tank.bulletCount >= limit) return;
     tank.cooldown = now + (tank.isPlayer ? 280 : 380);
-    tank.hasBullet = true;
+    tank.bulletCount += 1;
     // Spawn the bullet so its CENTER sits on the barrel tip, then the visual
     // sprite (BULLET_RENDER) is drawn centered on that point too.
     const c = tankCenter(tank);
@@ -315,7 +323,8 @@ export function TankBattleGame() {
       dir: tank.dir,
       ownerId: tank.id,
       fromPlayer: tank.isPlayer,
-      power: tank.isPlayer && tank.starLevel >= MAX_STAR_LEVEL ? 1 : 0,
+      power: tank.isPlayer && tank.starLevel >= 3 ? 1 : 0,
+      speedMul: tank.isPlayer && tank.starLevel >= 1 ? STAR_BULLET_SPEED_MUL : 1,
     });
     if (tank.isPlayer) sound.play(TANK_SOUNDS.fire.id, TANK_SOUNDS.fire.vol);
   }, []);
@@ -412,16 +421,26 @@ export function TankBattleGame() {
         if (p) enemyObstacles.push(p);
         for (const o of enemiesRef.current) if (o.id !== e.id) enemyObstacles.push(o);
 
-        if (now > e.aiNextTurnAt || isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current)) {
+        const blocked = isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current);
+        if (now > e.aiNextTurnAt || blocked) {
           let dir: Dir;
-          if (Math.random() < prof.targetBias) {
+          if (blocked) {
+            // Deadlock breaker: when bumped against terrain or another tank,
+            // ALWAYS pick a perpendicular direction. Two enemies meeting
+            // head-on used to both re-pick toward the same target and get
+            // stuck for seconds; now they peel apart cleanly.
+            const isHoriz = e.dir === "left" || e.dir === "right";
+            dir = isHoriz
+              ? (Math.random() < 0.5 ? "up"   : "down")
+              : (Math.random() < 0.5 ? "left" : "right");
+          } else if (Math.random() < prof.targetBias) {
             const dx = targetPos.x - (e.x + TANK_SIZE / 2);
             const dy = targetPos.y - (e.y + TANK_SIZE / 2);
             const preferX =
               Math.abs(dx) > Math.abs(dy) ||
               (Math.abs(dx) === Math.abs(dy) && Math.random() < 0.5);
             if (preferX) dir = dx > 0 ? "right" : "left";
-            else dir = dy > 0 ? "down" : "up";
+            else         dir = dy > 0 ? "down"  : "up";
           } else {
             dir = DIRS[Math.floor(Math.random() * DIRS.length)];
           }
@@ -429,7 +448,9 @@ export function TankBattleGame() {
             e.dir = dir;
             snapTankToLane(e, map, enemyObstacles, eagleAliveRef.current);
           }
-          e.aiNextTurnAt = now + 700 + Math.random() * 1500;
+          // Hold this direction long enough that a single bump doesn't
+          // immediately re-steer the tank into the same wall again.
+          e.aiNextTurnAt = now + (blocked ? 350 : 700) + Math.random() * 1200;
         }
         const before = { x: e.x, y: e.y };
         tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map, enemyObstacles, eagleAliveRef.current);
@@ -456,7 +477,7 @@ export function TankBattleGame() {
       const liveBullets: Bullet[] = [];
       for (const b of bulletsRef.current) {
         const v = DIR_VEC[b.dir];
-        const distance = dt * BULLET_SPEED;
+        const distance = dt * BULLET_SPEED * b.speedMul;
         // Sub-step by half-a-tile so we never overshoot a thin brick.
         const stepLen = TILE / 2;
         const steps = Math.max(1, Math.ceil(distance / stepLen));
@@ -839,7 +860,7 @@ export function TankBattleGame() {
       </div>
 
       <p className="mt-4 text-center text-[11px] text-white/40 font-mono">
-        🪖 helmet = 10s shield · ⭐⭐ two stars = bullets break steel · 🦅 protect the eagle
+        🪖 10s shield · ⭐ fast bullets · ⭐⭐ double-tap (2 in flight) · ⭐⭐⭐ break steel · 🦅 protect the eagle
       </p>
     </GameShell>
   );
@@ -1045,7 +1066,7 @@ function makePlayer(): Tank {
     dir: "up",
     isPlayer: true,
     cooldown: 0,
-    hasBullet: false,
+    bulletCount: 0,
     spawnInvuln: PLAYER_INVULN_MS,
     shield: 0,
     starLevel: 0,
@@ -1079,7 +1100,7 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
           isPlayer: false,
           type,
           cooldown: 0,
-          hasBullet: false,
+          bulletCount: 0,
           spawnInvuln: 0,
           shield: 0,
           starLevel: 0,
@@ -1105,10 +1126,11 @@ function freeOwnerBullet(b: Bullet) {
   // The owner reference is recovered from the global last-known arrays via
   // the refs-on-component-level. Helpers below set them at the start of each
   // step() invocation (see __lastPlayer / __lastEnemies below).
-  if (b.fromPlayer && __lastPlayer) __lastPlayer.hasBullet = false;
-  else if (!b.fromPlayer) {
+  if (b.fromPlayer && __lastPlayer) {
+    __lastPlayer.bulletCount = Math.max(0, __lastPlayer.bulletCount - 1);
+  } else if (!b.fromPlayer) {
     const owner = __lastEnemies.find((e) => e.id === b.ownerId);
-    if (owner) owner.hasBullet = false;
+    if (owner) owner.bulletCount = Math.max(0, owner.bulletCount - 1);
   }
 }
 
