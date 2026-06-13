@@ -323,6 +323,7 @@ export function TankBattleGame() {
   // ──────────────── stage loading ────────────────
   const loadStage = useCallback((idx: number, opts?: { keepUpgrades?: boolean }) => {
     const prevStar = opts?.keepUpgrades ? playerRef.current?.starLevel ?? 0 : 0;
+    const prevBoat = opts?.keepUpgrades ? playerRef.current?.hasBoat ?? false : false;
     const stage = STAGES[idx % STAGES.length];
     mapRef.current = parseStage(stage);
     brickStatesRef.current = new Uint8Array(STAGE_COLS * STAGE_ROWS);
@@ -338,9 +339,11 @@ export function TankBattleGame() {
     remainingSpawnsRef.current = ENEMIES_PER_STAGE;
     lastEnemySpawnRef.current = 0;
     const p = makePlayer();
-    // Star upgrades persist across stages (NES Battle City behaviour).
-    // Helmet shield is intentionally NOT carried over — it's a 10-s buff.
+    // Star upgrades AND boat persist across stages (upstream Player object
+    // is recycled in moveToNextStage — only timed buffs like the helmet
+    // shield are wiped). Boat is consumed on the next hit anyway.
     p.starLevel = prevStar;
+    p.hasBoat   = prevBoat;
     playerRef.current = p;
     stageIdxRef.current = idx;
     setStageNum(idx + 1);
@@ -365,6 +368,10 @@ export function TankBattleGame() {
   }, [reset]);
 
   const handleNextStage = useCallback(() => {
+    // +1 life per stage clear (upstream Player::moveToNextStage line 123).
+    const bumped = livesRef.current + 1;
+    livesRef.current = bumped;
+    setLives(bumped);
     loadStage(stageIdxRef.current + 1, { keepUpgrades: true });
     setOver(null);
     setRunning(true);
@@ -659,10 +666,16 @@ export function TankBattleGame() {
               // absorbed
             } else if (curP.hasBoat) {
               // 🚤 Boat absorbs ONE hit then disappears (upstream
-              // Player::respawn — boat is removed before life is subtracted).
+              // Player::hit — boat is removed before life is subtracted).
               curP.hasBoat = false;
               spawnBulletFx(effectsRef.current, b);
               sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
+            } else if (curP.starLevel >= MAX_STAR_LEVEL) {
+              // ⭐⭐⭐ Maxed player takes a hit → DEMOTE 1 star instead of
+              // dying. Upstream Player::hit lines 101-105.
+              curP.starLevel -= 1;
+              spawnBulletFx(effectsRef.current, b);
+              sound.play(TANK_SOUNDS.playerHit.id, TANK_SOUNDS.playerHit.vol);
             } else {
               spawnTankFx(effectsRef.current, curP.x, curP.y);
               sound.play(TANK_SOUNDS.playerDestroyed.id, TANK_SOUNDS.playerDestroyed.vol);

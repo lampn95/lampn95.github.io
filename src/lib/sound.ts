@@ -108,6 +108,7 @@ export const TANK_SOUNDS = {
   bonusObtained:  { id: "tank.bonus",          src: "/sounds/tank/bonus_obtained.ogg",     vol: 0.7 },
   stageStart:     { id: "tank.stageStart",     src: "/sounds/tank/stage_start_up.ogg",     vol: 0.6 },
   bulletVsBullet: { id: "tank.bvb",            src: "/sounds/tank/bullet_hit_bullet.ogg",  vol: 0.5 },
+  playerHit:      { id: "tank.playerHit",      src: "/sounds/tank/player_hit.ogg",         vol: 0.7 },
 } as const;
 
 let __tankRegistered = false;

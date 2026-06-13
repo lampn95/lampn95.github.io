@@ -8,6 +8,7 @@ See the upstream repository for the full LICENSE text.
 
 Files included:
 - player_fired.ogg
+- player_hit.ogg
 - bullet_hit_brick.ogg
 - bullet_hit_stone.ogg
 - bullet_hit_bullet.ogg
