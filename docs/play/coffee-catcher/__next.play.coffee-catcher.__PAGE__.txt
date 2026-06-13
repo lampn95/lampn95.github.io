@@ -2,5 +2,5 @@
 2:I[92034,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js","/_next/static/chunks/0xzpfj6w2c~b8.js"],"CoffeeCatcherGame"]
 3:I[97367,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/0xzpfj6w2c~b8.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"2ZCiXT2xPkUMxTAHJC0h1"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/0xzpfj6w2c~b8.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"WpxN444QFCzlxCwIvs6K-"}
 5:null

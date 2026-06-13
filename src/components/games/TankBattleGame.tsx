@@ -388,6 +388,8 @@ export function TankBattleGame() {
     setOver(null);
   }, [loadStage]);
 
+  const pauseStartRef = useRef<number | null>(null);
+
   const handleStart = useCallback((selectedMode?: "normal" | "super-funny") => {
     if (selectedMode) {
       modeRef.current = selectedMode;
@@ -396,15 +398,56 @@ export function TankBattleGame() {
     reset();
     setRunning(true);
     setPaused(false);
+    pauseStartRef.current = null;
     // Preload all sounds on first user gesture (autoplay policies).
     sound.preloadAll();
     sound.play(TANK_SOUNDS.stageStart.id, TANK_SOUNDS.stageStart.vol);
   }, [reset]);
 
+  /** Shift game timestamps forward by the paused window so every timer
+   *  resumes feeling untouched. Two flavours:
+   *
+   *  - "Future" timestamps (cooldowns, AI fire/turn waits, freeze/shovel
+   *    expiry): shift ONLY if they were still in the future at pause time.
+   *    Already-expired cooldowns must stay expired so a tank that was
+   *    ready to fire pre-pause is still ready post-resume.
+   *  - "Past" timestamps (bonus.bornAt, effect.bornAt, lastEnemySpawn):
+   *    always shift, so the perceived age is preserved across the pause.
+   */
+  const shiftTimestamps = useCallback((delta: number, pauseStarted: number) => {
+    if (delta <= 0) return;
+    const future = (t: number) => (t > pauseStarted ? t + delta : t);
+
+    const tanks: Tank[] = [];
+    if (playerRef.current) tanks.push(playerRef.current);
+    for (const e of enemiesRef.current) tanks.push(e);
+    for (const t of tanks) {
+      t.cooldown     = future(t.cooldown);
+      t.aiNextTurnAt = future(t.aiNextTurnAt);
+      t.aiNextFireAt = future(t.aiNextFireAt);
+    }
+    if (bonusRef.current) bonusRef.current.bornAt += delta;
+    for (const fx of effectsRef.current) fx.bornAt += delta;
+    if (lastEnemySpawnRef.current > 0) lastEnemySpawnRef.current += delta;
+    freezeUntilRef.current = future(freezeUntilRef.current);
+    shovelUntilRef.current = future(shovelUntilRef.current);
+  }, []);
+
   const togglePause = useCallback(() => {
-    if (over) return;
-    setPaused((p) => !p);
-  }, [over]);
+    if (!running || over) return;
+    setPaused((p) => {
+      const next = !p;
+      if (next) {
+        pauseStartRef.current = performance.now();
+      } else if (pauseStartRef.current != null) {
+        // Resuming — push every game timestamp forward by the paused window.
+        const pauseStarted = pauseStartRef.current;
+        shiftTimestamps(performance.now() - pauseStarted, pauseStarted);
+        pauseStartRef.current = null;
+      }
+      return next;
+    });
+  }, [running, over, shiftTimestamps]);
 
   const handleNextStage = useCallback(() => {
     // +1 life per stage clear (upstream Player::moveToNextStage line 123).
