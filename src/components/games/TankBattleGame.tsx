@@ -623,13 +623,14 @@ export function TankBattleGame() {
           const avoidingDir =
             e.lastBlockedDir && now < e.blockedAvoidUntil ? e.lastBlockedDir : null;
           if (blocked) {
-            // Deadlock breaker. Probe every non-current direction with a
-            // 1-px reach (more permissive than the 3-px "look-ahead" used
-            // for the blocked check itself) — escape is easier than entry.
-            // Stash the blocked direction so subsequent soft re-picks
-            // refuse to walk straight back into the same wall.
-            e.lastBlockedDir = e.dir;
-            e.blockedAvoidUntil = now + 4000;
+            // Deadlock breaker. Probe every non-current direction (perp
+            // first, reverse as last resort) with a 1-px reach. Honour the
+            // recent-blocked memory: if the deadlock breaker would force
+            // the tank straight back into the wall it just bounced off
+            // (e.g. corridor pinch — UP into ceiling and DOWN into steel
+            // alternating), prefer to STAY STILL until the avoidance
+            // window expires. Better one stationary frame than a
+            // forever-loop between the two ends of a dead-end corridor.
             const originalDir = e.dir;
             const shuffle = <T,>(arr: T[]) => {
               for (let i = arr.length - 1; i > 0; i--) {
@@ -642,15 +643,30 @@ export function TankBattleGame() {
             const opposites: Record<Dir, Dir> = { up: "down", down: "up", left: "right", right: "left" };
             const perps: Dir[] = shuffle(isHoriz ? ["up", "down"] : ["left", "right"]);
             const candidates: Dir[] = [...perps, opposites[originalDir]];
+            const filtered = avoidingDir
+              ? candidates.filter((c) => c !== avoidingDir)
+              : candidates;
             let chose: Dir | null = null;
-            for (const cand of candidates) {
+            for (const cand of filtered) {
               const v = DIR_VEC[cand];
               if (!tankBlocksAt(map, e.x + v.x, e.y + v.y, e, enemyObstacles, eagleAliveRef.current, brickStatesRef.current)) {
                 chose = cand;
                 break;
               }
             }
-            dir = chose ?? candidates[Math.floor(Math.random() * candidates.length)];
+            if (chose) {
+              // Found an unblocked escape that ALSO respects avoidance.
+              e.lastBlockedDir = originalDir;
+              e.blockedAvoidUntil = now + 4000;
+              dir = chose;
+            } else {
+              // No clean escape that avoids the recently-blocked direction
+              // (typical corridor pinch). Stay put facing the wall — the
+              // tank visually freezes in place until the 4-s avoidance
+              // window expires, then the AI is free to try again. Better
+              // than rapidly rotating between three blocked directions.
+              dir = originalDir;
+            }
           } else if (Math.random() < prof.targetBias) {
             const dx = targetPos.x - (e.x + TANK_SIZE / 2);
             const dy = targetPos.y - (e.y + TANK_SIZE / 2);
