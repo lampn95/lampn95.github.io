@@ -28,9 +28,13 @@ const BULLET_HITBOX = 6;              // logical hitbox (slightly tighter than s
 const ENEMIES_PER_STAGE = 5;
 const MAX_ALIVE_ENEMIES = 3;
 const MAX_LIVES = 3;
-const PLAYER_SPEED = 0.072;           // tiles/ms — Battle-City feel
+// Speeds match upstream appconfig.h exactly: tank_default_speed = 0.08 px/ms,
+// bullet_default_speed = 0.23 px/ms. Our PLAYER_SPEED is expressed in
+// tiles/ms (×TILE in the loop), so 0.08/16 = 0.005.
+const PLAYER_SPEED = 0.006;           // ≈ 0.096 px/ms — slightly above upstream
 const PLAYER_INVULN_MS = 1200;
-const BULLET_SPEED = 0.36;            // px/ms (player base)
+const BULLET_SPEED = 0.26;            // px/ms — slightly above upstream
+const SNAP_EPS = 5;                   // upstream uses 5 px tolerance on dir-change
 const BONUS_INTERVAL_MS = 18_000;
 const TREAD_FRAME_MS = 60;            // tread animation period
 
@@ -303,7 +307,10 @@ export function TankBattleGame() {
         }
         if (inputDir) {
           const before = { x: p.x, y: p.y };
-          p.dir = inputDir;
+          if (inputDir !== p.dir) {
+            p.dir = inputDir;
+            snapTankToLane(p);
+          }
           tryMove(p, dt * PLAYER_SPEED * TILE, map);
           accumulateTread(p, dt, before);
         }
@@ -357,7 +364,6 @@ export function TankBattleGame() {
           if (Math.random() < prof.targetBias) {
             const dx = targetPos.x - (e.x + TANK_SIZE / 2);
             const dy = targetPos.y - (e.y + TANK_SIZE / 2);
-            // Prefer the dominant axis; tie-break randomly.
             const preferX =
               Math.abs(dx) > Math.abs(dy) ||
               (Math.abs(dx) === Math.abs(dy) && Math.random() < 0.5);
@@ -366,7 +372,10 @@ export function TankBattleGame() {
           } else {
             dir = DIRS[Math.floor(Math.random() * DIRS.length)];
           }
-          e.dir = dir;
+          if (dir !== e.dir) {
+            e.dir = dir;
+            snapTankToLane(e);
+          }
           e.aiNextTurnAt = now + 700 + Math.random() * 1500;
         }
         const before = { x: e.x, y: e.y };
@@ -786,21 +795,37 @@ function tankBlocksAt(map: TileKind[], px: number, py: number): boolean {
   return false;
 }
 
+/** Advance the tank by `distance` pixels in its current direction, but stop
+ *  exactly when it hits a wall — rather than the old "if blocked, don't move
+ *  at all" rule which left a 1-pixel gap to every obstacle. We step in 1-px
+ *  increments because player speed is now ≈1 px/frame, so this is cheap. */
 function tryMove(t: Tank, distance: number, map: TileKind[]) {
   const v = DIR_VEC[t.dir];
-  if (v.x !== 0) {
-    // Snap Y to nearest cell lane to ease cornering.
-    const lane = Math.round(t.y / TILE) * TILE;
-    const drift = lane - t.y;
-    if (Math.abs(drift) > 0.1) t.y += Math.sign(drift) * Math.min(distance, Math.abs(drift));
-    const tryX = t.x + v.x * distance;
-    if (!tankBlocksAt(map, tryX, t.y)) t.x = tryX;
-  } else if (v.y !== 0) {
+  let remaining = distance;
+  while (remaining > 0) {
+    const step = remaining > 1 ? 1 : remaining;
+    const nx = t.x + v.x * step;
+    const ny = t.y + v.y * step;
+    if (tankBlocksAt(map, nx, ny)) return;
+    t.x = nx;
+    t.y = ny;
+    remaining -= step;
+  }
+}
+
+/** Snap the perpendicular axis to the nearest tile boundary when the tank
+ *  starts moving in a new direction — matches upstream Tank::setDirection()
+ *  with its 5-pixel epsilon. Without this, a tank that just rammed a wall
+ *  can't enter narrow corridors because its position is no longer
+ *  tile-aligned along the new axis. */
+function snapTankToLane(t: Tank) {
+  const v = DIR_VEC[t.dir];
+  if (v.y !== 0) {
     const lane = Math.round(t.x / TILE) * TILE;
-    const drift = lane - t.x;
-    if (Math.abs(drift) > 0.1) t.x += Math.sign(drift) * Math.min(distance, Math.abs(drift));
-    const tryY = t.y + v.y * distance;
-    if (!tankBlocksAt(map, t.x, tryY)) t.y = tryY;
+    if (Math.abs(t.x - lane) < SNAP_EPS) t.x = lane;
+  } else if (v.x !== 0) {
+    const lane = Math.round(t.y / TILE) * TILE;
+    if (Math.abs(t.y - lane) < SNAP_EPS) t.y = lane;
   }
 }
 
