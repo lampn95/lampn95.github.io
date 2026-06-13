@@ -1119,8 +1119,8 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
 }
 
 /* Bullet helpers — kept as module-internal (work on whatever map/players are
- * current; we pass the map explicitly, but the player/enemy "hasBullet" flag
- * release is done via the closure-captured arrays in step()). */
+ * current; we pass the map explicitly, but the owning tank's bulletCount
+ * decrement is done via the module-level last-seen refs set during draw). */
 
 function freeOwnerBullet(b: Bullet) {
   // The owner reference is recovered from the global last-known arrays via
