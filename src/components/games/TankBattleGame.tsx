@@ -1280,11 +1280,22 @@ export function TankBattleGame() {
           height={H}
           className={
             "rounded-2xl border border-white/10 bg-black/40 shadow-[0_20px_60px_rgba(0,0,0,0.55)] touch-none "
-            + (isFullscreen
-                ? "max-w-[min(95vmin,calc(100vh-140px))] max-h-[min(95vmin,calc(100vh-140px))] w-auto h-auto"
-                : "max-w-full")
+            + (isFullscreen ? "" : "max-w-full")
           }
-          style={{ touchAction: "none", imageRendering: "pixelated" }}
+          style={
+            isFullscreen
+              ? {
+                  // Force the canvas to actually scale up — `max-w` alone
+                  // doesn't grow past the intrinsic 416-px width attribute.
+                  // Pick the shorter axis (vmin), capped at viewport height
+                  // minus HUD/D-pad room, so the square aspect is preserved.
+                  width:  "min(95vmin, calc(100vh - 140px))",
+                  height: "min(95vmin, calc(100vh - 140px))",
+                  touchAction: "none",
+                  imageRendering: "pixelated",
+                }
+              : { touchAction: "none", imageRendering: "pixelated" }
+          }
         />
 
         {!running && !over && (
