@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
+import { asset } from "@/lib/config";
 import { games } from "@/lib/games";
 import { useT } from "@/lib/i18n";
 import { STAGES, STAGE_COLS, STAGE_ROWS } from "@/lib/tankStages";
@@ -9,29 +10,36 @@ import { TANK_SOUNDS, registerTankSounds, sound } from "@/lib/sound";
 import { GameShell, useBestScore } from "./GameShell";
 
 /* ──────────────────────────────────────────────────────────────────────────
- * A bigger Battle City tribute. Ported from the design (not the C++) of
- * https://github.com/krystiankaluzny/Tanks (MIT). Stage layouts borrowed
- * verbatim; everything else (rendering, AI loop, input) is fresh.
+ * A Battle City tribute that re-uses the upstream Tanks MIT assets and
+ * mirrors its sprite layout (4-direction × 2-tread frames) so it actually
+ * *looks* like the original. Stage layouts borrowed verbatim; AI loop and
+ * input are fresh.
+ *   https://github.com/krystiankaluzny/Tanks (MIT, © Krystian Kałużny)
  * ────────────────────────────────────────────────────────────────────────── */
 
-const TILE = 13;                     // canvas pixels per stage cell
-const W = STAGE_COLS * TILE;         // 338
-const H = STAGE_ROWS * TILE;         // 338
-const TANK_SIZE = TILE * 2;          // 2×2 cells, classic
+// Render at the asset's native tile size for crisp pixel art.
+const TILE = 16;
+const W = STAGE_COLS * TILE;          // 416
+const H = STAGE_ROWS * TILE;          // 416
+const TANK_SIZE = TILE * 2;           // 2×2 cells
 
-const BULLET_W = 4;
-const BULLET_H = 8;
+const BULLET_RENDER = 8;              // visual size (square sprite)
+const BULLET_HITBOX = 6;              // logical hitbox (slightly tighter than sprite)
 const ENEMIES_PER_STAGE = 5;
 const MAX_ALIVE_ENEMIES = 3;
 const MAX_LIVES = 3;
-const PLAYER_SPEED = 0.075;          // tiles/ms — feel "right"
+const PLAYER_SPEED = 0.072;           // tiles/ms — Battle-City feel
 const PLAYER_INVULN_MS = 1200;
-const BULLET_SPEED = 0.35;           // px/ms (player base)
-const BONUS_INTERVAL_MS = 18_000;    // drop a bonus roughly every 18s
+const BULLET_SPEED = 0.36;            // px/ms (player base)
+const BONUS_INTERVAL_MS = 18_000;
+const TREAD_FRAME_MS = 60;            // tread animation period
 
 type TileKind = "empty" | "brick" | "steel" | "bush" | "water" | "ice";
-type Dir = "up" | "down" | "left" | "right";
-const DIRS: Dir[] = ["up", "down", "left", "right"];
+type Dir = "up" | "right" | "down" | "left";
+// Atlas direction order matches the upstream Direction enum (UP/RIGHT/DOWN/LEFT)
+// because the C++ renderer indexes the sprite sheet by that order.
+const DIRS: Dir[] = ["up", "right", "down", "left"];
+const DIR_INDEX: Record<Dir, number> = { up: 0, right: 1, down: 2, left: 3 };
 
 const DIR_VEC: Record<Dir, { x: number; y: number }> = {
   up:    { x: 0,  y: -1 },
@@ -40,7 +48,7 @@ const DIR_VEC: Record<Dir, { x: number; y: number }> = {
   right: { x: 1,  y: 0 },
 };
 
-/* Enemy types A/B/C/D ported from the C++ repo's behaviour table. */
+/* Enemy types A/B/C/D ported from the C++ repo's behaviour + sprite tables. */
 type EnemyType = "A" | "B" | "C" | "D";
 const ENEMY_TYPE_SCRIPT: EnemyType[] = ["A", "A", "B", "C", "D"];
 
@@ -52,14 +60,48 @@ type EnemyProfile = {
   target: "player" | "eagle";
   /** Only fire when target is directly in front (else fire on a timer). */
   fireOnlyInFront: boolean;
-  color: string;
+  /** Y origin of this tank's sprite block inside atlas.png (4 dirs × 2 treads at 32 px each). */
+  atlasY: number;
 };
 const ENEMY_PROFILES: Record<EnemyType, EnemyProfile> = {
-  A: { speedMul: 1.0, targetBias: 0.8, target: "player", fireOnlyInFront: false, color: "#f87171" }, // rose
-  B: { speedMul: 1.3, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, color: "#fb923c" }, // amber
-  C: { speedMul: 1.0, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, color: "#a78bfa" }, // violet
-  D: { speedMul: 1.0, targetBias: 0.5, target: "player", fireOnlyInFront: true,  color: "#22d3ee" }, // cyan
+  A: { speedMul: 1.0, targetBias: 0.8, target: "player", fireOnlyInFront: false, atlasY: 0   },
+  B: { speedMul: 1.3, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, atlasY: 64  },
+  C: { speedMul: 1.0, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, atlasY: 128 },
+  D: { speedMul: 1.0, targetBias: 0.5, target: "player", fireOnlyInFront: true,  atlasY: 192 },
 };
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Sprite atlas coordinates (from upstream src/spriteconfig.cpp).
+ *
+ * Layout: each tank block is 4 columns (directions, 32 px each) × 2 rows
+ * (tread-animation frames, 32 px each). Single-cell tiles (brick/steel/…)
+ * are 16×16. Animated water uses 2 vertically-stacked frames.
+ * ────────────────────────────────────────────────────────────────────────── */
+const ATLAS_SRC = "/images/tank/atlas.png";
+
+const SP_PLAYER_X = 640;   // PLAYER_1 base column
+const SP_PLAYER_Y = 64;    // armor=1 frame baseline = (frame + 2*armor) * 32
+const SP_ENEMY_X  = 128;   // shared X origin for ST_TANK_*
+
+const SP = {
+  brick:        { x: 928, y: 0,   w: 16, h: 16 },
+  steel:        { x: 928, y: 144, w: 16, h: 16 },
+  water0:       { x: 928, y: 160, w: 16, h: 16 },
+  water1:       { x: 928, y: 176, w: 16, h: 16 },
+  bush:         { x: 928, y: 192, w: 16, h: 16 },
+  ice:          { x: 928, y: 208, w: 16, h: 16 },
+  eagle:        { x: 944, y: 0,   w: 32, h: 32 },
+  eagleDead:    { x: 944, y: 32,  w: 32, h: 32 }, // flag (sprite repurposed for "destroyed")
+  shield0:      { x: 976, y: 0,   w: 32, h: 32 },
+  shield1:      { x: 976, y: 32,  w: 32, h: 32 },
+  bonusHelmet:  { x: 896, y: 32,  w: 32, h: 32 },
+  bonusStar:    { x: 896, y: 160, w: 32, h: 32 },
+} as const;
+
+// Bullet sprite is 8×8, four direction tiles laid out horizontally at (944, 128).
+const BULLET_SX0 = 944;
+const BULLET_SY  = 128;
+const BULLET_TILE = 8;
 
 type Tank = {
   id: number;
@@ -76,6 +118,8 @@ type Tank = {
   speedMul: number;
   aiNextTurnAt: number;
   aiNextFireAt: number;
+  treadFrame: number;      // 0 / 1 — toggles while the tank is moving
+  treadAcc: number;        // ms accumulator for tread frame switching
 };
 
 type Bullet = {
@@ -105,6 +149,7 @@ export function TankBattleGame() {
   const [best, submitBest] = useBestScore(game.highScoreKey);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const atlasRef  = useRef<HTMLImageElement | null>(null);
 
   // Game state (mutable, lives in refs so rAF doesn't tear)
   const mapRef = useRef<TileKind[]>([]);
@@ -115,7 +160,9 @@ export function TankBattleGame() {
   const bonusRef = useRef<Bonus | null>(null);
   const lastBonusAtRef = useRef(0);
 
-  const pressedRef = useRef<{ [k in Dir]?: boolean } & { fire?: boolean }>({});
+  // pressedRef.order tracks the press sequence so the LAST direction pressed wins
+  // (classic Battle City: holding ↑ then pressing → instantly steers right).
+  const pressedRef = useRef<{ keys: Partial<Record<Dir, boolean>>; order: Dir[]; fire?: boolean }>({ keys: {}, order: [] });
   const remainingSpawnsRef = useRef(ENEMIES_PER_STAGE);
   const stageIdxRef = useRef(0);
   const lastTickRef = useRef(0);
@@ -138,10 +185,27 @@ export function TankBattleGame() {
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { livesRef.current = lives; }, [lives]);
 
-  // Sound: register the audio pool once and hydrate the initial muted flag.
+  // Sound + atlas: register audio once, preload the sprite atlas, hydrate mute.
   useEffect(() => {
     registerTankSounds();
     setMuted(sound.isMuted());
+    if (typeof window !== "undefined") {
+      const img = new Image();
+      img.onload  = () => { atlasRef.current = img; redraw(); };
+      img.onerror = () => { atlasRef.current = null; }; // graceful fallback to vector shapes
+      img.src = asset(ATLAS_SRC);
+    }
+    // We intentionally do not depend on `redraw` here — it's stable in a ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const redraw = useCallback(() => {
+    draw(
+      canvasRef.current, atlasRef.current,
+      mapRef.current, eagleAliveRef.current,
+      playerRef.current, enemiesRef.current,
+      bulletsRef.current, bonusRef.current,
+    );
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -195,12 +259,14 @@ export function TankBattleGame() {
     if (tank.hasBullet) return;
     tank.cooldown = now + (tank.isPlayer ? 280 : 380);
     tank.hasBullet = true;
+    // Spawn the bullet so its CENTER sits on the barrel tip, then the visual
+    // sprite (BULLET_RENDER) is drawn centered on that point too.
     const c = tankCenter(tank);
     const v = DIR_VEC[tank.dir];
     bulletsRef.current.push({
       id: nextId(),
-      x: c.x - BULLET_W / 2 + v.x * (TANK_SIZE / 2 - 2),
-      y: c.y - BULLET_H / 2 + v.y * (TANK_SIZE / 2 - 2),
+      x: c.x - BULLET_HITBOX / 2 + v.x * (TANK_SIZE / 2 - 1),
+      y: c.y - BULLET_HITBOX / 2 + v.y * (TANK_SIZE / 2 - 1),
       dir: tank.dir,
       ownerId: tank.id,
       fromPlayer: tank.isPlayer,
@@ -224,20 +290,22 @@ export function TankBattleGame() {
 
       const map = mapRef.current;
 
-      // 1. Player input
+      // 1. Player input — most-recent direction wins, so holding ↑ then
+      //    pressing → instantly steers right without releasing first.
       const p = playerRef.current;
       if (p) {
         p.spawnInvuln = Math.max(0, p.spawnInvuln - dt);
         p.shield = Math.max(0, p.shield - dt);
         let inputDir: Dir | null = null;
-        if (pressedRef.current.up) inputDir = "up";
-        else if (pressedRef.current.down) inputDir = "down";
-        else if (pressedRef.current.left) inputDir = "left";
-        else if (pressedRef.current.right) inputDir = "right";
-
+        const ord = pressedRef.current.order;
+        for (let i = ord.length - 1; i >= 0; i--) {
+          if (pressedRef.current.keys[ord[i]]) { inputDir = ord[i]; break; }
+        }
         if (inputDir) {
+          const before = { x: p.x, y: p.y };
           p.dir = inputDir;
           tryMove(p, dt * PLAYER_SPEED * TILE, map);
+          accumulateTread(p, dt, before);
         }
         if (pressedRef.current.fire) tryFire(p, now);
       }
@@ -301,7 +369,9 @@ export function TankBattleGame() {
           e.dir = dir;
           e.aiNextTurnAt = now + 700 + Math.random() * 1500;
         }
+        const before = { x: e.x, y: e.y };
         tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map);
+        accumulateTread(e, dt, before);
 
         // Firing
         let canFire = false;
@@ -320,37 +390,49 @@ export function TankBattleGame() {
         }
       }
 
-      // 5. Bullets
+      // 5. Bullets — sweep the movement so a fast bullet can't skip a brick.
       const liveBullets: Bullet[] = [];
       for (const b of bulletsRef.current) {
         const v = DIR_VEC[b.dir];
-        const speed = dt * BULLET_SPEED;
-        b.x += v.x * speed;
-        b.y += v.y * speed;
+        const distance = dt * BULLET_SPEED;
+        // Sub-step by half-a-tile so we never overshoot a thin brick.
+        const stepLen = TILE / 2;
+        const steps = Math.max(1, Math.ceil(distance / stepLen));
+        const step = distance / steps;
+        let resolved: "boundary" | "brick" | "steel" | "eagle" | "tank" | null = null;
+        for (let s = 0; s < steps && !resolved; s++) {
+          b.x += v.x * step;
+          b.y += v.y * step;
 
-        // Out of bounds
-        if (b.x < -BULLET_W || b.x > W || b.y < -BULLET_H || b.y > H) {
-          freeOwnerBullet(b);
-          continue;
+          // Map boundary — explode at the edge instead of flying off-screen.
+          if (b.x < 0 || b.x + BULLET_HITBOX > W || b.y < 0 || b.y + BULLET_HITBOX > H) {
+            resolved = "boundary";
+            break;
+          }
+
+          // Eagle check — instant lose
+          if (bulletHitsEagle(b)) {
+            eagleAliveRef.current = false;
+            setRunning(false);
+            setOver("lose-eagle");
+            submitBest(scoreRef.current);
+            sound.play(TANK_SOUNDS.eagleDestroyed.id, TANK_SOUNDS.eagleDestroyed.vol);
+            resolved = "eagle";
+            break;
+          }
+
+          // Terrain — leading edge of the bullet, plus the perpendicular
+          // extent so it can't slip through a one-tile-wide gap.
+          const terrainHit = checkBulletTerrain(b, map);
+          if (terrainHit) {
+            if (terrainHit === "brick") sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
+            else                        sound.play(TANK_SOUNDS.steelHit.id, TANK_SOUNDS.steelHit.vol);
+            resolved = terrainHit;
+            break;
+          }
         }
-
-        // Eagle check — instant lose
-        if (bulletHitsEagle(b)) {
-          eagleAliveRef.current = false;
-          setRunning(false);
-          setOver("lose-eagle");
-          submitBest(scoreRef.current);
+        if (resolved) {
           freeOwnerBullet(b);
-          sound.play(TANK_SOUNDS.eagleDestroyed.id, TANK_SOUNDS.eagleDestroyed.vol);
-          continue;
-        }
-
-        // Terrain
-        const terrainHit = checkBulletTerrain(b, map);
-        if (terrainHit) {
-          freeOwnerBullet(b);
-          if (terrainHit === "brick") sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
-          else                        sound.play(TANK_SOUNDS.steelHit.id, TANK_SOUNDS.steelHit.vol);
           continue;
         }
 
@@ -438,24 +520,16 @@ export function TankBattleGame() {
         submitBest(scoreRef.current);
       }
 
-      draw(
-        canvasRef.current,
-        map,
-        eagleAliveRef.current,
-        playerRef.current,
-        enemiesRef.current,
-        bulletsRef.current,
-        bonusRef.current,
-      );
+      redraw();
       return true;
     },
-    [over, respawnPlayer, submitBest, tryFire],
+    [over, redraw, respawnPlayer, submitBest, tryFire],
   );
 
   // ──────────────── rAF ────────────────
   useEffect(() => {
     if (!running) {
-      draw(canvasRef.current, mapRef.current, eagleAliveRef.current, playerRef.current, enemiesRef.current, bulletsRef.current, bonusRef.current);
+      redraw();
       return;
     }
     const loop = (now: number) => {
@@ -483,7 +557,12 @@ export function TankBattleGame() {
       const d = dirFromKey(e.key);
       if (d) {
         e.preventDefault();
-        pressedRef.current[d] = true;
+        // Only push onto the press-order stack on the *initial* key-down,
+        // not on auto-repeat events, so movement stays smooth.
+        if (!pressedRef.current.keys[d]) {
+          pressedRef.current.keys[d] = true;
+          pressedRef.current.order.push(d);
+        }
         return;
       }
       if (e.key === " ") {
@@ -502,7 +581,10 @@ export function TankBattleGame() {
     };
     const onUp = (e: KeyboardEvent) => {
       const d = dirFromKey(e.key);
-      if (d) pressedRef.current[d] = false;
+      if (d) {
+        pressedRef.current.keys[d] = false;
+        pressedRef.current.order = pressedRef.current.order.filter((x) => x !== d);
+      }
       if (e.key === " ") pressedRef.current.fire = false;
     };
     window.addEventListener("keydown", onDown);
@@ -519,10 +601,15 @@ export function TankBattleGame() {
       mapRef.current = parseStage(STAGES[0]);
       playerRef.current = makePlayer();
     }
-    draw(canvasRef.current, mapRef.current, eagleAliveRef.current, playerRef.current, enemiesRef.current, bulletsRef.current, bonusRef.current);
-  }, []);
+    redraw();
+  }, [redraw]);
 
-  const pressDir = (d: Dir, on: boolean) => () => { pressedRef.current[d] = on; };
+  const pressDir = (d: Dir, on: boolean) => () => {
+    const prev = pressedRef.current.keys[d];
+    pressedRef.current.keys[d] = on;
+    if (on && !prev) pressedRef.current.order.push(d);
+    if (!on)         pressedRef.current.order = pressedRef.current.order.filter((x) => x !== d);
+  };
   const pressFire = (on: boolean) => () => {
     if (on) {
       if (over === "stage-clear") { handleNextStage(); return; }
@@ -722,6 +809,17 @@ function isBlockedAhead(t: Tank, map: TileKind[]): boolean {
   return tankBlocksAt(map, t.x + v.x * 3, t.y + v.y * 3);
 }
 
+/** Advance the 2-frame tread animation only when the tank actually moved.
+ *  Calling code passes the position the tank had before tryMove(). */
+function accumulateTread(t: Tank, dt: number, before: { x: number; y: number }) {
+  if (t.x === before.x && t.y === before.y) return;
+  t.treadAcc += dt;
+  if (t.treadAcc >= TREAD_FRAME_MS) {
+    t.treadAcc = 0;
+    t.treadFrame = t.treadFrame === 0 ? 1 : 0;
+  }
+}
+
 function pickEmptySpot(map: TileKind[]): { x: number; y: number } | null {
   for (let attempt = 0; attempt < 30; attempt++) {
     const x = Math.floor(Math.random() * (STAGE_COLS - 2));
@@ -734,8 +832,8 @@ function pickEmptySpot(map: TileKind[]): { x: number; y: number } | null {
 }
 
 function makePlayer(): Tank {
-  // Bottom-center, 2 tiles wide; spawn just to the left of eagle path.
-  const tx = Math.floor(STAGE_COLS / 2) - 3; // tank's left edge in cells
+  // Classic Battle City player-1 spawn: 4 cells left of the eagle, bottom row.
+  const tx = Math.floor(STAGE_COLS / 2) - 5; // cell col 8 → x=128 at TILE=16
   const ty = STAGE_ROWS - 2;
   return {
     id: nextId(),
@@ -751,6 +849,8 @@ function makePlayer(): Tank {
     speedMul: 1,
     aiNextTurnAt: 0,
     aiNextFireAt: 0,
+    treadFrame: 0,
+    treadAcc: 0,
   };
 }
 
@@ -782,6 +882,8 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
           speedMul: prof.speedMul,
           aiNextTurnAt: 0,
           aiNextFireAt: performance.now() + 1200 + Math.random() * 800,
+          treadFrame: 0,
+          treadAcc: 0,
         };
       }
     }
@@ -804,28 +906,59 @@ function freeOwnerBullet(b: Bullet) {
   }
 }
 
+/** Check the cell(s) the bullet's *leading edge* occupies, not its center —
+ *  this matches the original behaviour where a bullet stops the moment its tip
+ *  touches a wall. For axis-aligned motion we also sample the perpendicular
+ *  extent so a bullet can never slip diagonally past a one-tile gap. */
 function checkBulletTerrain(b: Bullet, map: TileKind[]): "brick" | "steel" | null {
-  const tx = Math.floor((b.x + BULLET_W / 2) / TILE);
-  const ty = Math.floor((b.y + BULLET_H / 2) / TILE);
-  if (!inBounds(tx, ty)) return null;
-  const tile = map[idx(tx, ty)];
-  if (tile === "brick") {
-    map[idx(tx, ty)] = "empty";
-    return "brick";
+  const v = DIR_VEC[b.dir];
+  // Leading-edge coordinates along the motion axis.
+  const tipX =
+    v.x > 0 ? b.x + BULLET_HITBOX - 1
+    : v.x < 0 ? b.x
+    : b.x + BULLET_HITBOX / 2;
+  const tipY =
+    v.y > 0 ? b.y + BULLET_HITBOX - 1
+    : v.y < 0 ? b.y
+    : b.y + BULLET_HITBOX / 2;
+
+  // Sample the two tiles the bullet's perpendicular extent might touch.
+  const samples: { tx: number; ty: number }[] = v.y !== 0
+    ? [
+        { tx: Math.floor(b.x / TILE),                       ty: Math.floor(tipY / TILE) },
+        { tx: Math.floor((b.x + BULLET_HITBOX - 1) / TILE), ty: Math.floor(tipY / TILE) },
+      ]
+    : [
+        { tx: Math.floor(tipX / TILE), ty: Math.floor(b.y / TILE) },
+        { tx: Math.floor(tipX / TILE), ty: Math.floor((b.y + BULLET_HITBOX - 1) / TILE) },
+      ];
+
+  let result: "brick" | "steel" | null = null;
+  const cellsToErase: { i: number; kind: TileKind }[] = [];
+  for (let i = 0; i < samples.length; i++) {
+    const s = samples[i];
+    // Deduplicate (both samples may land in the same cell when not on a boundary).
+    if (i === 1 && samples[0].tx === s.tx && samples[0].ty === s.ty) break;
+    if (!inBounds(s.tx, s.ty)) continue;
+    const k = idx(s.tx, s.ty);
+    const tile = map[k];
+    if (tile === "brick") { cellsToErase.push({ i: k, kind: "brick" }); result = result === "steel" ? "steel" : "brick"; }
+    else if (tile === "steel") { cellsToErase.push({ i: k, kind: "steel" }); result = "steel"; }
   }
-  if (tile === "steel") {
-    // A star-powered bullet shatters steel; otherwise it ricochets (= dies).
-    if (b.power > 0) map[idx(tx, ty)] = "empty";
-    return "steel";
+  if (!result) return null;
+  // Apply damage. Bricks always shatter; steel only if the bullet is starred.
+  for (const c of cellsToErase) {
+    if (c.kind === "brick") map[c.i] = "empty";
+    else if (c.kind === "steel" && b.power > 0) map[c.i] = "empty";
   }
-  return null;
+  return result;
 }
 
 function bulletHitsTank(b: Bullet, t: Tank): boolean {
   return (
-    b.x + BULLET_W > t.x &&
+    b.x + BULLET_HITBOX > t.x &&
     b.x < t.x + TANK_SIZE &&
-    b.y + BULLET_H > t.y &&
+    b.y + BULLET_HITBOX > t.y &&
     b.y < t.y + TANK_SIZE
   );
 }
@@ -835,9 +968,9 @@ function bulletHitsEagle(b: Bullet): boolean {
   const ex = (Math.floor(STAGE_COLS / 2) - 1) * TILE;
   const ey = (STAGE_ROWS - 2) * TILE;
   return (
-    b.x + BULLET_W > ex &&
+    b.x + BULLET_HITBOX > ex &&
     b.x < ex + TILE * 2 &&
-    b.y + BULLET_H > ey &&
+    b.y + BULLET_HITBOX > ey &&
     b.y < ey + TILE * 2
   );
 }
@@ -846,11 +979,13 @@ let __lastPlayer: Tank | null = null;
 let __lastEnemies: Tank[] = [];
 
 /* ──────────────────────────────────────────────────────────────────────────
- * Drawing
+ * Drawing — sprite-atlas based. Falls back to vector shapes if the atlas
+ * isn't loaded yet (e.g. first frame after mount).
  * ────────────────────────────────────────────────────────────────────────── */
 
 function draw(
   canvas: HTMLCanvasElement | null,
+  atlas: HTMLImageElement | null,
   map: TileKind[],
   eagleAlive: boolean,
   player: Tank | null,
@@ -865,179 +1000,145 @@ function draw(
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  // bg
+  // Pixel-perfect blits: turn off image smoothing on every frame because some
+  // browsers reset it after a canvas resize.
+  ctx.imageSmoothingEnabled = false;
+
+  // Background
   ctx.fillStyle = "#0a0d14";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // tiles (skip bushes — drawn after tanks so they cover them)
+  // Tiles — bushes are drawn LAST so they conceal tanks underneath.
   for (let y = 0; y < STAGE_ROWS; y++) {
     for (let x = 0; x < STAGE_COLS; x++) {
-      const t = map[idx(x, y)];
-      if (t === "empty" || t === "bush") continue;
-      const px = x * TILE, py = y * TILE;
-      if      (t === "brick") drawBrick(ctx, px, py);
-      else if (t === "steel") drawSteel(ctx, px, py);
-      else if (t === "water") drawWater(ctx, px, py);
-      else if (t === "ice")   drawIce(ctx, px, py);
+      const tk = map[idx(x, y)];
+      if (tk === "empty" || tk === "bush") continue;
+      drawTile(ctx, atlas, tk, x * TILE, y * TILE);
     }
   }
 
-  // Eagle
+  // Eagle (2×2 tile sprite, centered above the base alley)
   drawEagle(
-    ctx,
+    ctx, atlas,
     (Math.floor(STAGE_COLS / 2) - 1) * TILE,
     (STAGE_ROWS - 2) * TILE,
     eagleAlive,
   );
 
-  // Bonus
-  if (bonus) drawBonus(ctx, bonus);
+  // Bonus (blinking 2×2)
+  if (bonus) drawBonus(ctx, atlas, bonus);
 
   // Tanks
-  for (const e of enemies) drawTank(ctx, e, ENEMY_PROFILES[e.type!].color);
-  if (player) drawTank(ctx, player, "#7cf2ff");
+  for (const e of enemies)  drawTank(ctx, atlas, e);
+  if (player)               drawTank(ctx, atlas, player);
 
-  // Bullets
-  for (const b of bullets) {
-    ctx.fillStyle = b.fromPlayer ? "#fde68a" : "#fda4af";
-    ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H);
-  }
+  // Bullets — sprite is 8×8, drawn centered on the (slightly smaller) hitbox.
+  for (const b of bullets) drawBullet(ctx, atlas, b);
 
-  // Bushes (above tanks, so they conceal)
+  // Bushes overlay
   for (let y = 0; y < STAGE_ROWS; y++) {
     for (let x = 0; x < STAGE_COLS; x++) {
-      if (map[idx(x, y)] === "bush") drawBush(ctx, x * TILE, y * TILE);
+      if (map[idx(x, y)] === "bush") drawTile(ctx, atlas, "bush", x * TILE, y * TILE);
     }
   }
 }
 
-function drawBrick(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.fillStyle = "#9a3412";
+function blit(
+  ctx: CanvasRenderingContext2D,
+  atlas: HTMLImageElement | null,
+  src: { x: number; y: number; w: number; h: number },
+  dx: number, dy: number, dw: number, dh: number,
+) {
+  if (!atlas) return false;
+  ctx.drawImage(atlas, src.x, src.y, src.w, src.h, dx, dy, dw, dh);
+  return true;
+}
+
+function drawTile(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, kind: TileKind, x: number, y: number) {
+  const src =
+    kind === "brick" ? SP.brick
+    : kind === "steel" ? SP.steel
+    : kind === "bush" ? SP.bush
+    : kind === "ice" ? SP.ice
+    : kind === "water" ? (Math.floor(Date.now() / 350) % 2 === 0 ? SP.water0 : SP.water1)
+    : null;
+  if (src && blit(ctx, atlas, src, x, y, TILE, TILE)) return;
+  // Fallback (atlas not loaded yet)
+  ctx.fillStyle =
+    kind === "brick" ? "#9a3412"
+    : kind === "steel" ? "#94a3b8"
+    : kind === "water" ? "#1d4ed8"
+    : kind === "bush"  ? "#166534"
+    : kind === "ice"   ? "#e0f2fe"
+    : "#0a0d14";
   ctx.fillRect(x, y, TILE, TILE);
-  ctx.strokeStyle = "rgba(0,0,0,0.55)";
-  ctx.lineWidth = 1;
-  // 2 horizontal mortar lines per cell
-  for (let row = 0; row < 2; row++) {
-    const yy = y + row * (TILE / 2) + (TILE / 4);
-    ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + TILE, yy); ctx.stroke();
-  }
-  // staggered vertical
-  ctx.beginPath();
-  ctx.moveTo(x + TILE / 2, y); ctx.lineTo(x + TILE / 2, y + TILE / 4);
-  ctx.moveTo(x,            y + TILE / 2); ctx.lineTo(x,            y + 3 * TILE / 4);
-  ctx.moveTo(x + TILE / 2, y + 3 * TILE / 4); ctx.lineTo(x + TILE / 2, y + TILE);
-  ctx.stroke();
 }
 
-function drawSteel(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  const g = ctx.createLinearGradient(x, y, x + TILE, y + TILE);
-  g.addColorStop(0, "#94a3b8"); g.addColorStop(1, "#475569");
-  ctx.fillStyle = g; ctx.fillRect(x, y, TILE, TILE);
-  ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
-}
-
-function drawWater(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.fillStyle = "#1d4ed8"; ctx.fillRect(x, y, TILE, TILE);
-  ctx.fillStyle = "rgba(255,255,255,0.15)";
-  for (let i = 0; i < 3; i++) {
-    const yy = y + 2 + i * 4;
-    ctx.fillRect(x + 2, yy, 4, 1);
-    ctx.fillRect(x + 8, yy + 2, 3, 1);
-  }
-}
-
-function drawIce(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.fillStyle = "#e0f2fe"; ctx.fillRect(x, y, TILE, TILE);
-  ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
-}
-
-function drawBush(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.fillStyle = "#166534";
-  ctx.fillRect(x, y, TILE, TILE);
-  ctx.fillStyle = "#22c55e";
-  ctx.fillRect(x + 1, y + 1, 4, 4);
-  ctx.fillRect(x + 7, y + 1, 4, 4);
-  ctx.fillRect(x + 1, y + 7, 4, 4);
-  ctx.fillRect(x + 7, y + 7, 4, 4);
-}
-
-function drawEagle(ctx: CanvasRenderingContext2D, x: number, y: number, alive: boolean) {
-  const size = TILE * 2;
+function drawEagle(
+  ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null,
+  x: number, y: number, alive: boolean,
+) {
+  if (blit(ctx, atlas, alive ? SP.eagle : SP.eagleDead, x, y, TANK_SIZE, TANK_SIZE)) return;
+  // Fallback
   ctx.fillStyle = alive ? "#fde68a" : "#52525b";
-  ctx.fillRect(x, y, size, size);
-  // Eagle silhouette
-  ctx.fillStyle = alive ? "#7c2d12" : "#27272a";
-  // small wings / body — abstract
-  ctx.fillRect(x + 4, y + 6, size - 8, 4);
-  ctx.fillRect(x + size / 2 - 2, y + 4, 4, size - 8);
-  // tail
-  ctx.fillRect(x + 8, y + size - 6, size - 16, 3);
-  if (!alive) {
-    // crack lines
-    ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x, y); ctx.lineTo(x + size, y + size);
-    ctx.moveTo(x + size, y); ctx.lineTo(x, y + size);
-    ctx.stroke();
-  }
+  ctx.fillRect(x, y, TANK_SIZE, TANK_SIZE);
 }
 
-function drawBonus(ctx: CanvasRenderingContext2D, b: Bonus) {
-  const w = TILE * 2;
+function drawBonus(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, b: Bonus) {
   // Blink: invisible 100ms out of every 500ms
   if ((Date.now() % 500) < 100) return;
+  const src = b.kind === "helmet" ? SP.bonusHelmet : SP.bonusStar;
+  if (blit(ctx, atlas, src, b.x, b.y, TANK_SIZE, TANK_SIZE)) return;
+  // Fallback
   ctx.fillStyle = "rgba(0,0,0,0.35)";
-  ctx.fillRect(b.x, b.y, w, w);
+  ctx.fillRect(b.x, b.y, TANK_SIZE, TANK_SIZE);
   ctx.font = `${TILE * 1.4}px serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(b.kind === "helmet" ? "🪖" : "⭐", b.x + w / 2, b.y + w / 2 + 1);
+  ctx.fillText(b.kind === "helmet" ? "🪖" : "⭐", b.x + TANK_SIZE / 2, b.y + TANK_SIZE / 2 + 1);
 }
 
-function drawTank(ctx: CanvasRenderingContext2D, t: Tank, color: string) {
-  const { x, y } = t;
-  const s = TANK_SIZE;
-  // spawn flicker
+function drawBullet(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, b: Bullet) {
+  const dx = b.x + (BULLET_HITBOX - BULLET_RENDER) / 2;
+  const dy = b.y + (BULLET_HITBOX - BULLET_RENDER) / 2;
+  const dirIdx = DIR_INDEX[b.dir];
+  if (atlas) {
+    ctx.drawImage(
+      atlas,
+      BULLET_SX0 + dirIdx * BULLET_TILE, BULLET_SY, BULLET_TILE, BULLET_TILE,
+      dx, dy, BULLET_RENDER, BULLET_RENDER,
+    );
+    return;
+  }
+  ctx.fillStyle = b.fromPlayer ? "#fde68a" : "#fda4af";
+  ctx.fillRect(b.x, b.y, BULLET_HITBOX, BULLET_HITBOX);
+}
+
+function drawTank(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, t: Tank) {
+  // Spawn flicker
   if (t.spawnInvuln > 0 && Math.floor(t.spawnInvuln / 100) % 2 === 0) return;
 
-  // shield ring (player helmet bonus)
-  if (t.isPlayer && t.shield > 0) {
+  const dirIdx = DIR_INDEX[t.dir];
+  // Each tank type's sprite block: 4 columns × 2 rows of 32×32 frames.
+  const sx = (t.isPlayer ? SP_PLAYER_X : SP_ENEMY_X) + dirIdx * 32;
+  const sy = (t.isPlayer ? SP_PLAYER_Y : ENEMY_PROFILES[t.type!].atlasY) + t.treadFrame * 32;
+
+  if (atlas) {
+    ctx.drawImage(atlas, sx, sy, 32, 32, t.x, t.y, TANK_SIZE, TANK_SIZE);
+  } else {
+    // Fallback vector tank
+    ctx.fillStyle = t.isPlayer ? "#7cf2ff" : "#f87171";
+    ctx.fillRect(t.x, t.y, TANK_SIZE, TANK_SIZE);
+  }
+
+  // Shield ring (helmet bonus) — overlay on top of the sprite
+  if (t.isPlayer && t.shield > 0 && atlas) {
+    const shieldSrc = Math.floor(Date.now() / 45) % 2 === 0 ? SP.shield0 : SP.shield1;
+    ctx.drawImage(atlas, shieldSrc.x, shieldSrc.y, shieldSrc.w, shieldSrc.h, t.x, t.y, TANK_SIZE, TANK_SIZE);
+  } else if (t.isPlayer && t.shield > 0) {
     ctx.strokeStyle = "#67e8f9";
     ctx.lineWidth = 2;
-    ctx.strokeRect(x - 1, y - 1, s + 2, s + 2);
-  }
-
-  // tracks (slightly darker)
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y + 3, 4, s - 6);
-  ctx.fillRect(x + s - 4, y + 3, 4, s - 6);
-  // hull
-  ctx.fillRect(x + 4, y + 4, s - 8, s - 8);
-
-  // barrel
-  ctx.fillStyle = "#0a0d14";
-  const cx = x + s / 2, cy = y + s / 2;
-  const bw = 3, bl = s / 2;
-  switch (t.dir) {
-    case "up":    ctx.fillRect(cx - bw / 2, y, bw, bl); break;
-    case "down":  ctx.fillRect(cx - bw / 2, cy, bw, bl); break;
-    case "left":  ctx.fillRect(x, cy - bw / 2, bl, bw); break;
-    case "right": ctx.fillRect(cx, cy - bw / 2, bl, bw); break;
-  }
-
-  // rivets
-  ctx.fillStyle = "rgba(0,0,0,0.35)";
-  ctx.fillRect(x + 6, y + 6, 2, 2);
-  ctx.fillRect(x + s - 8, y + 6, 2, 2);
-  ctx.fillRect(x + 6, y + s - 8, 2, 2);
-  ctx.fillRect(x + s - 8, y + s - 8, 2, 2);
-
-  // star marker
-  if (t.isPlayer && t.starLevel > 0) {
-    ctx.fillStyle = "#fde68a";
-    ctx.fillRect(x + s / 2 - 1, y + s / 2 - 1, 3, 3);
+    ctx.strokeRect(t.x - 1, t.y - 1, TANK_SIZE + 2, TANK_SIZE + 2);
   }
 }
 

@@ -1,0 +1,10 @@
+Image files in this folder are reused from the open-source project
+"Tanks" by Krystian Kałużny:
+
+    https://github.com/krystiankaluzny/Tanks
+
+Licensed under the MIT License (Copyright (c) 2025 Krystian Kałużny).
+See the upstream repository for the full LICENSE text.
+
+Files included:
+- atlas.png  (resources/textures/texture.png from the upstream repo)
