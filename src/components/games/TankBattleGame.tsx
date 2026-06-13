@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
 import { games } from "@/lib/games";
 import { useT } from "@/lib/i18n";
 import { STAGES, STAGE_COLS, STAGE_ROWS } from "@/lib/tankStages";
+import { TANK_SOUNDS, registerTankSounds, sound } from "@/lib/sound";
 import { GameShell, useBestScore } from "./GameShell";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -131,9 +133,20 @@ export function TankBattleGame() {
   const [stageNum, setStageNum]         = useState(1);
   const [running, setRunning]           = useState(false);
   const [over, setOver]                 = useState<null | "win" | "lose-lives" | "lose-eagle" | "stage-clear">(null);
+  const [muted, setMuted]               = useState(false);
 
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { livesRef.current = lives; }, [lives]);
+
+  // Sound: register the audio pool once and hydrate the initial muted flag.
+  useEffect(() => {
+    registerTankSounds();
+    setMuted(sound.isMuted());
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setMuted(sound.toggleMuted());
+  }, []);
 
   // ──────────────── stage loading ────────────────
   const loadStage = useCallback((idx: number) => {
@@ -164,12 +177,16 @@ export function TankBattleGame() {
   const handleStart = useCallback(() => {
     reset();
     setRunning(true);
+    // Preload all sounds on first user gesture (autoplay policies).
+    sound.preloadAll();
+    sound.play(TANK_SOUNDS.stageStart.id, TANK_SOUNDS.stageStart.vol);
   }, [reset]);
 
   const handleNextStage = useCallback(() => {
     loadStage(stageIdxRef.current + 1);
     setOver(null);
     setRunning(true);
+    sound.play(TANK_SOUNDS.stageStart.id, TANK_SOUNDS.stageStart.vol);
   }, [loadStage]);
 
   // ──────────────── tank helpers ────────────────
@@ -189,6 +206,7 @@ export function TankBattleGame() {
       fromPlayer: tank.isPlayer,
       power: tank.isPlayer && tank.starLevel > 0 ? 1 : 0,
     });
+    if (tank.isPlayer) sound.play(TANK_SOUNDS.fire.id, TANK_SOUNDS.fire.vol);
   }, []);
 
   const respawnPlayer = useCallback(() => {
@@ -323,12 +341,16 @@ export function TankBattleGame() {
           setOver("lose-eagle");
           submitBest(scoreRef.current);
           freeOwnerBullet(b);
+          sound.play(TANK_SOUNDS.eagleDestroyed.id, TANK_SOUNDS.eagleDestroyed.vol);
           continue;
         }
 
         // Terrain
-        if (checkBulletTerrain(b, map)) {
+        const terrainHit = checkBulletTerrain(b, map);
+        if (terrainHit) {
           freeOwnerBullet(b);
+          if (terrainHit === "brick") sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
+          else                        sound.play(TANK_SOUNDS.steelHit.id, TANK_SOUNDS.steelHit.vol);
           continue;
         }
 
@@ -348,6 +370,7 @@ export function TankBattleGame() {
               });
               consumed = true;
               freeOwnerBullet(b);
+              sound.play(TANK_SOUNDS.enemyDestroyed.id, TANK_SOUNDS.enemyDestroyed.vol);
               break;
             }
           }
@@ -360,6 +383,7 @@ export function TankBattleGame() {
             if (curP.shield > 0 || curP.spawnInvuln > 0) {
               // absorbed
             } else {
+              sound.play(TANK_SOUNDS.playerDestroyed.id, TANK_SOUNDS.playerDestroyed.vol);
               const newLives = livesRef.current - 1;
               livesRef.current = newLives;
               setLives(newLives);
@@ -393,6 +417,7 @@ export function TankBattleGame() {
             cur.starLevel = Math.min(1, cur.starLevel + 1);
           }
           bonusRef.current = null;
+          sound.play(TANK_SOUNDS.bonusObtained.id, TANK_SOUNDS.bonusObtained.vol);
           // Small score bump for picking up
           setScore((s) => {
             const ns = s + 1;
@@ -535,6 +560,15 @@ export function TankBattleGame() {
             <span className="text-white font-semibold">{enemiesLeft}</span>
           </span>
         </div>
+        <button
+          type="button"
+          onClick={toggleMute}
+          aria-label={muted ? "Unmute" : "Mute"}
+          title={muted ? "Unmute" : "Mute"}
+          className="rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors"
+        >
+          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
       </div>
 
       <div className="relative mt-4 flex justify-center">
@@ -770,21 +804,21 @@ function freeOwnerBullet(b: Bullet) {
   }
 }
 
-function checkBulletTerrain(b: Bullet, map: TileKind[]): boolean {
+function checkBulletTerrain(b: Bullet, map: TileKind[]): "brick" | "steel" | null {
   const tx = Math.floor((b.x + BULLET_W / 2) / TILE);
   const ty = Math.floor((b.y + BULLET_H / 2) / TILE);
-  if (!inBounds(tx, ty)) return false;
+  if (!inBounds(tx, ty)) return null;
   const tile = map[idx(tx, ty)];
   if (tile === "brick") {
     map[idx(tx, ty)] = "empty";
-    return true;
+    return "brick";
   }
   if (tile === "steel") {
     // A star-powered bullet shatters steel; otherwise it ricochets (= dies).
     if (b.power > 0) map[idx(tx, ty)] = "empty";
-    return true;
+    return "steel";
   }
-  return false;
+  return null;
 }
 
 function bulletHitsTank(b: Bullet, t: Tank): boolean {
