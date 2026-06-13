@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import { siteConfig } from "@/lib/config";
 import { CoffeeButton } from "./CoffeeButton";
+import { GithubIcon, LinkedInIcon } from "./SocialIcons";
 import { useT } from "@/lib/i18n";
 import type { TranslationKey } from "@/lib/translations";
 
@@ -35,13 +37,23 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-3 sm:items-end">
-          <div className="flex items-center gap-3 text-sm">
-            <a
+          <div className="flex items-center gap-2">
+            <SocialIconLink
+              href={siteConfig.socials.github}
+              label="GitHub"
+              icon={<GithubIcon className="h-4 w-4" />}
+            />
+            <SocialIconLink
+              href={siteConfig.socials.linkedin}
+              label="LinkedIn"
+              icon={<LinkedInIcon className="h-4 w-4" />}
+            />
+            <SocialIconLink
               href={`mailto:${siteConfig.email}`}
-              className="text-white/60 hover:text-white"
-            >
-              {siteConfig.email}
-            </a>
+              label="Email"
+              external={false}
+              icon={<Mail className="h-4 w-4" />}
+            />
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/stories" className="text-white/60 hover:text-white">
@@ -68,5 +80,29 @@ export function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function SocialIconLink({
+  href,
+  label,
+  icon,
+  external = true,
+}: {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  external?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      aria-label={label}
+      title={label}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-white/60 hover:text-white hover:border-white/25 hover:bg-white/[0.07] transition-colors"
+    >
+      {icon}
+    </a>
   );
 }

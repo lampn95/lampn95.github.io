@@ -22,7 +22,7 @@ export const siteConfig = {
   location: "Vietnam",
   socials: {
     github: "https://github.com/lampn95",
-    linkedin: "https://www.linkedin.com/in/lampham",
+    linkedin: "https://www.linkedin.com/in/lam0895/",
     engineerpro: "https://engineerprogurus.com/",
   },
   // Internal route — every Coffee CTA opens here, where the QR can be embedded inline.
