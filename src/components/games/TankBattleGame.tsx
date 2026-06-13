@@ -1773,34 +1773,29 @@ function drawTank(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null,
     ctx.drawImage(atlas, SP.boatPlayer.x, SP.boatPlayer.y, SP.boatPlayer.w, SP.boatPlayer.h, t.x, t.y, TANK_SIZE, TANK_SIZE);
   }
 
+  // Sprite addressing follows upstream enemy_alive_state.cpp lines 51-54:
+  //   bonus enemy:   tiledOffset(direction - 4, frame)        → x=0..127 area
+  //   armored enemy: tiledOffset(direction + (armor-1)*4, frame) — each
+  //                  armor level lives in its own 128-px-wide column band.
+  // The atlas has the colour-flash variants baked into frames 0/1 of each
+  // sprite, so we get the classic "armoured tanks flash colours" effect
+  // for free as soon as the tread animation ticks.
   const dirIdx = DIR_INDEX[t.dir];
-  // Each tank type's sprite block: 4 columns × 2 rows of 32×32 frames.
-  // Player atlas rows step by 64 px per star level (armor 1 → 2 → 3).
-  const sx = (t.isPlayer ? SP_PLAYER_X : SP_ENEMY_X) + dirIdx * 32;
-  const playerRowY = SP_PLAYER_Y + t.starLevel * 64;
-  const sy = (t.isPlayer ? playerRowY : ENEMY_PROFILES[t.type!].atlasY) + t.treadFrame * 32;
+  let sx: number, sy: number;
+  if (t.isPlayer) {
+    sx = SP_PLAYER_X + dirIdx * 32;
+    sy = SP_PLAYER_Y + t.starLevel * 64 + t.treadFrame * 32;
+  } else {
+    const colOffset = t.bonusDrop ? -4 : (t.armor - 1) * 4;
+    sx = SP_ENEMY_X + (dirIdx + colOffset) * 32;
+    sy = ENEMY_PROFILES[t.type!].atlasY + t.treadFrame * 32;
+  }
 
   if (atlas) {
     ctx.drawImage(atlas, sx, sy, 32, 32, t.x, t.y, TANK_SIZE, TANK_SIZE);
   } else {
     ctx.fillStyle = t.isPlayer ? "#7cf2ff" : "#f87171";
     ctx.fillRect(t.x, t.y, TANK_SIZE, TANK_SIZE);
-  }
-
-  // 🎁 Bonus enemy — pulsing red overlay so the player can spot the
-  // "flashing red tank" that drops a bonus when killed.
-  if (!t.isPlayer && t.bonusDrop) {
-    const pulse = (Math.sin(Date.now() / 110) + 1) / 2; // 0..1
-    ctx.fillStyle = `rgba(248, 113, 113, ${0.18 + 0.35 * pulse})`;
-    ctx.fillRect(t.x, t.y, TANK_SIZE, TANK_SIZE);
-  }
-
-  // 🛡 Armored enemy hint — thin coloured ring per remaining-armor level
-  // so the player can tell how many hits are left.
-  if (!t.isPlayer && t.armor > 1) {
-    ctx.strokeStyle = t.armor >= 4 ? "#fde68a" : t.armor === 3 ? "#fb923c" : "#fca5a5";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(t.x + 0.5, t.y + 0.5, TANK_SIZE - 1, TANK_SIZE - 1);
   }
 
   // Shield ring (helmet bonus) — overlay on top of the sprite
