@@ -449,6 +449,29 @@ export function TankBattleGame() {
     });
   }, [running, over, shiftTimestamps]);
 
+  // Auto-pause when the tab/window loses focus. Browsers throttle rAF when
+  // the tab is hidden but `performance.now()` keeps advancing, so without
+  // this every absolute-game-time timer (cooldowns, bonus expiry, AI fire
+  // delays) would be considered elapsed on return — leading to a barrage
+  // of enemy bullets and a vanished bonus the moment the user comes back.
+  // We don't auto-resume: the player presses P / Resume to come back in.
+  useEffect(() => {
+    if (!running || over) return;
+    const autoPause = () => {
+      if (!paused && !pauseStartRef.current) {
+        pauseStartRef.current = performance.now();
+        setPaused(true);
+      }
+    };
+    const onVisibility = () => { if (document.hidden) autoPause(); };
+    window.addEventListener("blur", autoPause);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("blur", autoPause);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [running, over, paused]);
+
   const handleNextStage = useCallback(() => {
     // +1 life per stage clear (upstream Player::moveToNextStage line 123).
     const bumped = livesRef.current + 1;
