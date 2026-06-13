@@ -454,9 +454,13 @@ export function TankBattleGame() {
     if (playerRef.current) tanks.push(playerRef.current);
     for (const e of enemiesRef.current) tanks.push(e);
     for (const t of tanks) {
-      t.cooldown     = future(t.cooldown);
-      t.aiNextTurnAt = future(t.aiNextTurnAt);
-      t.aiNextFireAt = future(t.aiNextFireAt);
+      t.cooldown          = future(t.cooldown);
+      t.aiNextTurnAt      = future(t.aiNextTurnAt);
+      t.aiNextFireAt      = future(t.aiNextFireAt);
+      // Anti-oscillation memory window — must also survive a pause,
+      // otherwise a stuck-in-corridor tank's avoidance evaporates and it
+      // walks right back into the wall it just bounced off.
+      t.blockedAvoidUntil = future(t.blockedAvoidUntil);
     }
     if (bonusRef.current) bonusRef.current.bornAt += delta;
     for (const fx of effectsRef.current) fx.bornAt += delta;
