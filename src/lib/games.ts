@@ -60,6 +60,22 @@ export const games: Game[] = [
     highScoreLabel: { en: "moves",                  vi: "moves" },
     accent: "from-violet-400 via-fuchsia-400 to-cyan-400",
   },
+  {
+    slug: "type-the-stack",
+    emoji: "⌨️",
+    title: { en: "Type the Stack",                  vi: "Type the Stack" },
+    blurb: {
+      en: "Tech names fall from above. Type them before they hit the floor. 60 seconds, three lives.",
+      vi: "Tên công nghệ rơi xuống. Gõ trước khi chạm đáy. 60 giây, ba mạng.",
+    },
+    controls: {
+      en: "Type letters · only words starting with that letter activate",
+      vi: "Gõ chữ · chỉ word bắt đầu bằng chữ đó được active",
+    },
+    highScoreKey: "lampham-type-best",
+    highScoreLabel: { en: "stacks typed",           vi: "stacks đã gõ" },
+    accent: "from-blue-400 via-indigo-400 to-purple-400",
+  },
 ];
 
 export function getGameBySlug(slug: string): Game | undefined {

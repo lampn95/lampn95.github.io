@@ -185,6 +185,17 @@ export const translations = {
   "coffee.timeUpHint":    { en: "Sixty seconds, gone.", vi: "Sáu mươi giây, thoáng cái." },
   "memory.win":           { en: "All pairs matched!",   vi: "Đã ghép hết các cặp!" },
   "memory.winHint":       { en: "Moves used: {n}",      vi: "Số moves đã dùng: {n}" },
+
+  "type.lives":           { en: "Lives",                vi: "Mạng" },
+  "type.gameOver":        { en: "Stack overflow",       vi: "Stack overflow" },
+  "type.gameOverHint":    { en: "Out of lives. Try again.",
+                            vi: "Hết mạng. Thử lại nhé." },
+  "type.timeUp":          { en: "Time's up",            vi: "Hết giờ" },
+  "type.timeUpHint":      { en: "Sixty seconds — see what you typed.",
+                            vi: "Sáu mươi giây — xem bạn gõ được bao nhiêu." },
+  "type.activeWord":      { en: "Typing",               vi: "Đang gõ" },
+  "type.nothingActive":   { en: "Type a letter to lock onto a word",
+                            vi: "Gõ một chữ để khoá vào một word" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
