@@ -311,7 +311,7 @@ export function TankBattleGame() {
             p.dir = inputDir;
             snapTankToLane(p);
           }
-          tryMove(p, dt * PLAYER_SPEED * TILE, map);
+          tryMove(p, dt * PLAYER_SPEED * TILE, map, enemiesRef.current, eagleAliveRef.current);
           accumulateTread(p, dt, before);
         }
         if (pressedRef.current.fire) tryFire(p, now);
@@ -359,7 +359,12 @@ export function TankBattleGame() {
             ? { x: p.x + TANK_SIZE / 2, y: p.y + TANK_SIZE / 2 }
             : eagleCenter;
 
-        if (now > e.aiNextTurnAt || isBlockedAhead(e, map)) {
+        // Enemies see the player and every other enemy as obstacles.
+        const enemyObstacles: Tank[] = [];
+        if (p) enemyObstacles.push(p);
+        for (const o of enemiesRef.current) if (o.id !== e.id) enemyObstacles.push(o);
+
+        if (now > e.aiNextTurnAt || isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current)) {
           let dir: Dir;
           if (Math.random() < prof.targetBias) {
             const dx = targetPos.x - (e.x + TANK_SIZE / 2);
@@ -379,7 +384,7 @@ export function TankBattleGame() {
           e.aiNextTurnAt = now + 700 + Math.random() * 1500;
         }
         const before = { x: e.x, y: e.y };
-        tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map);
+        tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map, enemyObstacles, eagleAliveRef.current);
         accumulateTread(e, dt, before);
 
         // Firing
@@ -780,7 +785,20 @@ function tankCenter(t: Tank) { return { x: t.x + TANK_SIZE / 2, y: t.y + TANK_SI
 function idx(x: number, y: number) { return y * STAGE_COLS + x; }
 function inBounds(x: number, y: number) { return x >= 0 && x < STAGE_COLS && y >= 0 && y < STAGE_ROWS; }
 
-function tankBlocksAt(map: TileKind[], px: number, py: number): boolean {
+function rectsOverlap(
+  ax: number, ay: number, aw: number, ah: number,
+  bx: number, by: number, bw: number, bh: number,
+): boolean {
+  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+
+/** True if a TANK_SIZE bounding box at (px,py) would overlap any solid
+ *  obstacle — terrain, the eagle (while alive), or any other tank. */
+function tankBlocksAt(
+  map: TileKind[], px: number, py: number,
+  self: Tank | null, others: ReadonlyArray<Tank>, eagleAlive: boolean,
+): boolean {
+  // Terrain — bricks, steel and water all block tanks.
   const left   = Math.floor(px / TILE);
   const top    = Math.floor(py / TILE);
   const right  = Math.floor((px + TANK_SIZE - 1) / TILE);
@@ -792,21 +810,38 @@ function tankBlocksAt(map: TileKind[], px: number, py: number): boolean {
       if (t === "brick" || t === "steel" || t === "water") return true;
     }
   }
+  // Eagle (2×2 tile) — solid while alive. Once destroyed the game ends so
+  // we no longer block movement through that footprint.
+  if (eagleAlive) {
+    const ex = (Math.floor(STAGE_COLS / 2) - 1) * TILE;
+    const ey = (STAGE_ROWS - 2) * TILE;
+    if (rectsOverlap(px, py, TANK_SIZE, TANK_SIZE, ex, ey, TANK_SIZE, TANK_SIZE)) {
+      return true;
+    }
+  }
+  // Other tanks — anything that isn't `self`.
+  for (const o of others) {
+    if (self && o.id === self.id) continue;
+    if (rectsOverlap(px, py, TANK_SIZE, TANK_SIZE, o.x, o.y, TANK_SIZE, TANK_SIZE)) {
+      return true;
+    }
+  }
   return false;
 }
 
 /** Advance the tank by `distance` pixels in its current direction, but stop
- *  exactly when it hits a wall — rather than the old "if blocked, don't move
- *  at all" rule which left a 1-pixel gap to every obstacle. We step in 1-px
- *  increments because player speed is now ≈1 px/frame, so this is cheap. */
-function tryMove(t: Tank, distance: number, map: TileKind[]) {
+ *  exactly when it hits a wall, the eagle, or another tank. */
+function tryMove(
+  t: Tank, distance: number,
+  map: TileKind[], others: ReadonlyArray<Tank>, eagleAlive: boolean,
+) {
   const v = DIR_VEC[t.dir];
   let remaining = distance;
   while (remaining > 0) {
     const step = remaining > 1 ? 1 : remaining;
     const nx = t.x + v.x * step;
     const ny = t.y + v.y * step;
-    if (tankBlocksAt(map, nx, ny)) return;
+    if (tankBlocksAt(map, nx, ny, t, others, eagleAlive)) return;
     t.x = nx;
     t.y = ny;
     remaining -= step;
@@ -829,9 +864,11 @@ function snapTankToLane(t: Tank) {
   }
 }
 
-function isBlockedAhead(t: Tank, map: TileKind[]): boolean {
+function isBlockedAhead(
+  t: Tank, map: TileKind[], others: ReadonlyArray<Tank>, eagleAlive: boolean,
+): boolean {
   const v = DIR_VEC[t.dir];
-  return tankBlocksAt(map, t.x + v.x * 3, t.y + v.y * 3);
+  return tankBlocksAt(map, t.x + v.x * 3, t.y + v.y * 3, t, others, eagleAlive);
 }
 
 /** Advance the 2-frame tread animation only when the tank actually moved.
@@ -886,7 +923,7 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
     const ty = 0;
     const px = tx * TILE;
     const py = ty * TILE;
-    if (!tankBlocksAt(map, px, py)) {
+    if (!tankBlocksAt(map, px, py, null, [], true)) {
       const tooClose =
         existing.some((e) => Math.abs(e.x - px) < TANK_SIZE && Math.abs(e.y - py) < TANK_SIZE) ||
         (player && Math.abs(player.x - px) < TANK_SIZE && Math.abs(player.y - py) < TANK_SIZE);
