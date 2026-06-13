@@ -655,6 +655,34 @@ export function TankBattleGame() {
           } else {
             dir = DIRS[Math.floor(Math.random() * DIRS.length)];
           }
+          // "Wall-hug" heuristic — if the picked direction is immediately
+          // blocked (a wall right in front), keep going in the current
+          // direction instead. This lets a tank stuck in a corridor commit
+          // to moving along the axial direction until the perpendicular
+          // toward the target actually opens up, rather than oscillating
+          // between "want to go left" (blocked) and "want to go down"
+          // (also blocked) every re-pick interval.
+          if (dir !== e.dir) {
+            const v = DIR_VEC[dir];
+            const pickedBlocked = tankBlocksAt(
+              map, e.x + v.x * 3, e.y + v.y * 3, e,
+              enemyObstacles, eagleAliveRef.current, brickStatesRef.current,
+            );
+            if (pickedBlocked) {
+              // Keep current direction unless it's also blocked.
+              const cv = DIR_VEC[e.dir];
+              const currentBlocked = tankBlocksAt(
+                map, e.x + cv.x * 3, e.y + cv.y * 3, e,
+                enemyObstacles, eagleAliveRef.current, brickStatesRef.current,
+              );
+              if (!currentBlocked) {
+                dir = e.dir;
+              }
+              // If both picked and current are blocked, fall through to the
+              // pick anyway — the deadlock breaker above already handled
+              // the all-blocked case; this is the "soft" re-pick path.
+            }
+          }
           if (dir !== e.dir) {
             e.dir = dir;
             snapTankToLane(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
