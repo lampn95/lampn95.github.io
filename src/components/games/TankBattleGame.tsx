@@ -205,6 +205,12 @@ type Tank = {
                            // absorbs one hit and is then removed.
   armor: number;           // enemies: 1..4, 1 = 1-hit kill, higher = needs more
   bonusDrop: boolean;      // enemy is "bonus" → drops a random bonus on death
+  // Anti-oscillation memory: when the tank deadlock-breaks, we stash the
+  // direction it was blocked in. The AI then refuses to pick that direction
+  // again until `blockedAvoidUntil` elapses, so it doesn't immediately
+  // walk back into the same wall after the post-bump hold expires.
+  lastBlockedDir: Dir | null;
+  blockedAvoidUntil: number;
 };
 
 type Bullet = {
@@ -614,15 +620,16 @@ export function TankBattleGame() {
         const blocked = isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
         if (now > e.aiNextTurnAt || blocked) {
           let dir: Dir;
+          const avoidingDir =
+            e.lastBlockedDir && now < e.blockedAvoidUntil ? e.lastBlockedDir : null;
           if (blocked) {
             // Deadlock breaker. Probe every non-current direction with a
             // 1-px reach (more permissive than the 3-px "look-ahead" used
             // for the blocked check itself) — escape is easier than entry.
-            // If everything is still blocked at the 1-px probe (rare: tank
-            // genuinely walled in on all four sides), fall back to a random
-            // non-current direction so the AI doesn't freeze mid-corridor
-            // when a neighbour is creeping toward it. The direction change
-            // shifts the AI's next-frame evaluation away from the wedge.
+            // Stash the blocked direction so subsequent soft re-picks
+            // refuse to walk straight back into the same wall.
+            e.lastBlockedDir = e.dir;
+            e.blockedAvoidUntil = now + 4000;
             const originalDir = e.dir;
             const shuffle = <T,>(arr: T[]) => {
               for (let i = arr.length - 1; i > 0; i--) {
@@ -652,8 +659,19 @@ export function TankBattleGame() {
               (Math.abs(dx) === Math.abs(dy) && Math.random() < 0.5);
             if (preferX) dir = dx > 0 ? "right" : "left";
             else         dir = dy > 0 ? "down"  : "up";
+            // If targetBias points us straight back into the wall we just
+            // bounced off, take the OTHER axis instead. Without this the
+            // tank goes down-bump-up-down-bump-up forever in a dead-end.
+            if (dir === avoidingDir) {
+              if (preferX) dir = dy > 0 ? "down" : "up";
+              else         dir = dx > 0 ? "right" : "left";
+            }
           } else {
-            dir = DIRS[Math.floor(Math.random() * DIRS.length)];
+            // Random pick that also avoids the recently-blocked direction.
+            const alts = avoidingDir
+              ? DIRS.filter((d) => d !== avoidingDir)
+              : DIRS;
+            dir = alts[Math.floor(Math.random() * alts.length)];
           }
           // "Wall-hug" heuristic — if the picked direction is immediately
           // blocked (a wall right in front), keep going in the current
@@ -1629,6 +1647,8 @@ function makePlayer(): Tank {
     hasBoat: false,
     armor: 1,
     bonusDrop: false,
+    lastBlockedDir: null,
+    blockedAvoidUntil: 0,
   };
 }
 
@@ -1670,6 +1690,8 @@ function makeEnemy(
           armor: pickArmorForStage(stageNumber),
           // ~12% of upstream enemy spawns drop a bonus when killed.
           bonusDrop: Math.random() < 0.12,
+          lastBlockedDir: null,
+          blockedAvoidUntil: 0,
         // spawnInvuln stays 0 — the creating phase already grants protection.
         };
       }
