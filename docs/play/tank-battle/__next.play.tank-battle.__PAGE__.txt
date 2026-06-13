@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
-2:I[2170,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js","/_next/static/chunks/0k1gsq53~tme2.js","/_next/static/chunks/08rz646zi_w2i.js"],"TankBattleGame"]
+2:I[2170,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js","/_next/static/chunks/0k1gsq53~tme2.js","/_next/static/chunks/08~_uxzfjtu79.js"],"TankBattleGame"]
 3:I[97367,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/0k1gsq53~tme2.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/08rz646zi_w2i.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"r7mJWMCp9o40bevqw2du-"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/0k1gsq53~tme2.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/08~_uxzfjtu79.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"FRb_tZemBqiCtLlFUuk2N"}
 5:null

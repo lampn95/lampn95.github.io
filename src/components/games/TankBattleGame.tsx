@@ -220,6 +220,10 @@ export function TankBattleGame() {
 
   // Game state (mutable, lives in refs so rAF doesn't tear)
   const mapRef = useRef<TileKind[]>([]);
+  // Per-cell brick "state code" (0..9) matching upstream Brick::bulletHit().
+  // 0 = whole brick, 1-4 = single half remaining, 5-8 = single quarter,
+  // 9 = fully destroyed (also cleared from `map`). Indexed by idx(x, y).
+  const brickStatesRef = useRef<Uint8Array>(new Uint8Array(STAGE_COLS * STAGE_ROWS));
   const eagleAliveRef = useRef(true);
   const playerRef = useRef<Tank | null>(null);
   const enemiesRef = useRef<Tank[]>([]);
@@ -277,7 +281,8 @@ export function TankBattleGame() {
   const redraw = useCallback(() => {
     draw(
       canvasRef.current, atlasRef.current,
-      mapRef.current, eagleAliveRef.current,
+      mapRef.current, brickStatesRef.current,
+      eagleAliveRef.current,
       playerRef.current, enemiesRef.current,
       bulletsRef.current, bonusRef.current,
       effectsRef.current,
@@ -293,6 +298,7 @@ export function TankBattleGame() {
     const prevStar = opts?.keepUpgrades ? playerRef.current?.starLevel ?? 0 : 0;
     const stage = STAGES[idx % STAGES.length];
     mapRef.current = parseStage(stage);
+    brickStatesRef.current = new Uint8Array(STAGE_COLS * STAGE_ROWS);
     eagleAliveRef.current = true;
     bulletsRef.current = [];
     enemiesRef.current = [];
@@ -396,9 +402,9 @@ export function TankBattleGame() {
             const before = { x: p.x, y: p.y };
             if (inputDir !== p.dir) {
               p.dir = inputDir;
-              snapTankToLane(p, map, enemiesRef.current, eagleAliveRef.current);
+              snapTankToLane(p, map, enemiesRef.current, eagleAliveRef.current, brickStatesRef.current);
             }
-            tryMove(p, dt * PLAYER_SPEED * TILE, map, enemiesRef.current, eagleAliveRef.current);
+            tryMove(p, dt * PLAYER_SPEED * TILE, map, enemiesRef.current, eagleAliveRef.current, brickStatesRef.current);
             accumulateTread(p, dt, before);
           }
           if (pressedRef.current.fire) tryFire(p, now);
@@ -458,7 +464,7 @@ export function TankBattleGame() {
         if (p) enemyObstacles.push(p);
         for (const o of enemiesRef.current) if (o.id !== e.id) enemyObstacles.push(o);
 
-        const blocked = isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current);
+        const blocked = isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
         if (now > e.aiNextTurnAt || blocked) {
           let dir: Dir;
           if (blocked) {
@@ -483,14 +489,14 @@ export function TankBattleGame() {
           }
           if (dir !== e.dir) {
             e.dir = dir;
-            snapTankToLane(e, map, enemyObstacles, eagleAliveRef.current);
+            snapTankToLane(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
           }
           // Hold this direction long enough that a single bump doesn't
           // immediately re-steer the tank into the same wall again.
           e.aiNextTurnAt = now + (blocked ? 350 : 700) + Math.random() * 1200;
         }
         const before = { x: e.x, y: e.y };
-        tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map, enemyObstacles, eagleAliveRef.current);
+        tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
         accumulateTread(e, dt, before);
 
         // Firing
@@ -547,7 +553,7 @@ export function TankBattleGame() {
 
           // Terrain — leading edge of the bullet, plus the perpendicular
           // extent so it can't slip through a one-tile-wide gap.
-          const terrainHit = checkBulletTerrain(b, map);
+          const terrainHit = checkBulletTerrain(b, map, brickStatesRef.current);
           if (terrainHit) {
             if (terrainHit === "brick") sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
             else                        sound.play(TANK_SOUNDS.steelHit.id, TANK_SOUNDS.steelHit.vol);
@@ -674,7 +680,7 @@ export function TankBattleGame() {
               freezeUntilRef.current = now + CLOCK_FREEZE_MS;
               break;
             case "shovel":
-              activateShovel(mapRef.current, shovelSavedRef.current);
+              activateShovel(mapRef.current, brickStatesRef.current, shovelSavedRef.current);
               shovelUntilRef.current = now + SHOVEL_FORTIFY_MS;
               break;
             case "boat":
@@ -713,7 +719,7 @@ export function TankBattleGame() {
       // 6b. Shovel expiry — restore the eagle's perimeter to its original
       //     tiles once the 15-second buff is up.
       if (shovelUntilRef.current > 0 && now > shovelUntilRef.current) {
-        restoreShovel(mapRef.current, shovelSavedRef.current);
+        restoreShovel(mapRef.current, brickStatesRef.current, shovelSavedRef.current);
         shovelSavedRef.current = [];
         shovelUntilRef.current = 0;
       }
@@ -1000,18 +1006,28 @@ function eaglePerimeterCells(): number[] {
   ];
 }
 
-function activateShovel(map: TileKind[], saved: { i: number; original: TileKind }[]) {
+function activateShovel(
+  map: TileKind[], brickStates: Uint8Array,
+  saved: { i: number; original: TileKind }[],
+) {
   saved.length = 0;
   for (const k of eaglePerimeterCells()) {
     saved.push({ i: k, original: map[k] });
     map[k] = "steel";
+    brickStates[k] = 0; // not a brick anymore, but keep the state slot tidy
   }
 }
 
-function restoreShovel(map: TileKind[], saved: { i: number; original: TileKind }[]) {
+function restoreShovel(
+  map: TileKind[], brickStates: Uint8Array,
+  saved: { i: number; original: TileKind }[],
+) {
   // Classic Battle-City: walls revert to BRICK regardless of what they were
   // before (so this also gives free walls in stages without a brick perimeter).
-  for (const c of saved) map[c.i] = "brick";
+  for (const c of saved) {
+    map[c.i] = "brick";
+    brickStates[c.i] = 0; // fresh, undamaged brick
+  }
 }
 
 /** Spawn the small 32×32 ST_DESTROY_BULLET spark, centered on the impact point. */
@@ -1050,14 +1066,70 @@ function rectsOverlap(
   return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Brick sub-tile destruction — verbatim port of upstream Brick::bulletHit
+ * (objects/brick.cpp). Each brick has 9 possible states:
+ *
+ *   0  ░░░░  whole 16×16 brick (initial)
+ *   1  ▀▀▀▀  top half remains    (bottom destroyed)
+ *   2  ░░▐▌  right half remains  (left destroyed)
+ *   3  ▄▄▄▄  bottom half remains (top destroyed)
+ *   4  ▌▌░░  left half remains   (right destroyed)
+ *   5  ░▝     top-right quarter
+ *   6  ░▗     bottom-right quarter
+ *   7  ▘░     top-left quarter
+ *   8  ▖░     bottom-left quarter
+ *   9        gone — cell becomes "empty"
+ *
+ * The atlas conveniently has each of these states pre-rendered at
+ * (928, state*16). The collision sub-rect is computed by `brickSubRect`.
+ * ────────────────────────────────────────────────────────────────────────── */
+function nextBrickState(prevState: number, bulletDir: Dir): number {
+  const bd = DIR_INDEX[bulletDir]; // 0=up, 1=right, 2=down, 3=left
+  if (prevState === 0) {
+    // First hit always knocks out the half the bullet came AT.
+    return bd + 1;
+  }
+  if (prevState >= 1 && prevState <= 4) {
+    // Quarter-remaining heuristic from upstream — gives nice cross-direction
+    // chip patterns and falls back to "fully destroyed" on parallel hits.
+    const ss = (prevState - 1) * (prevState - 1) + bd * bd;
+    return ss % 2 === 1 ? Math.floor((ss + 19) / 4) : 9;
+  }
+  // Anything beyond a quarter goes to dust on the next hit.
+  return 9;
+}
+
+function brickSubRect(state: number, cellPx: number, cellPy: number)
+  : { x: number; y: number; w: number; h: number } | null
+{
+  const half = TILE / 2;
+  switch (state) {
+    case 0: return { x: cellPx,        y: cellPy,        w: TILE, h: TILE };
+    case 1: return { x: cellPx,        y: cellPy,        w: TILE, h: half };          // top
+    case 2: return { x: cellPx + half, y: cellPy,        w: half, h: TILE };          // right
+    case 3: return { x: cellPx,        y: cellPy + half, w: TILE, h: half };          // bottom
+    case 4: return { x: cellPx,        y: cellPy,        w: half, h: TILE };          // left
+    case 5: return { x: cellPx + half, y: cellPy,        w: half, h: half };          // top-right
+    case 6: return { x: cellPx + half, y: cellPy + half, w: half, h: half };          // bottom-right
+    case 7: return { x: cellPx,        y: cellPy,        w: half, h: half };          // top-left
+    case 8: return { x: cellPx,        y: cellPy + half, w: half, h: half };          // bottom-left
+    default: return null; // 9 = destroyed
+  }
+}
+
 /** True if a TANK_SIZE bounding box at (px,py) would overlap any solid
- *  obstacle — terrain, the eagle (while alive), or any other tank. */
+ *  obstacle — terrain, the eagle (while alive), or any other tank.
+ *  Bricks are checked against their per-cell sub-rect (so tanks can squeeze
+ *  through the half-cell gaps left after a bullet chips a brick). */
 function tankBlocksAt(
   map: TileKind[], px: number, py: number,
   self: Tank | null, others: ReadonlyArray<Tank>, eagleAlive: boolean,
+  brickStates?: Uint8Array,
 ): boolean {
-  // Terrain — bricks, steel and water all block tanks. Tanks carrying the
-  // 🚤 Boat bonus traverse water freely.
+  // Terrain — steel and water always block (full cell); bricks only block
+  // within their remaining sub-rect. Tanks carrying the 🚤 Boat bonus
+  // traverse water freely.
   const left   = Math.floor(px / TILE);
   const top    = Math.floor(py / TILE);
   const right  = Math.floor((px + TANK_SIZE - 1) / TILE);
@@ -1066,9 +1138,17 @@ function tankBlocksAt(
   for (let x = left; x <= right; x++) {
     for (let y = top; y <= bottom; y++) {
       if (!inBounds(x, y)) return true;
-      const t = map[idx(x, y)];
-      if (t === "brick" || t === "steel") return true;
-      if (t === "water" && blocksWater)   return true;
+      const k = idx(x, y);
+      const t = map[k];
+      if (t === "steel") return true;
+      if (t === "water" && blocksWater) return true;
+      if (t === "brick") {
+        const state = brickStates ? brickStates[k] : 0;
+        const sub = brickSubRect(state, x * TILE, y * TILE);
+        if (sub && rectsOverlap(px, py, TANK_SIZE, TANK_SIZE, sub.x, sub.y, sub.w, sub.h)) {
+          return true;
+        }
+      }
     }
   }
   // Eagle (2×2 tile) — solid while alive. Once destroyed the game ends so
@@ -1097,6 +1177,7 @@ function tankBlocksAt(
 function tryMove(
   t: Tank, distance: number,
   map: TileKind[], others: ReadonlyArray<Tank>, eagleAlive: boolean,
+  brickStates?: Uint8Array,
 ) {
   const v = DIR_VEC[t.dir];
   let remaining = distance;
@@ -1104,7 +1185,7 @@ function tryMove(
     const step = remaining > 1 ? 1 : remaining;
     const nx = t.x + v.x * step;
     const ny = t.y + v.y * step;
-    if (tankBlocksAt(map, nx, ny, t, others, eagleAlive)) return;
+    if (tankBlocksAt(map, nx, ny, t, others, eagleAlive, brickStates)) return;
     t.x = nx;
     t.y = ny;
     remaining -= step;
@@ -1117,7 +1198,11 @@ function tryMove(
  *  into a wall, another tank, or the eagle. The snap matters because a
  *  mid-cell tank's bullet only samples one of the two columns the tank
  *  occupies, so it can slip past adjacent bricks. */
-function snapTankToLane(t: Tank, map: TileKind[], others: ReadonlyArray<Tank>, eagleAlive: boolean) {
+function snapTankToLane(
+  t: Tank, map: TileKind[],
+  others: ReadonlyArray<Tank>, eagleAlive: boolean,
+  brickStates?: Uint8Array,
+) {
   const v = DIR_VEC[t.dir];
   if (v.y !== 0) {
     const lo = Math.floor(t.x / TILE) * TILE;
@@ -1125,7 +1210,7 @@ function snapTankToLane(t: Tank, map: TileKind[], others: ReadonlyArray<Tank>, e
     const order = (t.x - lo) <= (hi - t.x) ? [lo, hi] : [hi, lo];
     for (const cand of order) {
       if (cand === t.x) return;
-      if (!tankBlocksAt(map, cand, t.y, t, others, eagleAlive)) {
+      if (!tankBlocksAt(map, cand, t.y, t, others, eagleAlive, brickStates)) {
         t.x = cand;
         return;
       }
@@ -1136,7 +1221,7 @@ function snapTankToLane(t: Tank, map: TileKind[], others: ReadonlyArray<Tank>, e
     const order = (t.y - lo) <= (hi - t.y) ? [lo, hi] : [hi, lo];
     for (const cand of order) {
       if (cand === t.y) return;
-      if (!tankBlocksAt(map, t.x, cand, t, others, eagleAlive)) {
+      if (!tankBlocksAt(map, t.x, cand, t, others, eagleAlive, brickStates)) {
         t.y = cand;
         return;
       }
@@ -1146,9 +1231,10 @@ function snapTankToLane(t: Tank, map: TileKind[], others: ReadonlyArray<Tank>, e
 
 function isBlockedAhead(
   t: Tank, map: TileKind[], others: ReadonlyArray<Tank>, eagleAlive: boolean,
+  brickStates?: Uint8Array,
 ): boolean {
   const v = DIR_VEC[t.dir];
-  return tankBlocksAt(map, t.x + v.x * 3, t.y + v.y * 3, t, others, eagleAlive);
+  return tankBlocksAt(map, t.x + v.x * 3, t.y + v.y * 3, t, others, eagleAlive, brickStates);
 }
 
 /** Advance the 2-frame tread animation only when the tank actually moved.
@@ -1254,15 +1340,15 @@ function freeOwnerBullet(b: Bullet) {
   }
 }
 
-/** Check the cell(s) the bullet's *leading edge* touches and destroy at
- *  most ONE — the cell whose center is closer to the bullet's perpendicular
- *  center. The bullet's hitbox may straddle two cells when the tank is mid-
- *  lane, but in classic Battle City a single shot only ever destroys one
- *  brick; we still sample the second cell so the bullet can't slip past
- *  a tile-wide gap, but only the primary cell is broken. */
-function checkBulletTerrain(b: Bullet, map: TileKind[]): "brick" | "steel" | null {
+/** Resolve the bullet's leading-edge cells in priority order, then check
+ *  each one's *current* solid extent (sub-rect for bricks). The first cell
+ *  whose solid extent overlaps the bullet's hitbox is hit. Brick hits run
+ *  through the upstream 9-state machine so only the sub-half closest to
+ *  the bullet is knocked out per shot. */
+function checkBulletTerrain(
+  b: Bullet, map: TileKind[], brickStates: Uint8Array,
+): "brick" | "steel" | null {
   const v = DIR_VEC[b.dir];
-  // Leading-edge coordinates along the motion axis.
   const tipX =
     v.x > 0 ? b.x + BULLET_HITBOX - 1
     : v.x < 0 ? b.x
@@ -1272,10 +1358,7 @@ function checkBulletTerrain(b: Bullet, map: TileKind[]): "brick" | "steel" | nul
     : v.y < 0 ? b.y
     : b.y + BULLET_HITBOX / 2;
 
-  // Build the ordered list of cells the bullet's leading edge might touch.
-  // Index 0 = "primary" (closer to the bullet center), index 1 = the
-  // adjacent cell. When the hitbox sits entirely inside one tile there's
-  // only the primary.
+  // Ordered candidate cells the leading edge might touch (primary first).
   let cells: { tx: number; ty: number }[];
   if (v.y !== 0) {
     const ty = Math.floor(tipY / TILE);
@@ -1307,13 +1390,25 @@ function checkBulletTerrain(b: Bullet, map: TileKind[]): "brick" | "steel" | nul
     }
   }
 
-  // First hit wins — destroy that single cell (or ricochet off steel).
   for (const s of cells) {
     if (!inBounds(s.tx, s.ty)) continue;
     const k = idx(s.tx, s.ty);
     const tile = map[k];
     if (tile === "brick") {
-      map[k] = "empty";
+      const sub = brickSubRect(brickStates[k], s.tx * TILE, s.ty * TILE);
+      if (!sub) continue;
+      if (!rectsOverlap(b.x, b.y, BULLET_HITBOX, BULLET_HITBOX, sub.x, sub.y, sub.w, sub.h)) {
+        // Brick is here but the remaining half doesn't cover the bullet's
+        // hitbox — the bullet sails through this cell. Try the secondary.
+        continue;
+      }
+      const newState = nextBrickState(brickStates[k], b.dir);
+      if (newState === 9) {
+        brickStates[k] = 0;
+        map[k] = "empty";
+      } else {
+        brickStates[k] = newState;
+      }
       return "brick";
     }
     if (tile === "steel") {
@@ -1357,6 +1452,7 @@ function draw(
   canvas: HTMLCanvasElement | null,
   atlas: HTMLImageElement | null,
   map: TileKind[],
+  brickStates: Uint8Array,
   eagleAlive: boolean,
   player: Tank | null,
   enemies: Tank[],
@@ -1382,9 +1478,10 @@ function draw(
   // Tiles — bushes are drawn LAST so they conceal tanks underneath.
   for (let y = 0; y < STAGE_ROWS; y++) {
     for (let x = 0; x < STAGE_COLS; x++) {
-      const tk = map[idx(x, y)];
+      const k = idx(x, y);
+      const tk = map[k];
       if (tk === "empty" || tk === "bush") continue;
-      drawTile(ctx, atlas, tk, x * TILE, y * TILE);
+      drawTile(ctx, atlas, tk, x * TILE, y * TILE, tk === "brick" ? brickStates[k] : 0);
     }
   }
 
@@ -1409,7 +1506,7 @@ function draw(
   // Bushes overlay
   for (let y = 0; y < STAGE_ROWS; y++) {
     for (let x = 0; x < STAGE_COLS; x++) {
-      if (map[idx(x, y)] === "bush") drawTile(ctx, atlas, "bush", x * TILE, y * TILE);
+      if (map[idx(x, y)] === "bush") drawTile(ctx, atlas, "bush", x * TILE, y * TILE, 0);
     }
   }
 
@@ -1457,19 +1554,31 @@ function blit(
   return true;
 }
 
-function drawTile(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, kind: TileKind, x: number, y: number) {
+function drawTile(
+  ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null,
+  kind: TileKind, x: number, y: number, brickState: number = 0,
+) {
+  // Bricks have 9 sub-state sprites stacked vertically in the atlas at
+  // (928, state*16). State 0 = whole brick. State 9 (destroyed) shouldn't
+  // reach here because the map is set to "empty" in that case.
+  if (kind === "brick") {
+    if (atlas) {
+      ctx.drawImage(atlas, SP.brick.x, SP.brick.y + brickState * 16, SP.brick.w, SP.brick.h, x, y, TILE, TILE);
+    } else {
+      ctx.fillStyle = "#9a3412";
+      ctx.fillRect(x, y, TILE, TILE);
+    }
+    return;
+  }
   const src =
-    kind === "brick" ? SP.brick
-    : kind === "steel" ? SP.steel
+    kind === "steel" ? SP.steel
     : kind === "bush" ? SP.bush
     : kind === "ice" ? SP.ice
     : kind === "water" ? (Math.floor(Date.now() / 350) % 2 === 0 ? SP.water0 : SP.water1)
     : null;
   if (src && blit(ctx, atlas, src, x, y, TILE, TILE)) return;
-  // Fallback (atlas not loaded yet)
   ctx.fillStyle =
-    kind === "brick" ? "#9a3412"
-    : kind === "steel" ? "#94a3b8"
+    kind === "steel" ? "#94a3b8"
     : kind === "water" ? "#1d4ed8"
     : kind === "bush"  ? "#166534"
     : kind === "ice"   ? "#e0f2fe"
