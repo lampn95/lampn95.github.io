@@ -110,7 +110,21 @@ const SP = {
   // shown while a tank is materialising onto the map.
   createX:      1008,
   createY0:     0,
+  // ST_DESTROY_BULLET — small spark when a bullet hits brick/steel/boundary
+  // (5 frames × 32×32, 40 ms each, vertically stacked).
+  bulletFxX:    1108,
+  bulletFxY0:   0,
+  // ST_DESTROY_TANK — big explosion when a tank or the eagle is destroyed
+  // (7 frames × 64×64, 70 ms each, vertically stacked).
+  tankFxX:      1040,
+  tankFxY0:     0,
 } as const;
+const BULLET_FX_FRAMES   = 5;
+const BULLET_FX_MS       = 40;        // upstream ST_DESTROY_BULLET frame_duration
+const BULLET_FX_DURATION = BULLET_FX_FRAMES * BULLET_FX_MS;
+const TANK_FX_FRAMES     = 7;
+const TANK_FX_MS         = 70;        // upstream ST_DESTROY_TANK frame_duration
+const TANK_FX_DURATION   = TANK_FX_FRAMES * TANK_FX_MS;
 
 // Bullet sprite is 8×8, four direction tiles laid out horizontally at (944, 128).
 const BULLET_SX0 = 944;
@@ -155,6 +169,14 @@ type Bonus = {
   bornAt: number;
 };
 
+type Effect = {
+  id: number;
+  kind: "bullet" | "tank"; // small spark vs. big explosion
+  x: number;               // top-left of the effect's render rect
+  y: number;
+  bornAt: number;          // performance.now() when spawned
+};
+
 let __id = 1;
 const nextId = () => __id++;
 
@@ -174,6 +196,7 @@ export function TankBattleGame() {
   const bulletsRef = useRef<Bullet[]>([]);
   const bonusRef = useRef<Bonus | null>(null);
   const lastBonusAtRef = useRef(0);
+  const effectsRef = useRef<Effect[]>([]);
 
   // pressedRef.order tracks the press sequence so the LAST direction pressed wins
   // (classic Battle City: holding ↑ then pressing → instantly steers right).
@@ -220,6 +243,7 @@ export function TankBattleGame() {
       mapRef.current, eagleAliveRef.current,
       playerRef.current, enemiesRef.current,
       bulletsRef.current, bonusRef.current,
+      effectsRef.current,
     );
   }, []);
 
@@ -235,6 +259,7 @@ export function TankBattleGame() {
     bulletsRef.current = [];
     enemiesRef.current = [];
     bonusRef.current = null;
+    effectsRef.current = [];
     lastBonusAtRef.current = 0;
     remainingSpawnsRef.current = ENEMIES_PER_STAGE;
     lastEnemySpawnRef.current = 0;
@@ -449,6 +474,10 @@ export function TankBattleGame() {
             setOver("lose-eagle");
             submitBest(scoreRef.current);
             sound.play(TANK_SOUNDS.eagleDestroyed.id, TANK_SOUNDS.eagleDestroyed.vol);
+            // Big explosion centered on the eagle's 2×2 footprint.
+            const ex = (Math.floor(STAGE_COLS / 2) - 1) * TILE;
+            const ey = (STAGE_ROWS - 2) * TILE;
+            spawnTankFx(effectsRef.current, ex, ey);
             resolved = "eagle";
             break;
           }
@@ -464,6 +493,9 @@ export function TankBattleGame() {
           }
         }
         if (resolved) {
+          // Bullet-destroy spark for every wall/edge hit (the eagle hit
+          // already spawned its own big explosion above).
+          if (resolved !== "eagle") spawnBulletFx(effectsRef.current, b);
           freeOwnerBullet(b);
           continue;
         }
@@ -475,6 +507,7 @@ export function TankBattleGame() {
             const e = enemiesRef.current[i];
             if (e.creating > 0 || e.spawnInvuln > 0) continue;
             if (bulletHitsTank(b, e)) {
+              spawnTankFx(effectsRef.current, e.x, e.y);
               enemiesRef.current.splice(i, 1);
               setEnemiesLeft((x) => x - 1);
               setScore((s) => {
@@ -497,6 +530,7 @@ export function TankBattleGame() {
             if (curP.shield > 0 || curP.spawnInvuln > 0) {
               // absorbed
             } else {
+              spawnTankFx(effectsRef.current, curP.x, curP.y);
               sound.play(TANK_SOUNDS.playerDestroyed.id, TANK_SOUNDS.playerDestroyed.vol);
               const newLives = livesRef.current - 1;
               livesRef.current = newLives;
@@ -535,6 +569,7 @@ export function TankBattleGame() {
             killedBulletIds.add(b2.id);
             freeOwnerBullet(a);
             freeOwnerBullet(b2);
+            spawnBulletFx(effectsRef.current, a);
             sound.play(TANK_SOUNDS.bulletVsBullet.id, TANK_SOUNDS.bulletVsBullet.vol);
             break;
           }
@@ -579,6 +614,14 @@ export function TankBattleGame() {
         setRunning(false);
         setOver("stage-clear");
         submitBest(scoreRef.current);
+      }
+
+      // 8. Effects bookkeeping — prune sparks/explosions that have finished.
+      if (effectsRef.current.length > 0) {
+        effectsRef.current = effectsRef.current.filter((fx) => {
+          const elapsed = now - fx.bornAt;
+          return elapsed < (fx.kind === "bullet" ? BULLET_FX_DURATION : TANK_FX_DURATION);
+        });
       }
 
       redraw();
@@ -829,6 +872,33 @@ function parseStage(s: string): TileKind[] {
  * ────────────────────────────────────────────────────────────────────────── */
 
 function tankCenter(t: Tank) { return { x: t.x + TANK_SIZE / 2, y: t.y + TANK_SIZE / 2 }; }
+
+/** Spawn the small 32×32 ST_DESTROY_BULLET spark, centered on the impact point. */
+function spawnBulletFx(effects: Effect[], b: Bullet) {
+  const v = DIR_VEC[b.dir];
+  // Use the bullet's leading edge as the impact point.
+  const cx = b.x + BULLET_HITBOX / 2 + v.x * BULLET_HITBOX / 2;
+  const cy = b.y + BULLET_HITBOX / 2 + v.y * BULLET_HITBOX / 2;
+  effects.push({
+    id: nextId(),
+    kind: "bullet",
+    x: cx - 16,
+    y: cy - 16,
+    bornAt: performance.now(),
+  });
+}
+
+/** Spawn the big 64×64 ST_DESTROY_TANK explosion, centered on a 2×2-tile entity
+ *  whose top-left is (tx, ty). Works for tanks AND the eagle. */
+function spawnTankFx(effects: Effect[], tx: number, ty: number) {
+  effects.push({
+    id: nextId(),
+    kind: "tank",
+    x: tx - 16, // (64 - 32) / 2 — center the 64×64 sprite on the 32×32 footprint
+    y: ty - 16,
+    bornAt: performance.now(),
+  });
+}
 function idx(x: number, y: number) { return y * STAGE_COLS + x; }
 function inBounds(x: number, y: number) { return x >= 0 && x < STAGE_COLS && y >= 0 && y < STAGE_ROWS; }
 
@@ -1123,6 +1193,7 @@ function draw(
   enemies: Tank[],
   bullets: Bullet[],
   bonus: Bonus | null,
+  effects: Effect[],
 ) {
   __lastPlayer = player;
   __lastEnemies = enemies;
@@ -1170,6 +1241,38 @@ function draw(
   for (let y = 0; y < STAGE_ROWS; y++) {
     for (let x = 0; x < STAGE_COLS; x++) {
       if (map[idx(x, y)] === "bush") drawTile(ctx, atlas, "bush", x * TILE, y * TILE);
+    }
+  }
+
+  // Sparks and explosions sit on top of everything else.
+  if (effects.length > 0) {
+    const now = performance.now();
+    for (const fx of effects) drawEffect(ctx, atlas, fx, now);
+  }
+}
+
+function drawEffect(
+  ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null,
+  fx: Effect, now: number,
+) {
+  const elapsed = now - fx.bornAt;
+  if (fx.kind === "bullet") {
+    const frame = Math.min(BULLET_FX_FRAMES - 1, Math.floor(elapsed / BULLET_FX_MS));
+    if (atlas) {
+      ctx.drawImage(
+        atlas,
+        SP.bulletFxX, SP.bulletFxY0 + frame * 32, 32, 32,
+        fx.x, fx.y, 32, 32,
+      );
+    }
+  } else {
+    const frame = Math.min(TANK_FX_FRAMES - 1, Math.floor(elapsed / TANK_FX_MS));
+    if (atlas) {
+      ctx.drawImage(
+        atlas,
+        SP.tankFxX, SP.tankFxY0 + frame * 64, 64, 64,
+        fx.x, fx.y, 64, 64,
+      );
     }
   }
 }
