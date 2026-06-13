@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin, Sparkles } from "lucide-react";
 import { CoffeeButton } from "./CoffeeButton";
+import { LinkedInIcon } from "./SocialIcons";
 import { asset, siteConfig } from "@/lib/config";
 import { useLang, useT } from "@/lib/i18n";
 
@@ -115,6 +116,16 @@ export function Hero() {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <CoffeeButton size="lg" />
+              <a
+                href={siteConfig.socials.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="group inline-flex items-center gap-2 rounded-full border border-[#0a66c2]/40 bg-[#0a66c2]/[0.08] px-5 h-11 text-sm font-medium text-white hover:bg-[#0a66c2]/[0.18] hover:border-[#0a66c2]/70 transition-colors"
+              >
+                <LinkedInIcon className="h-4 w-4 text-[#0a66c2] group-hover:text-white transition-colors" />
+                LinkedIn
+              </a>
               <a
                 href={`mailto:${siteConfig.email}`}
                 className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-5 h-11 text-sm text-white/80 hover:text-white hover:border-white/30 hover:bg-white/[0.06] transition-colors"
