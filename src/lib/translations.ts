@@ -74,26 +74,13 @@ export const translations = {
                                    vi: "… và vài anh em khác từng làm ở Acronis, Microsoft, TikTok…" },
   "engineerpro.cta":             { en: "Explore EngineerPro", vi: "Khám phá EngineerPro" },
 
-  // ===== Book section =====
-  "book.eyebrow":     { en: "Note · Book",   vi: "Note · Book" },
-  "book.title":       { en: "Co-authored a small book.",
-                        vi: "Đồng tác giả một cuốn sách nhỏ." },
-  "book.description": { en: "Co-wrote a free book on DSA coding interviews with Lê Quang Hoà, sponsored by EngineerPro.",
-                        vi: "Cùng anh Lê Quang Hoà biên soạn một cuốn sách miễn phí về DSA coding interview, dưới sự bảo trợ của EngineerPro." },
-  "book.cardTitle":   { en: "Coding DSA Interview — with solutions.",
-                        vi: "Coding DSA Interview — kèm lời giải." },
-  "book.copyLead":    { en: "A collection of common DSA problems asked in technical interviews, with Python 3 solutions, complexity analysis, and interview pitfalls. Learn by ",
-                        vi: "Cuốn sách tổng hợp các bài DSA thường gặp trong phỏng vấn kỹ thuật, kèm lời giải Python 3, phân tích độ phức tạp, và các bẫy phỏng vấn. Học theo " },
-  "book.pattern":     { en: "pattern", vi: "pattern" },
-  "book.copyTail":    { en: ", not by memorizing every problem. Completely free for the community.",
-                        vi: ", không phải học vẹt từng bài. Hoàn toàn miễn phí cho cộng đồng." },
-  "book.stat.problems":   { en: "problems", vi: "bài tập" },
-  "book.stat.patterns":   { en: "patterns", vi: "patterns" },
-  "book.stat.freeLabel":  { en: "Free", vi: "Free" },
-  "book.stat.freeSub":    { en: "open to everyone", vi: "mở cho cộng đồng" },
-  "book.cta":         { en: "Open the book", vi: "Mở sách" },
-  "book.credit":      { en: "Co-authors: Phạm Ngọc Lâm · Lê Quang Hoà — 2026.",
-                        vi: "Đồng tác giả: Phạm Ngọc Lâm · Lê Quang Hoà — 2026." },
+  // ===== Books section =====
+  // Per-book copy lives in src/lib/books.ts. Only the section heading is here.
+  "book.eyebrow":     { en: "Note · Books",  vi: "Note · Books" },
+  "book.title":       { en: "A couple of books I helped write.",
+                        vi: "Vài cuốn sách mình đã đồng tác giả." },
+  "book.description": { en: "Two free books on technical-interview prep — coding patterns and system design — co-written under the EngineerPro umbrella.",
+                        vi: "Hai cuốn sách miễn phí về phỏng vấn kỹ thuật — coding patterns và system design — đồng biên soạn dưới sự bảo trợ của EngineerPro." },
 
   // ===== Podcast section =====
   "podcast.eyebrow":     { en: "Podcast · Notes by voice",
