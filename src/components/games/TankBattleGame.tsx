@@ -25,31 +25,41 @@ const TANK_SIZE = TILE * 2;           // 2×2 cells
 
 const BULLET_RENDER = 8;              // visual size (square sprite)
 const BULLET_HITBOX = 8;              // logical hitbox matches the sprite size
-                                      // — anything tighter lets shots slip past
-                                      // a brick when the tank is mid-cell.
-const ENEMIES_PER_STAGE = 5;
-const MAX_ALIVE_ENEMIES = 3;
-const MAX_LIVES = 3;
-// Speeds match upstream appconfig.h exactly: tank_default_speed = 0.08 px/ms,
-// bullet_default_speed = 0.23 px/ms. Our PLAYER_SPEED is expressed in
-// tiles/ms (×TILE in the loop), so 0.08/16 = 0.005.
-const PLAYER_SPEED = 0.006;           // ≈ 0.096 px/ms — slightly above upstream
-const PLAYER_INVULN_MS = 1200;
-const BULLET_SPEED = 0.26;            // px/ms — slightly above upstream
-const BONUS_INTERVAL_MS = 18_000;
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * All gameplay constants come from upstream appconfig.h / soundconfig.h /
+ * player.cpp / enemy.cpp. Comments cite the original symbol/line.
+ * ────────────────────────────────────────────────────────────────────────── */
+const ENEMIES_PER_STAGE        = 20;    // enemies_to_kill_total_count
+const MAX_ALIVE_ENEMIES        = 4;     // enemies_max_count_on_map
+const NEW_ENEMY_COOLDOWN_MS    = 500;   // new_enemy_cooldown
+const MAX_LIVES                = 3;     // (kept lower than upstream's 10
+                                        // because +1 life is granted per stage)
+const PLAYER_SPEED             = 0.006; // ≈0.096 px/ms — slightly above
+                                        // tank_default_speed (0.08) for snappier
+                                        // keyboard feel.
+const BULLET_SPEED             = 0.26;  // ≈ bullet_default_speed (0.23)
+const PLAYER_INVULN_MS         = 1200;  // ShortShieldEffect ≈ shield_time / 2
+const PLAYER_RELOAD_MS         = 120;   // player_reload_time
+const AI_TURN_MIN_MS           = 100;   // m_keep_direction_time = rand()%800+100
+const AI_TURN_RANGE_MS         = 800;
+const BONUS_SHOW_MS            = 10_000; // bonus_show_time
+const BONUS_BLINK_MS           = 350;    // bonus_blink_time
+const CLOCK_FREEZE_MS          = 8_000;  // tank_frozen_time
+const SHOVEL_FORTIFY_MS        = 15_000; // protect_eagle_time
+const SHIELD_TIME_MS           = 10_000; // tank_shield_time
+const BONUS_DROP_PROB          = 0.12;   // generateEnemyIfPossible — 12% bonus
+
 const TREAD_FRAME_MS = 60;            // tread animation period
-const SPAWN_ANIM_MS = 900;            // duration of the create-flash before
-                                      // a tank becomes alive (≈9 frames @100ms)
-const SPAWN_ANIM_FRAMES = 10;         // matches upstream ST_CREATE.frames_count
-// Classic NES Battle-City star progression (matches upstream player.cpp):
-//   0 stars: base bullet, 1 in flight
+const SPAWN_ANIM_MS = 900;            // ST_CREATE: 10 frames × 100 ms (animation_time)
+const SPAWN_ANIM_FRAMES = 10;
+// Star progression (Player::changeStarCountBy):
+//   0 stars: base bullet, 1 in flight (NES feel; upstream lets you have 2)
 //   1 star : 1.3× faster bullet, still 1 in flight
 //   2 stars: ↑ + up to 2 bullets in flight at once ("double tap")
-//   3 stars: ↑ + bullets break steel ("breaker tank")
+//   3 stars: ↑ + bullets break steel + plough through bushes
 const MAX_STAR_LEVEL = 3;
 const STAR_BULLET_SPEED_MUL = 1.3;
-const CLOCK_FREEZE_MS  = 8_000;       // ⏱ Clock bonus: freeze enemies for 8s
-const SHOVEL_FORTIFY_MS = 15_000;     // 🛠 Shovel bonus: steel walls for 15s
 
 type TileKind = "empty" | "brick" | "steel" | "bush" | "water" | "ice";
 type Dir = "up" | "right" | "down" | "left";
@@ -67,7 +77,11 @@ const DIR_VEC: Record<Dir, { x: number; y: number }> = {
 
 /* Enemy types A/B/C/D ported from the C++ repo's behaviour + sprite tables. */
 type EnemyType = "A" | "B" | "C" | "D";
-const ENEMY_TYPE_SCRIPT: EnemyType[] = ["A", "A", "B", "C", "D"];
+// Per upstream Enemy::updateBehavior — Tank D reloads fastest, A/B slowest.
+// `rand() % MAX` gives a fresh delay every shot.
+const ENEMY_RELOAD_MAX_MS: Record<EnemyType, number> = {
+  A: 1000, B: 1000, C: 800, D: 400,
+};
 
 type EnemyProfile = {
   speedMul: number;
@@ -256,7 +270,6 @@ export function TankBattleGame() {
   const enemiesRef = useRef<Tank[]>([]);
   const bulletsRef = useRef<Bullet[]>([]);
   const bonusRef = useRef<Bonus | null>(null);
-  const lastBonusAtRef = useRef(0);
   const effectsRef = useRef<Effect[]>([]);
   // ⏱ enemies are frozen until this timestamp (Clock bonus)
   const freezeUntilRef = useRef(0);
@@ -336,7 +349,6 @@ export function TankBattleGame() {
     enemiesRef.current = [];
     bonusRef.current = null;
     effectsRef.current = [];
-    lastBonusAtRef.current = 0;
     freezeUntilRef.current = 0;
     shovelUntilRef.current = 0;
     shovelSavedRef.current = [];
@@ -390,7 +402,8 @@ export function TankBattleGame() {
     // Player can keep 2 bullets in flight at 2+ stars; everything else is 1.
     const limit = tank.isPlayer && tank.starLevel >= 2 ? 2 : 1;
     if (tank.bulletCount >= limit) return;
-    tank.cooldown = now + (tank.isPlayer ? 280 : 380);
+    // Enemies rely on aiNextFireAt for cadence — no extra reload here.
+    tank.cooldown = now + (tank.isPlayer ? PLAYER_RELOAD_MS : 0);
     tank.bulletCount += 1;
     // Spawn the bullet so its CENTER sits on the barrel tip, then the visual
     // sprite (BULLET_RENDER) is drawn centered on that point too.
@@ -413,10 +426,10 @@ export function TankBattleGame() {
   }, []);
 
   const respawnPlayer = useCallback(() => {
-    const keep = playerRef.current;
-    const p = makePlayer();
-    if (keep) p.starLevel = keep.starLevel; // preserve star across deaths
-    playerRef.current = p;
+    // Upstream Player::hit non-3-star path calls changeStarCountBy(-3), which
+    // clamps star_count to 0 — i.e. stars RESET on death. Boat is bound to
+    // the destroyed tank instance so it's gone too.
+    playerRef.current = makePlayer();
   }, []);
 
   // ──────────────── step ────────────────
@@ -454,15 +467,21 @@ export function TankBattleGame() {
         }
       }
 
-      // 2. Spawn enemies on a cadence
+      // 2. Spawn enemies on a cadence — upstream generateEnemyIfPossible.
+      //    Probability of Tank D scales with stage (0.00735*S + 0.09265);
+      //    everything else is uniform over A/B/C.
       if (
         remainingSpawnsRef.current > 0 &&
         enemiesRef.current.length < MAX_ALIVE_ENEMIES &&
-        now - lastEnemySpawnRef.current > 1500
+        now - lastEnemySpawnRef.current > NEW_ENEMY_COOLDOWN_MS
       ) {
-        const idx = ENEMIES_PER_STAGE - remainingSpawnsRef.current;
-        const type = ENEMY_TYPE_SCRIPT[idx % ENEMY_TYPE_SCRIPT.length];
-        const e = makeEnemy(map, enemiesRef.current, p, type, stageIdxRef.current + 1);
+        const stage = stageIdxRef.current + 1;
+        const dProb = 0.00735 * stage + 0.09265;
+        const type: EnemyType =
+          Math.random() < dProb
+            ? "D"
+            : (["A", "B", "C"] as const)[Math.floor(Math.random() * 3)];
+        const e = makeEnemy(map, enemiesRef.current, p, type, stage);
         if (e) {
           enemiesRef.current.push(e);
           remainingSpawnsRef.current -= 1;
@@ -470,19 +489,11 @@ export function TankBattleGame() {
         }
       }
 
-      // 3. Drop a bonus occasionally on an empty cell.
-      if (now - lastBonusAtRef.current > BONUS_INTERVAL_MS && bonusRef.current == null) {
-        const spot = pickEmptySpot(map);
-        if (spot) {
-          bonusRef.current = {
-            id: nextId(),
-            kind: BONUS_KINDS[Math.floor(Math.random() * BONUS_KINDS.length)],
-            x: spot.x * TILE,
-            y: spot.y * TILE,
-            bornAt: now,
-          };
-          lastBonusAtRef.current = now;
-        }
+      // 3. Bonus expiry — upstream bonus_show_time = 10 s. If the player
+      //    doesn't grab it in time, it vanishes. (Upstream only drops bonuses
+      //    from "bonus enemies" — no periodic spawner here.)
+      if (bonusRef.current && now - bonusRef.current.bornAt > BONUS_SHOW_MS) {
+        bonusRef.current = null;
       }
 
       // 4. Enemies (AI)
@@ -551,28 +562,31 @@ export function TankBattleGame() {
             e.dir = dir;
             snapTankToLane(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
           }
-          // Hold this direction long enough that a single bump doesn't
-          // immediately re-steer the tank into the same wall again.
-          e.aiNextTurnAt = now + (blocked ? 350 : 700) + Math.random() * 1200;
+          // Upstream m_keep_direction_time = rand()%800 + 100, applied AFTER
+          // every direction choice. The bumped path stays slightly shorter so
+          // the tank doesn't immediately re-steer into the same wall.
+          e.aiNextTurnAt = now + (blocked ? 50 : AI_TURN_MIN_MS) + Math.random() * AI_TURN_RANGE_MS;
         }
         const before = { x: e.x, y: e.y };
         tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
         accumulateTread(e, dt, before);
 
-        // Firing
-        let canFire = false;
-        if (prof.fireOnlyInFront) {
-          const dx = targetPos.x - (e.x + TANK_SIZE / 2);
-          const dy = targetPos.y - (e.y + TANK_SIZE / 2);
-          const vd = DIR_VEC[e.dir];
-          const dot = dx * vd.x + dy * vd.y;
-          canFire = dot > 0 && Math.abs(vd.x !== 0 ? dy : dx) < TILE;
-        } else {
-          canFire = now > e.aiNextFireAt;
-        }
-        if (canFire) {
-          tryFire(e, now);
-          e.aiNextFireAt = now + 900 + Math.random() * 1400;
+        // Firing — upstream Enemy::updateBehavior:
+        //   every m_reload_time ms, attempt to fire and pick a new random
+        //   reload window (per-type max). Tank D additionally requires the
+        //   target to be straight ahead.
+        if (now >= e.aiNextFireAt) {
+          e.aiNextFireAt = now + Math.random() * ENEMY_RELOAD_MAX_MS[e.type!];
+          let shouldFire = true;
+          if (prof.fireOnlyInFront) {
+            const dx = targetPos.x - (e.x + TANK_SIZE / 2);
+            const dy = targetPos.y - (e.y + TANK_SIZE / 2);
+            const vd = DIR_VEC[e.dir];
+            const aligned = vd.x !== 0 ? Math.abs(dy) < TANK_SIZE : Math.abs(dx) < TANK_SIZE;
+            const inFront = dx * vd.x + dy * vd.y > 0;
+            shouldFire = inFront && aligned;
+          }
+          if (shouldFire) tryFire(e, now);
         }
       }
 
@@ -675,9 +689,6 @@ export function TankBattleGame() {
                   y: spot.y * TILE,
                   bornAt: now,
                 };
-                // Reset the drop timer so a regular bonus doesn't appear
-                // right after this one.
-                lastBonusAtRef.current = now;
               }
               break;
             }
@@ -765,7 +776,7 @@ export function TankBattleGame() {
         ) {
           switch (b.kind) {
             case "helmet":
-              cur.shield = 10_000;
+              cur.shield = SHIELD_TIME_MS;
               break;
             case "star":
               cur.starLevel = Math.min(MAX_STAR_LEVEL, cur.starLevel + 1);
@@ -1749,8 +1760,8 @@ const BONUS_EMOJI: Record<BonusKind, string> = {
 };
 
 function drawBonus(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, b: Bonus) {
-  // Blink: invisible 100ms out of every 500ms
-  if ((Date.now() % 500) < 100) return;
+  // Upstream bonus_blink_time = 350 ms: 50 % visible / 50 % invisible toggle.
+  if ((Date.now() % (BONUS_BLINK_MS * 2)) < BONUS_BLINK_MS) return;
   const src = BONUS_SP[b.kind];
   if (blit(ctx, atlas, src, b.x, b.y, TANK_SIZE, TANK_SIZE)) return;
   // Fallback when the atlas hasn't loaded yet
