@@ -16,6 +16,7 @@ const links: Array<{ href: string; key: TranslationKey }> = [
   { href: "/#book",        key: "nav.book" },
   { href: "/#podcast",     key: "nav.podcast" },
   { href: "/stories",      key: "nav.stories" },
+  { href: "/play",         key: "nav.play" },
 ];
 
 export function Navbar() {

@@ -15,6 +15,7 @@ export const translations = {
   "nav.book":        { en: "Book",        vi: "Sách" },
   "nav.podcast":     { en: "Podcast",     vi: "Podcast" },
   "nav.stories":     { en: "Stories",     vi: "Stories" },
+  "nav.play":        { en: "Play",        vi: "Play" },
 
   // ===== Hero =====
   "hero.statusPill":  { en: "Open to interesting conversations",
@@ -150,6 +151,40 @@ export const translations = {
 
   // ===== Language toggle aria =====
   "langToggle.aria":    { en: "Switch language",     vi: "Đổi ngôn ngữ" },
+
+  // ===== Play / Games =====
+  "play.eyebrow":         { en: "Play · A few small games",
+                            vi: "Play · Vài game nhỏ" },
+  "play.title":           { en: "Take a short break.",
+                            vi: "Nghỉ giải lao một chút." },
+  "play.description":     { en: "Three tiny browser games — pure JS, no leaderboards, no ads. Best scores stay in your browser.",
+                            vi: "Ba game nhỏ trên browser — pure JS, không leaderboard, không ads. Best score lưu trong browser của bạn." },
+  "play.cta":             { en: "Play",                 vi: "Chơi" },
+  "play.bestLocal":       { en: "Your best",            vi: "Best của bạn" },
+  "play.notPlayedYet":    { en: "Not played yet",       vi: "Chưa chơi" },
+
+  // ===== Game shell =====
+  "game.back":            { en: "All games",            vi: "Tất cả game" },
+  "game.score":           { en: "Score",                vi: "Score" },
+  "game.best":            { en: "Best",                 vi: "Best" },
+  "game.time":            { en: "Time",                 vi: "Time" },
+  "game.start":           { en: "Start",                vi: "Bắt đầu" },
+  "game.restart":         { en: "Restart",              vi: "Chơi lại" },
+  "game.pause":           { en: "Pause",                vi: "Tạm dừng" },
+  "game.resume":          { en: "Resume",               vi: "Tiếp tục" },
+  "game.over":            { en: "Game over",            vi: "Game over" },
+  "game.gameStartHint":   { en: "Press Start (or any arrow / WASD) to begin",
+                            vi: "Bấm Bắt đầu (hoặc phím mũi tên / WASD) để chơi" },
+  "game.newBest":         { en: "New personal best!",   vi: "Personal best mới!" },
+
+  // Game-specific overlays
+  "snake.gameOver":       { en: "Build failed",         vi: "Build failed" },
+  "snake.gameOverHint":   { en: "You hit a wall. Restart and try again.",
+                            vi: "Bạn đụng tường. Chơi lại nhé." },
+  "coffee.timeUp":        { en: "Time's up",            vi: "Hết giờ" },
+  "coffee.timeUpHint":    { en: "Sixty seconds, gone.", vi: "Sáu mươi giây, thoáng cái." },
+  "memory.win":           { en: "All pairs matched!",   vi: "Đã ghép hết các cặp!" },
+  "memory.winHint":       { en: "Moves used: {n}",      vi: "Số moves đã dùng: {n}" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

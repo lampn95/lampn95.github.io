@@ -4,6 +4,7 @@
 
 import { siteConfig } from "@/lib/config";
 import { stories } from "@/lib/stories";
+import { games } from "@/lib/games";
 
 export const dynamic = "force-static";
 
@@ -33,6 +34,7 @@ export async function GET(): Promise<Response> {
   const entries: Entry[] = [
     { loc: `${base}/`,         lastmod: now, changefreq: "monthly", priority: "1.00" },
     { loc: `${base}/stories/`, lastmod: now, changefreq: "monthly", priority: "0.80" },
+    { loc: `${base}/play/`,    lastmod: now, changefreq: "monthly", priority: "0.50" },
     { loc: `${base}/coffee/`,  lastmod: now, changefreq: "yearly",  priority: "0.30" },
     ...stories.map<Entry>((s) => ({
       loc: `${base}/stories/${s.slug}/`,
@@ -43,6 +45,12 @@ export async function GET(): Promise<Response> {
         { hreflang: "en", href: `${base}/stories/${s.slug}/` },
         { hreflang: "vi", href: `${base}/stories/${s.slug}/` },
       ],
+    })),
+    ...games.map<Entry>((g) => ({
+      loc: `${base}/play/${g.slug}/`,
+      lastmod: now,
+      changefreq: "yearly" as const,
+      priority: "0.40",
     })),
   ];
 
