@@ -1851,8 +1851,12 @@ function drawTank(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null,
   const dirIdx = DIR_INDEX[t.dir];
   let sx: number, sy: number;
   if (t.isPlayer) {
+    // Atlas only has 3 visible-armor rows for the player tank (y=64, 128,
+    // 192). Going past y=192 lands in an empty atlas region, which made
+    // the 3-star tank disappear after a Gun pickup. Cap the row index.
     sx = SP_PLAYER_X + dirIdx * 32;
-    sy = SP_PLAYER_Y + t.starLevel * 64 + t.treadFrame * 32;
+    const armorRow = Math.min(2, t.starLevel); // 0..2 → y=64,128,192
+    sy = SP_PLAYER_Y + armorRow * 64 + t.treadFrame * 32;
   } else {
     const colOffset = t.bonusDrop ? -4 : (t.armor - 1) * 4;
     sx = SP_ENEMY_X + (dirIdx + colOffset) * 32;
