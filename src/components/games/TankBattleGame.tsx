@@ -252,7 +252,8 @@ export function TankBattleGame() {
   }, []);
 
   // ──────────────── stage loading ────────────────
-  const loadStage = useCallback((idx: number) => {
+  const loadStage = useCallback((idx: number, opts?: { keepUpgrades?: boolean }) => {
+    const prevStar = opts?.keepUpgrades ? playerRef.current?.starLevel ?? 0 : 0;
     const stage = STAGES[idx % STAGES.length];
     mapRef.current = parseStage(stage);
     eagleAliveRef.current = true;
@@ -263,7 +264,11 @@ export function TankBattleGame() {
     lastBonusAtRef.current = 0;
     remainingSpawnsRef.current = ENEMIES_PER_STAGE;
     lastEnemySpawnRef.current = 0;
-    playerRef.current = makePlayer();
+    const p = makePlayer();
+    // Star upgrades persist across stages (NES Battle City behaviour).
+    // Helmet shield is intentionally NOT carried over — it's a 10-s buff.
+    p.starLevel = prevStar;
+    playerRef.current = p;
     stageIdxRef.current = idx;
     setStageNum(idx + 1);
     setEnemiesLeft(ENEMIES_PER_STAGE);
@@ -287,7 +292,7 @@ export function TankBattleGame() {
   }, [reset]);
 
   const handleNextStage = useCallback(() => {
-    loadStage(stageIdxRef.current + 1);
+    loadStage(stageIdxRef.current + 1, { keepUpgrades: true });
     setOver(null);
     setRunning(true);
     sound.play(TANK_SOUNDS.stageStart.id, TANK_SOUNDS.stageStart.vol);
