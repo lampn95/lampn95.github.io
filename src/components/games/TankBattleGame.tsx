@@ -38,6 +38,11 @@ const PLAYER_INVULN_MS = 1200;
 const BULLET_SPEED = 0.26;            // px/ms — slightly above upstream
 const BONUS_INTERVAL_MS = 18_000;
 const TREAD_FRAME_MS = 60;            // tread animation period
+const SPAWN_ANIM_MS = 900;            // duration of the create-flash before
+                                      // a tank becomes alive (≈9 frames @100ms)
+const SPAWN_ANIM_FRAMES = 10;         // matches upstream ST_CREATE.frames_count
+const MAX_STAR_LEVEL = 2;             // 0 = base, 1 = quick bullets, 2 = breaks
+                                      // steel — matches classic Battle City
 
 type TileKind = "empty" | "brick" | "steel" | "bush" | "water" | "ice";
 type Dir = "up" | "right" | "down" | "left";
@@ -101,6 +106,10 @@ const SP = {
   shield1:      { x: 976, y: 32,  w: 32, h: 32 },
   bonusHelmet:  { x: 896, y: 32,  w: 32, h: 32 },
   bonusStar:    { x: 896, y: 160, w: 32, h: 32 },
+  // ST_CREATE — 10 vertically stacked frames at (1008, frame*32, 32, 32)
+  // shown while a tank is materialising onto the map.
+  createX:      1008,
+  createY0:     0,
 } as const;
 
 // Bullet sprite is 8×8, four direction tiles laid out horizontally at (944, 128).
@@ -119,12 +128,13 @@ type Tank = {
   hasBullet: boolean;
   spawnInvuln: number;     // ms remaining
   shield: number;          // ms remaining (helmet bonus)
-  starLevel: number;       // player only: 0 / 1 (1 = bullets break steel and 1 brick per hit deeper)
+  starLevel: number;       // player only: 0..2 (2 = bullets break steel)
   speedMul: number;
   aiNextTurnAt: number;
   aiNextFireAt: number;
   treadFrame: number;      // 0 / 1 — toggles while the tank is moving
   treadAcc: number;        // ms accumulator for tread frame switching
+  creating: number;        // ms remaining of the create-flash (untouchable)
 };
 
 type Bullet = {
@@ -275,7 +285,7 @@ export function TankBattleGame() {
       dir: tank.dir,
       ownerId: tank.id,
       fromPlayer: tank.isPlayer,
-      power: tank.isPlayer && tank.starLevel > 0 ? 1 : 0,
+      power: tank.isPlayer && tank.starLevel >= MAX_STAR_LEVEL ? 1 : 0,
     });
     if (tank.isPlayer) sound.play(TANK_SOUNDS.fire.id, TANK_SOUNDS.fire.vol);
   }, []);
@@ -299,23 +309,27 @@ export function TankBattleGame() {
       //    pressing → instantly steers right without releasing first.
       const p = playerRef.current;
       if (p) {
+        p.creating    = Math.max(0, p.creating    - dt);
         p.spawnInvuln = Math.max(0, p.spawnInvuln - dt);
-        p.shield = Math.max(0, p.shield - dt);
-        let inputDir: Dir | null = null;
-        const ord = pressedRef.current.order;
-        for (let i = ord.length - 1; i >= 0; i--) {
-          if (pressedRef.current.keys[ord[i]]) { inputDir = ord[i]; break; }
-        }
-        if (inputDir) {
-          const before = { x: p.x, y: p.y };
-          if (inputDir !== p.dir) {
-            p.dir = inputDir;
-            snapTankToLane(p, map, enemiesRef.current, eagleAliveRef.current);
+        p.shield      = Math.max(0, p.shield      - dt);
+        // No movement or fire while the spawn flash is playing.
+        if (p.creating === 0) {
+          let inputDir: Dir | null = null;
+          const ord = pressedRef.current.order;
+          for (let i = ord.length - 1; i >= 0; i--) {
+            if (pressedRef.current.keys[ord[i]]) { inputDir = ord[i]; break; }
           }
-          tryMove(p, dt * PLAYER_SPEED * TILE, map, enemiesRef.current, eagleAliveRef.current);
-          accumulateTread(p, dt, before);
+          if (inputDir) {
+            const before = { x: p.x, y: p.y };
+            if (inputDir !== p.dir) {
+              p.dir = inputDir;
+              snapTankToLane(p, map, enemiesRef.current, eagleAliveRef.current);
+            }
+            tryMove(p, dt * PLAYER_SPEED * TILE, map, enemiesRef.current, eagleAliveRef.current);
+            accumulateTread(p, dt, before);
+          }
+          if (pressedRef.current.fire) tryFire(p, now);
         }
-        if (pressedRef.current.fire) tryFire(p, now);
       }
 
       // 2. Spawn enemies on a cadence
@@ -352,7 +366,10 @@ export function TankBattleGame() {
       // 4. Enemies (AI)
       const eagleCenter = { x: ((STAGE_COLS - 2) / 2) * TILE + TILE, y: (STAGE_ROWS - 2) * TILE + TILE };
       for (const e of enemiesRef.current) {
+        e.creating    = Math.max(0, e.creating    - dt);
         e.spawnInvuln = Math.max(0, e.spawnInvuln - dt);
+        // Frozen during the spawn flash — no AI, no fire, no collision.
+        if (e.creating > 0) continue;
         const prof = ENEMY_PROFILES[e.type!];
 
         const targetPos =
@@ -456,7 +473,7 @@ export function TankBattleGame() {
         if (b.fromPlayer) {
           for (let i = 0; i < enemiesRef.current.length; i++) {
             const e = enemiesRef.current[i];
-            if (e.spawnInvuln > 0) continue;
+            if (e.creating > 0 || e.spawnInvuln > 0) continue;
             if (bulletHitsTank(b, e)) {
               enemiesRef.current.splice(i, 1);
               setEnemiesLeft((x) => x - 1);
@@ -473,7 +490,7 @@ export function TankBattleGame() {
           }
         } else {
           const curP = playerRef.current;
-          if (curP && bulletHitsTank(b, curP)) {
+          if (curP && curP.creating === 0 && bulletHitsTank(b, curP)) {
             consumed = true;
             freeOwnerBullet(b);
             // Shield protects without losing a life.
@@ -496,7 +513,36 @@ export function TankBattleGame() {
         }
         if (!consumed) liveBullets.push(b);
       }
-      bulletsRef.current = liveBullets;
+
+      // 5b. Bullet-vs-bullet — opposing-side bullets that overlap mutually
+      // annihilate (classic Battle City), so the player can deflect an
+      // incoming shot by firing into it.
+      const killedBulletIds = new Set<number>();
+      for (let i = 0; i < liveBullets.length; i++) {
+        const a = liveBullets[i];
+        if (killedBulletIds.has(a.id)) continue;
+        for (let j = i + 1; j < liveBullets.length; j++) {
+          const b2 = liveBullets[j];
+          if (killedBulletIds.has(b2.id)) continue;
+          if (a.fromPlayer === b2.fromPlayer) continue;
+          if (
+            rectsOverlap(
+              a.x,  a.y,  BULLET_HITBOX, BULLET_HITBOX,
+              b2.x, b2.y, BULLET_HITBOX, BULLET_HITBOX,
+            )
+          ) {
+            killedBulletIds.add(a.id);
+            killedBulletIds.add(b2.id);
+            freeOwnerBullet(a);
+            freeOwnerBullet(b2);
+            sound.play(TANK_SOUNDS.bulletVsBullet.id, TANK_SOUNDS.bulletVsBullet.vol);
+            break;
+          }
+        }
+      }
+      bulletsRef.current = killedBulletIds.size === 0
+        ? liveBullets
+        : liveBullets.filter((b) => !killedBulletIds.has(b.id));
 
       // 6. Bonus pickup by player
       const cur = playerRef.current;
@@ -511,7 +557,7 @@ export function TankBattleGame() {
           if (b.kind === "helmet") {
             cur.shield = 10_000;
           } else if (b.kind === "star") {
-            cur.starLevel = Math.min(1, cur.starLevel + 1);
+            cur.starLevel = Math.min(MAX_STAR_LEVEL, cur.starLevel + 1);
           }
           bonusRef.current = null;
           sound.play(TANK_SOUNDS.bonusObtained.id, TANK_SOUNDS.bonusObtained.vol);
@@ -745,7 +791,7 @@ export function TankBattleGame() {
       </div>
 
       <p className="mt-4 text-center text-[11px] text-white/40 font-mono">
-        🪖 helmet = 10s shield · ⭐ star = bullets break steel · 🦅 protect the eagle
+        🪖 helmet = 10s shield · ⭐⭐ two stars = bullets break steel · 🦅 protect the eagle
       </p>
     </GameShell>
   );
@@ -820,9 +866,11 @@ function tankBlocksAt(
       return true;
     }
   }
-  // Other tanks — anything that isn't `self`.
+  // Other tanks — anything that isn't `self`. Tanks still in the spawn
+  // flash don't yet occupy the map physically, so we skip them.
   for (const o of others) {
     if (self && o.id === self.id) continue;
+    if (o.creating > 0) continue;
     if (rectsOverlap(px, py, TANK_SIZE, TANK_SIZE, o.x, o.y, TANK_SIZE, TANK_SIZE)) {
       return true;
     }
@@ -931,6 +979,7 @@ function makePlayer(): Tank {
     aiNextFireAt: 0,
     treadFrame: 0,
     treadAcc: 0,
+    creating: SPAWN_ANIM_MS,
   };
 }
 
@@ -956,7 +1005,7 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
           type,
           cooldown: 0,
           hasBullet: false,
-          spawnInvuln: 700,
+          spawnInvuln: 0,
           shield: 0,
           starLevel: 0,
           speedMul: prof.speedMul,
@@ -964,6 +1013,8 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
           aiNextFireAt: performance.now() + 1200 + Math.random() * 800,
           treadFrame: 0,
           treadAcc: 0,
+          creating: SPAWN_ANIM_MS,
+        // spawnInvuln stays 0 — the creating phase already grants protection.
         };
       }
     }
@@ -1195,18 +1246,37 @@ function drawBullet(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | nul
 }
 
 function drawTank(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, t: Tank) {
-  // Spawn flicker
+  // ST_CREATE spawn-flash animation: 10 vertically-stacked 32×32 frames
+  // played over SPAWN_ANIM_MS while the tank materialises onto the map.
+  if (t.creating > 0) {
+    const progress = 1 - t.creating / SPAWN_ANIM_MS;
+    const frame = Math.min(SPAWN_ANIM_FRAMES - 1, Math.floor(progress * SPAWN_ANIM_FRAMES));
+    if (atlas) {
+      ctx.drawImage(
+        atlas,
+        SP.createX, SP.createY0 + frame * 32, 32, 32,
+        t.x, t.y, TANK_SIZE, TANK_SIZE,
+      );
+    } else {
+      ctx.fillStyle = "rgba(253, 230, 138, 0.6)";
+      ctx.fillRect(t.x, t.y, TANK_SIZE, TANK_SIZE);
+    }
+    return;
+  }
+
+  // Brief invulnerability flicker right after the create-flash ends.
   if (t.spawnInvuln > 0 && Math.floor(t.spawnInvuln / 100) % 2 === 0) return;
 
   const dirIdx = DIR_INDEX[t.dir];
   // Each tank type's sprite block: 4 columns × 2 rows of 32×32 frames.
+  // Player atlas rows step by 64 px per star level (armor 1 → 2 → 3).
   const sx = (t.isPlayer ? SP_PLAYER_X : SP_ENEMY_X) + dirIdx * 32;
-  const sy = (t.isPlayer ? SP_PLAYER_Y : ENEMY_PROFILES[t.type!].atlasY) + t.treadFrame * 32;
+  const playerRowY = SP_PLAYER_Y + t.starLevel * 64;
+  const sy = (t.isPlayer ? playerRowY : ENEMY_PROFILES[t.type!].atlasY) + t.treadFrame * 32;
 
   if (atlas) {
     ctx.drawImage(atlas, sx, sy, 32, 32, t.x, t.y, TANK_SIZE, TANK_SIZE);
   } else {
-    // Fallback vector tank
     ctx.fillStyle = t.isPlayer ? "#7cf2ff" : "#f87171";
     ctx.fillRect(t.x, t.y, TANK_SIZE, TANK_SIZE);
   }

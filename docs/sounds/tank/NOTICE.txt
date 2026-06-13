@@ -10,6 +10,7 @@ Files included:
 - player_fired.ogg
 - bullet_hit_brick.ogg
 - bullet_hit_stone.ogg
+- bullet_hit_bullet.ogg
 - enemy_destroyed.ogg
 - player_destroyed.ogg
 - eagle_destroyed.ogg
