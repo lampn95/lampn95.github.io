@@ -1431,11 +1431,12 @@ function freeOwnerBullet(b: Bullet) {
   }
 }
 
-/** Resolve the bullet's leading-edge cells in priority order, then check
- *  each one's *current* solid extent (sub-rect for bricks). The first cell
- *  whose solid extent overlaps the bullet's hitbox is hit. Brick hits run
- *  through the upstream 9-state machine so only the sub-half closest to
- *  the bullet is knocked out per shot. */
+/** Iterate every cell the bullet's hitbox overlaps at its leading edge
+ *  and apply destruction to each (matches upstream stage_environment.cpp
+ *  lines 198-260: nested loops over (row_start..row_end, column_start..
+ *  column_end) calling bulletHit on every brick they touch). Symmetric
+ *  damage when a bullet straddles two columns — both bricks chip together
+ *  through the 9-state machine. */
 function checkBulletTerrain(
   b: Bullet, map: TileKind[], brickStates: Uint8Array,
 ): "brick" | "steel" | null {
@@ -1449,48 +1450,32 @@ function checkBulletTerrain(
     : v.y < 0 ? b.y
     : b.y + BULLET_HITBOX / 2;
 
-  // Ordered candidate cells the leading edge might touch (primary first).
-  let cells: { tx: number; ty: number }[];
+  // Every candidate cell along the perpendicular extent of the bullet's
+  // leading edge. For axis-aligned motion we touch up to 2 cells.
+  const cells: { tx: number; ty: number }[] = [];
   if (v.y !== 0) {
     const ty = Math.floor(tipY / TILE);
     const txLo = Math.floor(b.x / TILE);
     const txHi = Math.floor((b.x + BULLET_HITBOX - 1) / TILE);
-    if (txLo === txHi) {
-      cells = [{ tx: txLo, ty }];
-    } else {
-      const bcx = b.x + BULLET_HITBOX / 2;
-      const cxLo = txLo * TILE + TILE / 2;
-      const cxHi = txHi * TILE + TILE / 2;
-      cells = Math.abs(bcx - cxLo) <= Math.abs(bcx - cxHi)
-        ? [{ tx: txLo, ty }, { tx: txHi, ty }]
-        : [{ tx: txHi, ty }, { tx: txLo, ty }];
-    }
+    cells.push({ tx: txLo, ty });
+    if (txHi !== txLo) cells.push({ tx: txHi, ty });
   } else {
     const tx = Math.floor(tipX / TILE);
     const tyLo = Math.floor(b.y / TILE);
     const tyHi = Math.floor((b.y + BULLET_HITBOX - 1) / TILE);
-    if (tyLo === tyHi) {
-      cells = [{ tx, ty: tyLo }];
-    } else {
-      const bcy = b.y + BULLET_HITBOX / 2;
-      const cyLo = tyLo * TILE + TILE / 2;
-      const cyHi = tyHi * TILE + TILE / 2;
-      cells = Math.abs(bcy - cyLo) <= Math.abs(bcy - cyHi)
-        ? [{ tx, ty: tyLo }, { tx, ty: tyHi }]
-        : [{ tx, ty: tyHi }, { tx, ty: tyLo }];
-    }
+    cells.push({ tx, ty: tyLo });
+    if (tyHi !== tyLo) cells.push({ tx, ty: tyHi });
   }
 
+  let result: "brick" | "steel" | null = null;
   for (const s of cells) {
     if (!inBounds(s.tx, s.ty)) continue;
     const k = idx(s.tx, s.ty);
     const tile = map[k];
     if (tile === "bush") {
       // 3-star bullets PLOW through bushes, destroying every one in their
-      // path (upstream stage_environment.cpp:248 — "Do not stop bullet on
-      // bush, it allows to destroy all of bushes on the bullet way, when
-      // damages are increased"). Non-3-star bullets just pass through
-      // without affecting the bush.
+      // path (upstream stage_environment.cpp:248). Non-3-star bullets just
+      // pass through without affecting the bush.
       if (b.power > 0) map[k] = "empty";
       continue;
     }
@@ -1514,14 +1499,16 @@ function checkBulletTerrain(
           brickStates[k] = newState;
         }
       }
-      return "brick";
-    }
-    if (tile === "steel") {
+      if (result !== "steel") result = "brick";
+      // Don't break — when the bullet straddles two brick cells, BOTH
+      // should chip together (symmetric damage). The bullet still dies
+      // this frame (handled by the non-null return).
+    } else if (tile === "steel") {
       if (b.power > 0) map[k] = "empty";
-      return "steel";
+      result = "steel";
     }
   }
-  return null;
+  return result;
 }
 
 function bulletHitsTank(b: Bullet, t: Tank): boolean {
