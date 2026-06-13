@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { asset } from "@/lib/config";
 import { games } from "@/lib/games";
 import { useT } from "@/lib/i18n";
@@ -291,6 +291,10 @@ export function TankBattleGame() {
   // Score / lives mirrored in refs for stale-closure safety.
   const scoreRef = useRef(0);
   const livesRef = useRef(MAX_LIVES);
+  // Game mode chosen on the pre-game screen — Super Funny gives the player
+  // 3 stars + a boat at every spawn (steel-piercing bullets, double tap,
+  // can cross water from the get-go).
+  const modeRef = useRef<"normal" | "super-funny">("normal");
 
   // UI state
   const [score, setScore]               = useState(0);
@@ -300,6 +304,8 @@ export function TankBattleGame() {
   const [running, setRunning]           = useState(false);
   const [over, setOver]                 = useState<null | "win" | "lose-lives" | "lose-eagle" | "stage-clear">(null);
   const [muted, setMuted]               = useState(false);
+  const [paused, setPaused]             = useState(false);
+  const [mode, setMode]                 = useState<"normal" | "super-funny">("normal");
   // HUD-only mirrors of the player's progressive upgrades, sampled each frame
   // so the user can see what star count / boat status they currently have.
   const [playerStars, setPlayerStars]   = useState(0);
@@ -360,6 +366,11 @@ export function TankBattleGame() {
     // shield are wiped). Boat is consumed on the next hit anyway.
     p.starLevel = prevStar;
     p.hasBoat   = prevBoat;
+    // 🎉 Super Funny override: always spawn maxed out.
+    if (modeRef.current === "super-funny") {
+      p.starLevel = MAX_STAR_LEVEL;
+      p.hasBoat   = true;
+    }
     playerRef.current = p;
     stageIdxRef.current = idx;
     setStageNum(idx + 1);
@@ -377,13 +388,23 @@ export function TankBattleGame() {
     setOver(null);
   }, [loadStage]);
 
-  const handleStart = useCallback(() => {
+  const handleStart = useCallback((selectedMode?: "normal" | "super-funny") => {
+    if (selectedMode) {
+      modeRef.current = selectedMode;
+      setMode(selectedMode);
+    }
     reset();
     setRunning(true);
+    setPaused(false);
     // Preload all sounds on first user gesture (autoplay policies).
     sound.preloadAll();
     sound.play(TANK_SOUNDS.stageStart.id, TANK_SOUNDS.stageStart.vol);
   }, [reset]);
+
+  const togglePause = useCallback(() => {
+    if (over) return;
+    setPaused((p) => !p);
+  }, [over]);
 
   const handleNextStage = useCallback(() => {
     // +1 life per stage clear (upstream Player::moveToNextStage line 123).
@@ -429,7 +450,13 @@ export function TankBattleGame() {
     // Upstream Player::hit non-3-star path calls changeStarCountBy(-3), which
     // clamps star_count to 0 — i.e. stars RESET on death. Boat is bound to
     // the destroyed tank instance so it's gone too.
-    playerRef.current = makePlayer();
+    // 🎉 Super Funny mode keeps the player fully geared up on every respawn.
+    const fresh = makePlayer();
+    if (modeRef.current === "super-funny") {
+      fresh.starLevel = MAX_STAR_LEVEL;
+      fresh.hasBoat   = true;
+    }
+    playerRef.current = fresh;
   }, []);
 
   // ──────────────── step ────────────────
@@ -901,10 +928,13 @@ export function TankBattleGame() {
 
   // ──────────────── rAF ────────────────
   useEffect(() => {
-    if (!running) {
+    if (!running || paused) {
       redraw();
       return;
     }
+    // Reset the dt baseline when resuming so the first frame after a long
+    // pause doesn't dump 1+ seconds of physics in one tick.
+    lastTickRef.current = 0;
     const loop = (now: number) => {
       step(now);
       rafRef.current = requestAnimationFrame(loop);
@@ -914,7 +944,7 @@ export function TankBattleGame() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     };
-  }, [running, step]);
+  }, [running, paused, redraw, step]);
 
   // ──────────────── keyboard ────────────────
   useEffect(() => {
@@ -938,8 +968,15 @@ export function TankBattleGame() {
         }
         return;
       }
+      // ⏸ Pause toggle.
+      if (e.key === "p" || e.key === "P" || e.key === "Escape") {
+        e.preventDefault();
+        if (running && !over) togglePause();
+        return;
+      }
       if (e.key === " ") {
         e.preventDefault();
+        if (paused) { togglePause(); return; }
         if (over === "stage-clear") {
           handleNextStage();
           return;
@@ -966,7 +1003,7 @@ export function TankBattleGame() {
       window.removeEventListener("keydown", onDown);
       window.removeEventListener("keyup", onUp);
     };
-  }, [over, running, handleStart, handleNextStage]);
+  }, [over, running, paused, handleStart, handleNextStage, togglePause]);
 
   // ──────────────── initial draw ────────────────
   useEffect(() => {
@@ -985,6 +1022,7 @@ export function TankBattleGame() {
   };
   const pressFire = (on: boolean) => () => {
     if (on) {
+      if (paused) { togglePause(); return; }
       if (over === "stage-clear") { handleNextStage(); return; }
       if (over || !running) { handleStart(); return; }
     }
@@ -999,6 +1037,9 @@ export function TankBattleGame() {
         <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5">
           <span className="text-white/45">Stage: </span>
           <span className="text-white font-semibold">{stageNum}</span>
+          {mode === "super-funny" && (
+            <span className="ml-2 text-amber-300 font-medium text-[11px]" title="Super Funny mode">🎉</span>
+          )}
         </div>
         <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5">
           <span className="text-white/45">{t("game.score")}: </span>
@@ -1033,6 +1074,16 @@ export function TankBattleGame() {
         </div>
         <button
           type="button"
+          onClick={togglePause}
+          disabled={!running || over != null}
+          aria-label={paused ? "Resume" : "Pause"}
+          title={paused ? "Resume (P)" : "Pause (P)"}
+          className="rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+        </button>
+        <button
+          type="button"
           onClick={toggleMute}
           aria-label={muted ? "Unmute" : "Mute"}
           title={muted ? "Unmute" : "Mute"}
@@ -1053,8 +1104,33 @@ export function TankBattleGame() {
 
         {!running && !over && (
           <Overlay>
-            <p className="text-sm text-white/70">{t("game.gameStartHint")}</p>
-            <button onClick={handleStart} className={primaryBtn}>{t("game.start")}</button>
+            <p className="text-base font-semibold text-white">Choose mode</p>
+            <p className="text-xs text-white/55 max-w-[260px]">
+              Super Funny gives you 3 stars + a boat at every spawn — bullets break
+              steel and plough through bushes from the very first shot.
+            </p>
+            <div className="flex flex-col gap-2 mt-2 w-full max-w-[220px]">
+              <button
+                onClick={() => handleStart("normal")}
+                className={primaryBtn + " w-full justify-center"}
+              >
+                Normal
+              </button>
+              <button
+                onClick={() => handleStart("super-funny")}
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-300 via-rose-300 to-cyan-300 text-black px-5 text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                🎉 Super Funny
+              </button>
+            </div>
+          </Overlay>
+        )}
+        {running && paused && (
+          <Overlay>
+            <div className="text-3xl">⏸</div>
+            <p className="text-lg font-semibold text-white">Paused</p>
+            <p className="text-xs text-white/55">Press P (or space) to resume</p>
+            <button onClick={togglePause} className={primaryBtn}>Resume</button>
           </Overlay>
         )}
         {over === "lose-lives" && (
@@ -1064,7 +1140,7 @@ export function TankBattleGame() {
             <p className="text-sm text-white/65">{t("tank.gameOverHint")}</p>
             <FinalLine score={score} best={best} t={t} />
             {isNewBest && <p className="text-sm text-amber-300 font-medium">{t("game.newBest")}</p>}
-            <button onClick={handleStart} className={primaryBtn}>{t("game.restart")}</button>
+            <button onClick={() => handleStart()} className={primaryBtn}>{t("game.restart")}</button>
           </Overlay>
         )}
         {over === "lose-eagle" && (
@@ -1074,7 +1150,7 @@ export function TankBattleGame() {
             <p className="text-sm text-white/65">The eagle fell. Try again.</p>
             <FinalLine score={score} best={best} t={t} />
             {isNewBest && <p className="text-sm text-amber-300 font-medium">{t("game.newBest")}</p>}
-            <button onClick={handleStart} className={primaryBtn}>{t("game.restart")}</button>
+            <button onClick={() => handleStart()} className={primaryBtn}>{t("game.restart")}</button>
           </Overlay>
         )}
         {over === "stage-clear" && (
