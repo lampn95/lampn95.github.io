@@ -1470,11 +1470,14 @@ function tankBlocksAt(
       return true;
     }
   }
-  // Other tanks — anything that isn't `self`. Tanks still in the spawn
-  // flash don't yet occupy the map physically, so we skip them.
+  // Other tanks — including ones still in their spawn flash. We must NOT
+  // let a tank walk through a creating tank, otherwise it ends up sitting
+  // on top of the new tank the moment the flash finishes, with no way to
+  // separate (every 1-px tryMove keeps both bounding boxes overlapping
+  // and gets refused). Bullets still pass through creating tanks via the
+  // separate `e.creating > 0` check in the bullet loop.
   for (const o of others) {
     if (self && o.id === self.id) continue;
-    if (o.creating > 0) continue;
     if (rectsOverlap(px, py, TANK_SIZE, TANK_SIZE, o.x, o.y, TANK_SIZE, TANK_SIZE)) {
       return true;
     }
