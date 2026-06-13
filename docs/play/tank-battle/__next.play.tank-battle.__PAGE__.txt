@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
-2:I[2170,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js","/_next/static/chunks/15jg4qm6tii9s.js"],"TankBattleGame"]
+2:I[2170,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js","/_next/static/chunks/0a_4ut60jdwal.js"],"TankBattleGame"]
 3:I[97367,["/_next/static/chunks/0yadf0zyk6.r3.js","/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/15jg4qm6tii9s.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"qe7gollqd4uEFTepm0hFz"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/0a_4ut60jdwal.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ddtTrC6u_xOVvroOqFzMU"}
 5:null

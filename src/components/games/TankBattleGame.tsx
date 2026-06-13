@@ -24,7 +24,9 @@ const H = STAGE_ROWS * TILE;          // 416
 const TANK_SIZE = TILE * 2;           // 2×2 cells
 
 const BULLET_RENDER = 8;              // visual size (square sprite)
-const BULLET_HITBOX = 6;              // logical hitbox (slightly tighter than sprite)
+const BULLET_HITBOX = 8;              // logical hitbox matches the sprite size
+                                      // — anything tighter lets shots slip past
+                                      // a brick when the tank is mid-cell.
 const ENEMIES_PER_STAGE = 5;
 const MAX_ALIVE_ENEMIES = 3;
 const MAX_LIVES = 3;
@@ -34,7 +36,6 @@ const MAX_LIVES = 3;
 const PLAYER_SPEED = 0.006;           // ≈ 0.096 px/ms — slightly above upstream
 const PLAYER_INVULN_MS = 1200;
 const BULLET_SPEED = 0.26;            // px/ms — slightly above upstream
-const SNAP_EPS = 5;                   // upstream uses 5 px tolerance on dir-change
 const BONUS_INTERVAL_MS = 18_000;
 const TREAD_FRAME_MS = 60;            // tread animation period
 
@@ -309,7 +310,7 @@ export function TankBattleGame() {
           const before = { x: p.x, y: p.y };
           if (inputDir !== p.dir) {
             p.dir = inputDir;
-            snapTankToLane(p);
+            snapTankToLane(p, map, enemiesRef.current, eagleAliveRef.current);
           }
           tryMove(p, dt * PLAYER_SPEED * TILE, map, enemiesRef.current, eagleAliveRef.current);
           accumulateTread(p, dt, before);
@@ -379,7 +380,7 @@ export function TankBattleGame() {
           }
           if (dir !== e.dir) {
             e.dir = dir;
-            snapTankToLane(e);
+            snapTankToLane(e, map, enemyObstacles, eagleAliveRef.current);
           }
           e.aiNextTurnAt = now + 700 + Math.random() * 1500;
         }
@@ -848,19 +849,36 @@ function tryMove(
   }
 }
 
-/** Snap the perpendicular axis to the nearest tile boundary when the tank
- *  starts moving in a new direction — matches upstream Tank::setDirection()
- *  with its 5-pixel epsilon. Without this, a tank that just rammed a wall
- *  can't enter narrow corridors because its position is no longer
- *  tile-aligned along the new axis. */
-function snapTankToLane(t: Tank) {
+/** Snap the perpendicular axis to a tile boundary when the tank starts
+ *  moving in a new direction. We always try the *nearer* boundary first
+ *  and fall back to the further one if the nearer one would push the tank
+ *  into a wall, another tank, or the eagle. The snap matters because a
+ *  mid-cell tank's bullet only samples one of the two columns the tank
+ *  occupies, so it can slip past adjacent bricks. */
+function snapTankToLane(t: Tank, map: TileKind[], others: ReadonlyArray<Tank>, eagleAlive: boolean) {
   const v = DIR_VEC[t.dir];
   if (v.y !== 0) {
-    const lane = Math.round(t.x / TILE) * TILE;
-    if (Math.abs(t.x - lane) < SNAP_EPS) t.x = lane;
+    const lo = Math.floor(t.x / TILE) * TILE;
+    const hi = lo + TILE;
+    const order = (t.x - lo) <= (hi - t.x) ? [lo, hi] : [hi, lo];
+    for (const cand of order) {
+      if (cand === t.x) return;
+      if (!tankBlocksAt(map, cand, t.y, t, others, eagleAlive)) {
+        t.x = cand;
+        return;
+      }
+    }
   } else if (v.x !== 0) {
-    const lane = Math.round(t.y / TILE) * TILE;
-    if (Math.abs(t.y - lane) < SNAP_EPS) t.y = lane;
+    const lo = Math.floor(t.y / TILE) * TILE;
+    const hi = lo + TILE;
+    const order = (t.y - lo) <= (hi - t.y) ? [lo, hi] : [hi, lo];
+    for (const cand of order) {
+      if (cand === t.y) return;
+      if (!tankBlocksAt(map, t.x, cand, t, others, eagleAlive)) {
+        t.y = cand;
+        return;
+      }
+    }
   }
 }
 
