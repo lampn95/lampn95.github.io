@@ -48,6 +48,8 @@ const SPAWN_ANIM_FRAMES = 10;         // matches upstream ST_CREATE.frames_count
 //   3 stars: ↑ + bullets break steel ("breaker tank")
 const MAX_STAR_LEVEL = 3;
 const STAR_BULLET_SPEED_MUL = 1.3;
+const CLOCK_FREEZE_MS  = 8_000;       // ⏱ Clock bonus: freeze enemies for 8s
+const SHOVEL_FORTIFY_MS = 15_000;     // 🛠 Shovel bonus: steel walls for 15s
 
 type TileKind = "empty" | "brick" | "steel" | "bush" | "water" | "ice";
 type Dir = "up" | "right" | "down" | "left";
@@ -109,8 +111,15 @@ const SP = {
   eagleDead:    { x: 944, y: 32,  w: 32, h: 32 }, // flag (sprite repurposed for "destroyed")
   shield0:      { x: 976, y: 0,   w: 32, h: 32 },
   shield1:      { x: 976, y: 32,  w: 32, h: 32 },
+  bonusGrenade: { x: 896, y: 0,   w: 32, h: 32 },
   bonusHelmet:  { x: 896, y: 32,  w: 32, h: 32 },
+  bonusClock:   { x: 896, y: 64,  w: 32, h: 32 },
+  bonusShovel:  { x: 896, y: 96,  w: 32, h: 32 },
+  bonusTank:    { x: 896, y: 128, w: 32, h: 32 },
   bonusStar:    { x: 896, y: 160, w: 32, h: 32 },
+  bonusGun:     { x: 896, y: 192, w: 32, h: 32 },
+  bonusBoat:    { x: 896, y: 224, w: 32, h: 32 },
+  boatPlayer:   { x: 944, y: 96,  w: 32, h: 32 },
   // ST_CREATE — 10 vertically stacked frames at (1008, frame*32, 32, 32)
   // shown while a tank is materialising onto the map.
   createX:      1008,
@@ -154,6 +163,7 @@ type Tank = {
   treadFrame: number;      // 0 / 1 — toggles while the tank is moving
   treadAcc: number;        // ms accumulator for tread frame switching
   creating: number;        // ms remaining of the create-flash (untouchable)
+  hasBoat: boolean;        // 🚤 Boat bonus — lets this tank cross water
 };
 
 type Bullet = {
@@ -167,13 +177,27 @@ type Bullet = {
   speedMul: number;        // 1.0 base, 1.3 for 1+ star player bullets
 };
 
+type BonusKind =
+  | "grenade"   // 💣 destroys every alive enemy on the map
+  | "helmet"    // 🪖 10-second invulnerability shield
+  | "clock"     // ⏱ freezes enemies for 8 s
+  | "shovel"    // 🛠 turns eagle's brick perimeter into steel for 15 s
+  | "tank"      // 🛡 +1 life
+  | "star"      // ⭐ progressive bullet upgrade (speed → double → break steel)
+  | "gun"       // 🔫 instantly maxes the star meter (3 stars)
+  | "boat";     // 🚤 lets the tank cross water tiles
+
 type Bonus = {
   id: number;
-  kind: "helmet" | "star";
+  kind: BonusKind;
   x: number;
   y: number;
   bornAt: number;
 };
+
+const BONUS_KINDS: BonusKind[] = [
+  "grenade", "helmet", "clock", "shovel", "tank", "star", "gun", "boat",
+];
 
 type Effect = {
   id: number;
@@ -203,6 +227,13 @@ export function TankBattleGame() {
   const bonusRef = useRef<Bonus | null>(null);
   const lastBonusAtRef = useRef(0);
   const effectsRef = useRef<Effect[]>([]);
+  // ⏱ enemies are frozen until this timestamp (Clock bonus)
+  const freezeUntilRef = useRef(0);
+  // 🛠 eagle perimeter is reinforced until this timestamp (Shovel bonus).
+  // `shovelSavedRef` stores the original tile kind of each fortified cell so
+  // we can restore it once the buff expires.
+  const shovelUntilRef = useRef(0);
+  const shovelSavedRef = useRef<{ i: number; original: TileKind }[]>([]);
 
   // pressedRef.order tracks the press sequence so the LAST direction pressed wins
   // (classic Battle City: holding ↑ then pressing → instantly steers right).
@@ -268,6 +299,9 @@ export function TankBattleGame() {
     bonusRef.current = null;
     effectsRef.current = [];
     lastBonusAtRef.current = 0;
+    freezeUntilRef.current = 0;
+    shovelUntilRef.current = 0;
+    shovelSavedRef.current = [];
     remainingSpawnsRef.current = ENEMIES_PER_STAGE;
     lastEnemySpawnRef.current = 0;
     const p = makePlayer();
@@ -387,13 +421,13 @@ export function TankBattleGame() {
         }
       }
 
-      // 3. Drop a bonus occasionally on an empty cell
+      // 3. Drop a bonus occasionally on an empty cell.
       if (now - lastBonusAtRef.current > BONUS_INTERVAL_MS && bonusRef.current == null) {
         const spot = pickEmptySpot(map);
         if (spot) {
           bonusRef.current = {
             id: nextId(),
-            kind: Math.random() < 0.5 ? "helmet" : "star",
+            kind: BONUS_KINDS[Math.floor(Math.random() * BONUS_KINDS.length)],
             x: spot.x * TILE,
             y: spot.y * TILE,
             bornAt: now,
@@ -404,11 +438,14 @@ export function TankBattleGame() {
 
       // 4. Enemies (AI)
       const eagleCenter = { x: ((STAGE_COLS - 2) / 2) * TILE + TILE, y: (STAGE_ROWS - 2) * TILE + TILE };
+      const frozen = now < freezeUntilRef.current;
       for (const e of enemiesRef.current) {
         e.creating    = Math.max(0, e.creating    - dt);
         e.spawnInvuln = Math.max(0, e.spawnInvuln - dt);
         // Frozen during the spawn flash — no AI, no fire, no collision.
         if (e.creating > 0) continue;
+        // ⏱ Clock bonus: enemies stop moving and firing, but stay vulnerable.
+        if (frozen) continue;
         const prof = ENEMY_PROFILES[e.type!];
 
         const targetPos =
@@ -605,7 +642,8 @@ export function TankBattleGame() {
         ? liveBullets
         : liveBullets.filter((b) => !killedBulletIds.has(b.id));
 
-      // 6. Bonus pickup by player
+      // 6. Bonus pickup by player — dispatch on bonus kind. Matches the
+      //    eight upstream Battle-City bonuses (see game README).
       const cur = playerRef.current;
       if (cur && bonusRef.current) {
         const b = bonusRef.current;
@@ -615,20 +653,69 @@ export function TankBattleGame() {
           cur.y < b.y + TILE * 2 &&
           cur.y + TANK_SIZE > b.y
         ) {
-          if (b.kind === "helmet") {
-            cur.shield = 10_000;
-          } else if (b.kind === "star") {
-            cur.starLevel = Math.min(MAX_STAR_LEVEL, cur.starLevel + 1);
+          switch (b.kind) {
+            case "helmet":
+              cur.shield = 10_000;
+              break;
+            case "star":
+              cur.starLevel = Math.min(MAX_STAR_LEVEL, cur.starLevel + 1);
+              break;
+            case "gun":
+              // Instantly maxes the star meter ⇒ same as "three stars".
+              cur.starLevel = MAX_STAR_LEVEL;
+              break;
+            case "tank": {
+              const newLives = livesRef.current + 1;
+              livesRef.current = newLives;
+              setLives(newLives);
+              break;
+            }
+            case "clock":
+              freezeUntilRef.current = now + CLOCK_FREEZE_MS;
+              break;
+            case "shovel":
+              activateShovel(mapRef.current, shovelSavedRef.current);
+              shovelUntilRef.current = now + SHOVEL_FORTIFY_MS;
+              break;
+            case "boat":
+              cur.hasBoat = true;
+              break;
+            case "grenade": {
+              // Wipe every alive enemy on the map.
+              const killed = enemiesRef.current.length;
+              for (const e of enemiesRef.current) {
+                spawnTankFx(effectsRef.current, e.x, e.y);
+              }
+              enemiesRef.current = [];
+              if (killed > 0) {
+                sound.play(TANK_SOUNDS.enemyDestroyed.id, TANK_SOUNDS.enemyDestroyed.vol);
+                setEnemiesLeft((x) => x - killed);
+                setScore((s) => {
+                  const ns = s + killed;
+                  scoreRef.current = ns;
+                  return ns;
+                });
+              }
+              break;
+            }
           }
           bonusRef.current = null;
           sound.play(TANK_SOUNDS.bonusObtained.id, TANK_SOUNDS.bonusObtained.vol);
-          // Small score bump for picking up
+          // Small score bump for the pickup itself.
           setScore((s) => {
             const ns = s + 1;
             scoreRef.current = ns;
             return ns;
           });
         }
+      }
+
+      // 6b. Shovel expiry — restore the eagle's perimeter to its original
+      //     tiles once the 15-second buff is up.
+      if (shovelUntilRef.current > 0 && now > shovelUntilRef.current) {
+        restoreShovel(mapRef.current, shovelSavedRef.current);
+        shovelSavedRef.current = [];
+        shovelUntilRef.current = 0;
       }
 
       // 7. Stage clear check
@@ -860,7 +947,7 @@ export function TankBattleGame() {
       </div>
 
       <p className="mt-4 text-center text-[11px] text-white/40 font-mono">
-        🪖 10s shield · ⭐ fast bullets · ⭐⭐ double-tap (2 in flight) · ⭐⭐⭐ break steel · 🦅 protect the eagle
+        💣 wipe enemies · 🪖 10s shield · ⏱ 8s freeze · 🛠 15s steel walls · 🛡 +1 life · ⭐ upgrade · 🔫 max stars · 🚤 cross water
       </p>
     </GameShell>
   );
@@ -898,6 +985,34 @@ function parseStage(s: string): TileKind[] {
  * ────────────────────────────────────────────────────────────────────────── */
 
 function tankCenter(t: Tank) { return { x: t.x + TANK_SIZE / 2, y: t.y + TANK_SIZE / 2 }; }
+
+/** The 8 cells forming the brick perimeter around the eagle. Used by the
+ *  Shovel bonus to temporarily reinforce the base. */
+function eaglePerimeterCells(): number[] {
+  const ex = Math.floor(STAGE_COLS / 2) - 1; // 12 — eagle's left column
+  const ey = STAGE_ROWS - 2;                 // 24 — eagle's top row
+  return [
+    idx(ex - 1, ey - 1), idx(ex, ey - 1), idx(ex + 1, ey - 1), idx(ex + 2, ey - 1), // top
+    idx(ex - 1, ey),                                                                 // left-mid
+    idx(ex + 2, ey),                                                                 // right-mid
+    idx(ex - 1, ey + 1),                                                             // left-bot
+    idx(ex + 2, ey + 1),                                                             // right-bot
+  ];
+}
+
+function activateShovel(map: TileKind[], saved: { i: number; original: TileKind }[]) {
+  saved.length = 0;
+  for (const k of eaglePerimeterCells()) {
+    saved.push({ i: k, original: map[k] });
+    map[k] = "steel";
+  }
+}
+
+function restoreShovel(map: TileKind[], saved: { i: number; original: TileKind }[]) {
+  // Classic Battle-City: walls revert to BRICK regardless of what they were
+  // before (so this also gives free walls in stages without a brick perimeter).
+  for (const c of saved) map[c.i] = "brick";
+}
 
 /** Spawn the small 32×32 ST_DESTROY_BULLET spark, centered on the impact point. */
 function spawnBulletFx(effects: Effect[], b: Bullet) {
@@ -941,16 +1056,19 @@ function tankBlocksAt(
   map: TileKind[], px: number, py: number,
   self: Tank | null, others: ReadonlyArray<Tank>, eagleAlive: boolean,
 ): boolean {
-  // Terrain — bricks, steel and water all block tanks.
+  // Terrain — bricks, steel and water all block tanks. Tanks carrying the
+  // 🚤 Boat bonus traverse water freely.
   const left   = Math.floor(px / TILE);
   const top    = Math.floor(py / TILE);
   const right  = Math.floor((px + TANK_SIZE - 1) / TILE);
   const bottom = Math.floor((py + TANK_SIZE - 1) / TILE);
+  const blocksWater = !(self?.hasBoat);
   for (let x = left; x <= right; x++) {
     for (let y = top; y <= bottom; y++) {
       if (!inBounds(x, y)) return true;
       const t = map[idx(x, y)];
-      if (t === "brick" || t === "steel" || t === "water") return true;
+      if (t === "brick" || t === "steel") return true;
+      if (t === "water" && blocksWater)   return true;
     }
   }
   // Eagle (2×2 tile) — solid while alive. Once destroyed the game ends so
@@ -1076,6 +1194,7 @@ function makePlayer(): Tank {
     treadFrame: 0,
     treadAcc: 0,
     creating: SPAWN_ANIM_MS,
+    hasBoat: false,
   };
 }
 
@@ -1110,6 +1229,7 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
           treadFrame: 0,
           treadAcc: 0,
           creating: SPAWN_ANIM_MS,
+          hasBoat: false,
         // spawnInvuln stays 0 — the creating phase already grants protection.
         };
       }
@@ -1367,18 +1487,33 @@ function drawEagle(
   ctx.fillRect(x, y, TANK_SIZE, TANK_SIZE);
 }
 
+const BONUS_SP: Record<BonusKind, { x: number; y: number; w: number; h: number }> = {
+  grenade: SP.bonusGrenade,
+  helmet:  SP.bonusHelmet,
+  clock:   SP.bonusClock,
+  shovel:  SP.bonusShovel,
+  tank:    SP.bonusTank,
+  star:    SP.bonusStar,
+  gun:     SP.bonusGun,
+  boat:    SP.bonusBoat,
+};
+const BONUS_EMOJI: Record<BonusKind, string> = {
+  grenade: "💣", helmet: "🪖", clock: "⏱", shovel: "🛠",
+  tank:    "🛡", star:   "⭐", gun:   "🔫", boat:   "🚤",
+};
+
 function drawBonus(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, b: Bonus) {
   // Blink: invisible 100ms out of every 500ms
   if ((Date.now() % 500) < 100) return;
-  const src = b.kind === "helmet" ? SP.bonusHelmet : SP.bonusStar;
+  const src = BONUS_SP[b.kind];
   if (blit(ctx, atlas, src, b.x, b.y, TANK_SIZE, TANK_SIZE)) return;
-  // Fallback
+  // Fallback when the atlas hasn't loaded yet
   ctx.fillStyle = "rgba(0,0,0,0.35)";
   ctx.fillRect(b.x, b.y, TANK_SIZE, TANK_SIZE);
   ctx.font = `${TILE * 1.4}px serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(b.kind === "helmet" ? "🪖" : "⭐", b.x + TANK_SIZE / 2, b.y + TANK_SIZE / 2 + 1);
+  ctx.fillText(BONUS_EMOJI[b.kind], b.x + TANK_SIZE / 2, b.y + TANK_SIZE / 2 + 1);
 }
 
 function drawBullet(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null, b: Bullet) {
@@ -1418,6 +1553,11 @@ function drawTank(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null,
 
   // Brief invulnerability flicker right after the create-flash ends.
   if (t.spawnInvuln > 0 && Math.floor(t.spawnInvuln / 100) % 2 === 0) return;
+
+  // 🚤 Boat overlay sits *underneath* the tank hull, so we blit it first.
+  if (t.isPlayer && t.hasBoat && atlas) {
+    ctx.drawImage(atlas, SP.boatPlayer.x, SP.boatPlayer.y, SP.boatPlayer.w, SP.boatPlayer.h, t.x, t.y, TANK_SIZE, TANK_SIZE);
+  }
 
   const dirIdx = DIR_INDEX[t.dir];
   // Each tank type's sprite block: 4 columns × 2 rows of 32×32 frames.
