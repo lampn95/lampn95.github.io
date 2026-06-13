@@ -592,10 +592,14 @@ export function TankBattleGame() {
         if (now > e.aiNextTurnAt || blocked) {
           let dir: Dir;
           if (blocked) {
-            // Deadlock breaker: try every non-current direction (perpendicular
-            // first, reverse as last resort), pick the FIRST one that isn't
-            // also blocked. Two enemies head-on used to both pick perpendicular
-            // and stay stuck if perpendicular itself was walled in.
+            // Deadlock breaker. Probe every non-current direction with a
+            // 1-px reach (more permissive than the 3-px "look-ahead" used
+            // for the blocked check itself) — escape is easier than entry.
+            // If everything is still blocked at the 1-px probe (rare: tank
+            // genuinely walled in on all four sides), fall back to a random
+            // non-current direction so the AI doesn't freeze mid-corridor
+            // when a neighbour is creeping toward it. The direction change
+            // shifts the AI's next-frame evaluation away from the wedge.
             const originalDir = e.dir;
             const shuffle = <T,>(arr: T[]) => {
               for (let i = arr.length - 1; i > 0; i--) {
@@ -608,15 +612,15 @@ export function TankBattleGame() {
             const opposites: Record<Dir, Dir> = { up: "down", down: "up", left: "right", right: "left" };
             const perps: Dir[] = shuffle(isHoriz ? ["up", "down"] : ["left", "right"]);
             const candidates: Dir[] = [...perps, opposites[originalDir]];
-            dir = originalDir; // fallback to current if all blocked
+            let chose: Dir | null = null;
             for (const cand of candidates) {
-              e.dir = cand;
-              if (!isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current)) {
-                dir = cand;
+              const v = DIR_VEC[cand];
+              if (!tankBlocksAt(map, e.x + v.x, e.y + v.y, e, enemyObstacles, eagleAliveRef.current, brickStatesRef.current)) {
+                chose = cand;
                 break;
               }
             }
-            e.dir = originalDir;
+            dir = chose ?? candidates[Math.floor(Math.random() * candidates.length)];
           } else if (Math.random() < prof.targetBias) {
             const dx = targetPos.x - (e.x + TANK_SIZE / 2);
             const dy = targetPos.y - (e.y + TANK_SIZE / 2);
