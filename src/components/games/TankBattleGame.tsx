@@ -1613,10 +1613,18 @@ function accumulateTread(t: Tank, dt: number, before: { x: number; y: number }) 
 }
 
 function pickEmptySpot(map: TileKind[]): { x: number; y: number } | null {
+  // Bonus sprite is 2 × 2 tiles, so we need 4 empty cells. Restrict y to the
+  // 1..STAGE_ROWS-3 band so the bonus never spawns on the eagle's footprint
+  // or in the very top row.
   for (let attempt = 0; attempt < 30; attempt++) {
     const x = Math.floor(Math.random() * (STAGE_COLS - 2));
     const y = Math.floor(Math.random() * (STAGE_ROWS - 4)) + 1;
-    if (map[idx(x, y)] === "empty" && map[idx(x + 1, y)] === "empty") {
+    if (
+      map[idx(x,     y    )] === "empty" &&
+      map[idx(x + 1, y    )] === "empty" &&
+      map[idx(x,     y + 1)] === "empty" &&
+      map[idx(x + 1, y + 1)] === "empty"
+    ) {
       return { x, y };
     }
   }
