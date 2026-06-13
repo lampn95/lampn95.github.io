@@ -196,6 +196,17 @@ export const translations = {
   "type.activeWord":      { en: "Typing",               vi: "Đang gõ" },
   "type.nothingActive":   { en: "Type a letter to lock onto a word",
                             vi: "Gõ một chữ để khoá vào một word" },
+
+  "tank.lives":           { en: "Lives",                vi: "Mạng" },
+  "tank.enemies":         { en: "Left",                 vi: "Còn" },
+  "tank.win":             { en: "Round clear",          vi: "Hết đợt" },
+  "tank.winHint":         { en: "All tanks down. Generate a new map?",
+                            vi: "Hạ hết xe tăng. Tạo map mới chứ?" },
+  "tank.gameOver":        { en: "Tank down",            vi: "Tank đã rớt" },
+  "tank.gameOverHint":    { en: "Out of lives. The next map will be different.",
+                            vi: "Hết mạng. Map sau sẽ khác." },
+  "tank.fire":            { en: "Fire",                 vi: "Bắn" },
+  "tank.newMap":          { en: "New map",              vi: "Map mới" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

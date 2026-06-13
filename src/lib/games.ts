@@ -76,6 +76,22 @@ export const games: Game[] = [
     highScoreLabel: { en: "stacks typed",           vi: "stacks đã gõ" },
     accent: "from-blue-400 via-indigo-400 to-purple-400",
   },
+  {
+    slug: "tank-battle",
+    emoji: "🚜",
+    title: { en: "Tank Battle",                     vi: "Tank Battle" },
+    blurb: {
+      en: "A small tribute to Battle City. Random map each round. Bust five enemy tanks to win — don't let the brick walls fool you.",
+      vi: "Một lời tri ân nhỏ tới Tank 1990. Map random mỗi ván. Hạ 5 xe tăng địch để thắng — coi chừng tường gạch.",
+    },
+    controls: {
+      en: "Arrow keys / WASD to move · Space to fire · D-pad + Fire on mobile",
+      vi: "Mũi tên / WASD để chạy · Space để bắn · D-pad + Fire trên mobile",
+    },
+    highScoreKey: "lampham-tank-best",
+    highScoreLabel: { en: "tanks busted",           vi: "tank đã hạ" },
+    accent: "from-orange-400 via-red-400 to-rose-400",
+  },
 ];
 
 export function getGameBySlug(slug: string): Game | undefined {
