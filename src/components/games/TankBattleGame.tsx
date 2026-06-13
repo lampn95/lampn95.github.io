@@ -687,10 +687,15 @@ export function TankBattleGame() {
             e.dir = dir;
             snapTankToLane(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
           }
-          // Upstream m_keep_direction_time = rand()%800 + 100, applied AFTER
-          // every direction choice. The bumped path stays slightly shorter so
-          // the tank doesn't immediately re-steer into the same wall.
-          e.aiNextTurnAt = now + (blocked ? 50 : AI_TURN_MIN_MS) + Math.random() * AI_TURN_RANGE_MS;
+          // After a deadlock break the tank commits to its new direction
+          // for 800-1800 ms — long enough to move several tiles AWAY from
+          // the wall it just bounced off. With the previous 50-850 ms
+          // window the tank would re-pick toward the target almost
+          // immediately, slam into the same wall, and oscillate. The
+          // normal (non-blocked) re-pick interval matches upstream's
+          // m_keep_direction_time = rand()%800 + 100.
+          e.aiNextTurnAt = now + (blocked ? 800 : AI_TURN_MIN_MS)
+                          + Math.random() * (blocked ? 1000 : AI_TURN_RANGE_MS);
         }
         const before = { x: e.x, y: e.y };
         tryMove(e, dt * PLAYER_SPEED * TILE * e.speedMul, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current);
