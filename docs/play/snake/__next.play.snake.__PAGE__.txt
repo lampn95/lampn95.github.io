@@ -2,5 +2,5 @@
 2:I[84649,["/_next/static/chunks/0b3rxp08qknjt.js","/_next/static/chunks/0t2xr05rlu96l.js","/_next/static/chunks/02zgqwayhm-bd.js"],"SnakeGame"]
 3:I[97367,["/_next/static/chunks/0b3rxp08qknjt.js","/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/02zgqwayhm-bd.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"-IUVZotUFBGN45ckT9-s2"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/02zgqwayhm-bd.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"t1UUlwHX6lpP2CIYDXzJs"}
 5:null

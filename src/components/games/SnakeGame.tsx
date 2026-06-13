@@ -97,15 +97,14 @@ export function SnakeGame() {
       bugRef.current.y * CELL + CELL / 2,
     );
 
-    // Snake
+    // Snake — gradient from cyan head to green tail
     const snake = snakeRef.current;
     for (let i = 0; i < snake.length; i++) {
       const seg = snake[i];
-      const t = i / Math.max(1, snake.length - 1);
-      // Head gradient: cyan → green tail
-      const r = Math.round(124 + (110 - 124) * t);
-      const g = Math.round(242 + (242 - 242) * t);
-      const b = Math.round(255 + (110 - 255) * t);
+      const u = i / Math.max(1, snake.length - 1);
+      const r = Math.round(124 + (110 - 124) * u);
+      const g = Math.round(242 + (242 - 242) * u);
+      const b = Math.round(255 + (110 - 255) * u);
       ctx.fillStyle = `rgb(${r},${g},${b})`;
       const pad = i === 0 ? 1 : 2;
       ctx.fillRect(

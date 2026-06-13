@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { games } from "@/lib/games";
 import { useLang, useT } from "@/lib/i18n";
-import { GameShell, useBestScore } from "./GameShell";
+import { GameShell } from "./GameShell";
 
 type Pair = {
   id: string;
@@ -32,10 +32,8 @@ export function MemoryMatchGame() {
   const game = games.find((g) => g.slug === "memory-match")!;
   const t = useT();
   const { lang } = useLang();
-  // For memory match, "best" = fewest moves. We store best as a regular high
-  // score (higher = better is the usual semantic), but for this game we
-  // re-purpose: store negative so the larger-is-better hook still picks the
-  // best one. Easier: use a separate small storage helper inline.
+  // Memory Match: "best" = FEWEST moves, so it uses a custom inline storage
+  // rather than the shared useBestScore() hook (which is for higher-is-better).
   const [best, setBest] = useState<number | null>(null);
   useEffect(() => {
     try {
@@ -46,17 +44,16 @@ export function MemoryMatchGame() {
     }
   }, [game.highScoreKey]);
   const submitBest = (moves: number) => {
-    if (best == null || moves < best) {
-      setBest(moves);
+    setBest((prev) => {
+      if (prev != null && moves >= prev) return prev;
       try {
         localStorage.setItem(game.highScoreKey, String(moves));
       } catch {
         /* ignore */
       }
-    }
+      return moves;
+    });
   };
-  // satisfy unused-helper lint (keep API symmetry with other games)
-  void useBestScore;
 
   const [cards, setCards] = useState<Card[]>(() => shuffle());
   const [openA, setOpenA] = useState<number | null>(null);

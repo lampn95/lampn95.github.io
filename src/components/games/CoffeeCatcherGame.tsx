@@ -108,9 +108,6 @@ export function CoffeeCatcherGame() {
 
     // Collide with basket / floor
     const bx = basketXRef.current;
-    const newScore = (s: number) => {
-      setScore(s);
-    };
     let scoreDelta = 0;
     const next: Falling[] = [];
     for (const it of itemsRef.current) {
@@ -120,20 +117,17 @@ export function CoffeeCatcherGame() {
           continue;
         }
       }
-      if (it.y > H + 20) continue; // off screen
+      if (it.y > H + 20) continue; // off-screen, drop it
       next.push(it);
     }
     itemsRef.current = next;
     if (scoreDelta !== 0) {
-      // Use functional update so we don't capture stale score.
+      // Functional update so we don't capture a stale `score`.
       setScore((s) => Math.max(0, s + scoreDelta));
     }
 
     // Draw
     draw(canvasRef.current, itemsRef.current, basketXRef.current);
-
-    // Suppress unused-var warning for inner helper
-    void newScore;
 
     return true;
   }, [score, submitBest]);
