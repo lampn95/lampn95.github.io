@@ -287,6 +287,10 @@ export function TankBattleGame() {
   const [running, setRunning]           = useState(false);
   const [over, setOver]                 = useState<null | "win" | "lose-lives" | "lose-eagle" | "stage-clear">(null);
   const [muted, setMuted]               = useState(false);
+  // HUD-only mirrors of the player's progressive upgrades, sampled each frame
+  // so the user can see what star count / boat status they currently have.
+  const [playerStars, setPlayerStars]   = useState(0);
+  const [playerHasBoat, setPlayerHasBoat] = useState(false);
 
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { livesRef.current = lives; }, [lives]);
@@ -356,6 +360,8 @@ export function TankBattleGame() {
     setLives(MAX_LIVES);
     scoreRef.current = 0;
     livesRef.current = MAX_LIVES;
+    setPlayerStars(0);
+    setPlayerHasBoat(false);
     setOver(null);
   }, [loadStage]);
 
@@ -505,14 +511,31 @@ export function TankBattleGame() {
         if (now > e.aiNextTurnAt || blocked) {
           let dir: Dir;
           if (blocked) {
-            // Deadlock breaker: when bumped against terrain or another tank,
-            // ALWAYS pick a perpendicular direction. Two enemies meeting
-            // head-on used to both re-pick toward the same target and get
-            // stuck for seconds; now they peel apart cleanly.
-            const isHoriz = e.dir === "left" || e.dir === "right";
-            dir = isHoriz
-              ? (Math.random() < 0.5 ? "up"   : "down")
-              : (Math.random() < 0.5 ? "left" : "right");
+            // Deadlock breaker: try every non-current direction (perpendicular
+            // first, reverse as last resort), pick the FIRST one that isn't
+            // also blocked. Two enemies head-on used to both pick perpendicular
+            // and stay stuck if perpendicular itself was walled in.
+            const originalDir = e.dir;
+            const shuffle = <T,>(arr: T[]) => {
+              for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+              }
+              return arr;
+            };
+            const isHoriz = originalDir === "left" || originalDir === "right";
+            const opposites: Record<Dir, Dir> = { up: "down", down: "up", left: "right", right: "left" };
+            const perps: Dir[] = shuffle(isHoriz ? ["up", "down"] : ["left", "right"]);
+            const candidates: Dir[] = [...perps, opposites[originalDir]];
+            dir = originalDir; // fallback to current if all blocked
+            for (const cand of candidates) {
+              e.dir = cand;
+              if (!isBlockedAhead(e, map, enemyObstacles, eagleAliveRef.current, brickStatesRef.current)) {
+                dir = cand;
+                break;
+              }
+            }
+            e.dir = originalDir;
           } else if (Math.random() < prof.targetBias) {
             const dx = targetPos.x - (e.x + TANK_SIZE / 2);
             const dy = targetPos.y - (e.y + TANK_SIZE / 2);
@@ -823,10 +846,18 @@ export function TankBattleGame() {
         });
       }
 
+      // 9. Sync player upgrades into HUD state (only when they actually
+      //    change, so React doesn't re-render every frame).
+      const cp = playerRef.current;
+      if (cp) {
+        if (cp.starLevel !== playerStars)  setPlayerStars(cp.starLevel);
+        if (cp.hasBoat   !== playerHasBoat) setPlayerHasBoat(cp.hasBoat);
+      }
+
       redraw();
       return true;
     },
-    [over, redraw, respawnPlayer, submitBest, tryFire],
+    [over, playerStars, playerHasBoat, redraw, respawnPlayer, submitBest, tryFire],
   );
 
   // ──────────────── rAF ────────────────
@@ -940,15 +971,26 @@ export function TankBattleGame() {
         </div>
         <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 flex items-center gap-2">
           <span aria-label="lives">
-            {Array.from({ length: MAX_LIVES }, (_, i) => (
-              <span key={i} className={i < lives ? "text-rose-300" : "text-white/15"} aria-hidden>♥</span>
-            ))}
+            {lives <= MAX_LIVES
+              ? Array.from({ length: MAX_LIVES }, (_, i) => (
+                  <span key={i} className={i < lives ? "text-rose-300" : "text-white/15"} aria-hidden>♥</span>
+                ))
+              : <span className="text-rose-300 font-semibold">♥ ×{lives}</span>}
           </span>
           <span className="text-white/30">·</span>
           <span>
             <span className="text-white/45">{t("tank.enemies")}: </span>
             <span className="text-white font-semibold">{enemiesLeft}</span>
           </span>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 flex items-center gap-2"
+             title={`Star ${playerStars}/${MAX_STAR_LEVEL}`}>
+          <span aria-label={`stars ${playerStars}`}>
+            {Array.from({ length: MAX_STAR_LEVEL }, (_, i) => (
+              <span key={i} className={i < playerStars ? "text-amber-300" : "text-white/15"} aria-hidden>★</span>
+            ))}
+          </span>
+          {playerHasBoat && <span className="text-cyan-300" aria-label="boat">🚤</span>}
         </div>
         <button
           type="button"
