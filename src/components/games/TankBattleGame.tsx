@@ -79,13 +79,37 @@ type EnemyProfile = {
   fireOnlyInFront: boolean;
   /** Y origin of this tank's sprite block inside atlas.png (4 dirs × 2 treads at 32 px each). */
   atlasY: number;
+  /** NES Battle-City score per kill (Tank A 100, B 200, C 300, D 400). */
+  score: number;
+  /** Tank C fires 1.3× speed bullets (matches upstream Enemy::fire). */
+  bulletSpeedMul: number;
 };
 const ENEMY_PROFILES: Record<EnemyType, EnemyProfile> = {
-  A: { speedMul: 1.0, targetBias: 0.8, target: "player", fireOnlyInFront: false, atlasY: 0   },
-  B: { speedMul: 1.3, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, atlasY: 64  },
-  C: { speedMul: 1.0, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, atlasY: 128 },
-  D: { speedMul: 1.0, targetBias: 0.5, target: "player", fireOnlyInFront: true,  atlasY: 192 },
+  A: { speedMul: 1.0, targetBias: 0.8, target: "player", fireOnlyInFront: false, atlasY: 0,   score: 100, bulletSpeedMul: 1   },
+  B: { speedMul: 1.3, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, atlasY: 64,  score: 200, bulletSpeedMul: 1   },
+  C: { speedMul: 1.0, targetBias: 0.5, target: "eagle",  fireOnlyInFront: false, atlasY: 128, score: 300, bulletSpeedMul: 1.3 },
+  D: { speedMul: 1.0, targetBias: 0.5, target: "player", fireOnlyInFront: true,  atlasY: 192, score: 400, bulletSpeedMul: 1   },
 };
+
+/** Upstream Game::generateEnemyIfPossible distributes armor across stages.
+ *  Early stages: almost always armor 1. Late stages: more 2/3/4-armor tanks. */
+function pickArmorForStage(stage: number): number {
+  let a: number, b: number, c: number;
+  if (stage <= 17) {
+    a = -0.040625 * stage + 0.940625;
+    b = -0.028125 * stage + 0.978125;
+    c = -0.014375 * stage + 0.994375;
+  } else {
+    a = -0.012778 * stage + 0.467222;
+    b = -0.025000 * stage + 0.925000;
+    c = -0.036111 * stage + 1.363889;
+  }
+  const p = Math.random();
+  if (p < a) return 1;
+  if (p < b) return 2;
+  if (p < c) return 3;
+  return 4;
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
  * Sprite atlas coordinates (from upstream src/spriteconfig.cpp).
@@ -163,7 +187,10 @@ type Tank = {
   treadFrame: number;      // 0 / 1 — toggles while the tank is moving
   treadAcc: number;        // ms accumulator for tread frame switching
   creating: number;        // ms remaining of the create-flash (untouchable)
-  hasBoat: boolean;        // 🚤 Boat bonus — lets this tank cross water
+  hasBoat: boolean;        // 🚤 Boat bonus — lets this tank cross water,
+                           // absorbs one hit and is then removed.
+  armor: number;           // enemies: 1..4, 1 = 1-hit kill, higher = needs more
+  bonusDrop: boolean;      // enemy is "bonus" → drops a random bonus on death
 };
 
 type Bullet = {
@@ -356,6 +383,7 @@ export function TankBattleGame() {
     // sprite (BULLET_RENDER) is drawn centered on that point too.
     const c = tankCenter(tank);
     const v = DIR_VEC[tank.dir];
+    const enemyBulletMul = tank.type ? ENEMY_PROFILES[tank.type].bulletSpeedMul : 1;
     bulletsRef.current.push({
       id: nextId(),
       x: c.x - BULLET_HITBOX / 2 + v.x * (TANK_SIZE / 2 - 1),
@@ -364,7 +392,9 @@ export function TankBattleGame() {
       ownerId: tank.id,
       fromPlayer: tank.isPlayer,
       power: tank.isPlayer && tank.starLevel >= 3 ? 1 : 0,
-      speedMul: tank.isPlayer && tank.starLevel >= 1 ? STAR_BULLET_SPEED_MUL : 1,
+      speedMul: tank.isPlayer
+        ? (tank.starLevel >= 1 ? STAR_BULLET_SPEED_MUL : 1)
+        : enemyBulletMul,
     });
     if (tank.isPlayer) sound.play(TANK_SOUNDS.fire.id, TANK_SOUNDS.fire.vol);
   }, []);
@@ -419,7 +449,7 @@ export function TankBattleGame() {
       ) {
         const idx = ENEMIES_PER_STAGE - remainingSpawnsRef.current;
         const type = ENEMY_TYPE_SCRIPT[idx % ENEMY_TYPE_SCRIPT.length];
-        const e = makeEnemy(map, enemiesRef.current, p, type);
+        const e = makeEnemy(map, enemiesRef.current, p, type, stageIdxRef.current + 1);
         if (e) {
           enemiesRef.current.push(e);
           remainingSpawnsRef.current -= 1;
@@ -576,17 +606,46 @@ export function TankBattleGame() {
             const e = enemiesRef.current[i];
             if (e.creating > 0 || e.spawnInvuln > 0) continue;
             if (bulletHitsTank(b, e)) {
+              consumed = true;
+              freeOwnerBullet(b);
+              // Armored enemies absorb hits until armor reaches 1.
+              if (e.armor > 1) {
+                e.armor -= 1;
+                sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
+                spawnBulletFx(effectsRef.current, b);
+                break;
+              }
+              // Armor 1 → destroyed for real.
               spawnTankFx(effectsRef.current, e.x, e.y);
+              const earned = ENEMY_PROFILES[e.type!].score;
+              const wasBonus = e.bonusDrop;
+              const ex = e.x, ey = e.y;
               enemiesRef.current.splice(i, 1);
               setEnemiesLeft((x) => x - 1);
               setScore((s) => {
-                const ns = s + 1;
+                const ns = s + earned;
                 scoreRef.current = ns;
                 return ns;
               });
-              consumed = true;
-              freeOwnerBullet(b);
               sound.play(TANK_SOUNDS.enemyDestroyed.id, TANK_SOUNDS.enemyDestroyed.vol);
+              // 🎁 Bonus enemy → drop a random bonus on a nearby empty cell.
+              //    (Matches the famous "flashing red enemy = bonus" rule.)
+              if (wasBonus && !bonusRef.current) {
+                const spot = pickEmptySpot(map) ?? {
+                  x: Math.floor(ex / TILE),
+                  y: Math.floor(ey / TILE),
+                };
+                bonusRef.current = {
+                  id: nextId(),
+                  kind: BONUS_KINDS[Math.floor(Math.random() * BONUS_KINDS.length)],
+                  x: spot.x * TILE,
+                  y: spot.y * TILE,
+                  bornAt: now,
+                };
+                // Reset the drop timer so a regular bonus doesn't appear
+                // right after this one.
+                lastBonusAtRef.current = now;
+              }
               break;
             }
           }
@@ -598,6 +657,12 @@ export function TankBattleGame() {
             // Shield protects without losing a life.
             if (curP.shield > 0 || curP.spawnInvuln > 0) {
               // absorbed
+            } else if (curP.hasBoat) {
+              // 🚤 Boat absorbs ONE hit then disappears (upstream
+              // Player::respawn — boat is removed before life is subtracted).
+              curP.hasBoat = false;
+              spawnBulletFx(effectsRef.current, b);
+              sound.play(TANK_SOUNDS.brickHit.id, TANK_SOUNDS.brickHit.vol);
             } else {
               spawnTankFx(effectsRef.current, curP.x, curP.y);
               sound.play(TANK_SOUNDS.playerDestroyed.id, TANK_SOUNDS.playerDestroyed.vol);
@@ -687,17 +752,19 @@ export function TankBattleGame() {
               cur.hasBoat = true;
               break;
             case "grenade": {
-              // Wipe every alive enemy on the map.
+              // Wipe every alive enemy on the map. Score adds up per-type.
               const killed = enemiesRef.current.length;
+              let earned = 0;
               for (const e of enemiesRef.current) {
                 spawnTankFx(effectsRef.current, e.x, e.y);
+                earned += ENEMY_PROFILES[e.type!].score;
               }
               enemiesRef.current = [];
               if (killed > 0) {
                 sound.play(TANK_SOUNDS.enemyDestroyed.id, TANK_SOUNDS.enemyDestroyed.vol);
                 setEnemiesLeft((x) => x - killed);
                 setScore((s) => {
-                  const ns = s + killed;
+                  const ns = s + earned;
                   scoreRef.current = ns;
                   return ns;
                 });
@@ -953,7 +1020,10 @@ export function TankBattleGame() {
       </div>
 
       <p className="mt-4 text-center text-[11px] text-white/40 font-mono">
-        💣 wipe enemies · 🪖 10s shield · ⏱ 8s freeze · 🛠 15s steel walls · 🛡 +1 life · ⭐ upgrade · 🔫 max stars · 🚤 cross water
+        💣 wipe · 🪖 10s shield · ⏱ 8s freeze · 🛠 15s steel walls · 🛡 +1 life · ⭐ upgrade · 🔫 max stars · 🚤 cross water (absorbs 1 hit)
+      </p>
+      <p className="mt-1 text-center text-[11px] text-white/30 font-mono">
+        Flashing red tank drops a bonus · armored tanks need multiple hits · ⭐⭐⭐ bullets plow through bushes
       </p>
     </GameShell>
   );
@@ -1281,10 +1351,15 @@ function makePlayer(): Tank {
     treadAcc: 0,
     creating: SPAWN_ANIM_MS,
     hasBoat: false,
+    armor: 1,
+    bonusDrop: false,
   };
 }
 
-function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type: EnemyType): Tank | null {
+function makeEnemy(
+  map: TileKind[], existing: Tank[], player: Tank | null,
+  type: EnemyType, stageNumber: number,
+): Tank | null {
   const cols = [0, Math.floor(STAGE_COLS / 2) - 1, STAGE_COLS - 2];
   const tryCols = cols.sort(() => Math.random() - 0.5);
   for (const tx of tryCols) {
@@ -1316,6 +1391,9 @@ function makeEnemy(map: TileKind[], existing: Tank[], player: Tank | null, type:
           treadAcc: 0,
           creating: SPAWN_ANIM_MS,
           hasBoat: false,
+          armor: pickArmorForStage(stageNumber),
+          // ~12% of upstream enemy spawns drop a bonus when killed.
+          bonusDrop: Math.random() < 0.12,
         // spawnInvuln stays 0 — the creating phase already grants protection.
         };
       }
@@ -1394,20 +1472,34 @@ function checkBulletTerrain(
     if (!inBounds(s.tx, s.ty)) continue;
     const k = idx(s.tx, s.ty);
     const tile = map[k];
+    if (tile === "bush") {
+      // 3-star bullets PLOW through bushes, destroying every one in their
+      // path (upstream stage_environment.cpp:248 — "Do not stop bullet on
+      // bush, it allows to destroy all of bushes on the bullet way, when
+      // damages are increased"). Non-3-star bullets just pass through
+      // without affecting the bush.
+      if (b.power > 0) map[k] = "empty";
+      continue;
+    }
     if (tile === "brick") {
       const sub = brickSubRect(brickStates[k], s.tx * TILE, s.ty * TILE);
       if (!sub) continue;
       if (!rectsOverlap(b.x, b.y, BULLET_HITBOX, BULLET_HITBOX, sub.x, sub.y, sub.w, sub.h)) {
-        // Brick is here but the remaining half doesn't cover the bullet's
-        // hitbox — the bullet sails through this cell. Try the secondary.
+        // Remaining brick half doesn't cover the bullet — sails through.
         continue;
       }
-      const newState = nextBrickState(brickStates[k], b.dir);
-      if (newState === 9) {
+      if (b.power > 0) {
+        // 3-star bullet shatters the whole brick in one shot.
         brickStates[k] = 0;
         map[k] = "empty";
       } else {
-        brickStates[k] = newState;
+        const newState = nextBrickState(brickStates[k], b.dir);
+        if (newState === 9) {
+          brickStates[k] = 0;
+          map[k] = "empty";
+        } else {
+          brickStates[k] = newState;
+        }
       }
       return "brick";
     }
@@ -1680,6 +1772,22 @@ function drawTank(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement | null,
   } else {
     ctx.fillStyle = t.isPlayer ? "#7cf2ff" : "#f87171";
     ctx.fillRect(t.x, t.y, TANK_SIZE, TANK_SIZE);
+  }
+
+  // 🎁 Bonus enemy — pulsing red overlay so the player can spot the
+  // "flashing red tank" that drops a bonus when killed.
+  if (!t.isPlayer && t.bonusDrop) {
+    const pulse = (Math.sin(Date.now() / 110) + 1) / 2; // 0..1
+    ctx.fillStyle = `rgba(248, 113, 113, ${0.18 + 0.35 * pulse})`;
+    ctx.fillRect(t.x, t.y, TANK_SIZE, TANK_SIZE);
+  }
+
+  // 🛡 Armored enemy hint — thin coloured ring per remaining-armor level
+  // so the player can tell how many hits are left.
+  if (!t.isPlayer && t.armor > 1) {
+    ctx.strokeStyle = t.armor >= 4 ? "#fde68a" : t.armor === 3 ? "#fb923c" : "#fca5a5";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(t.x + 0.5, t.y + 0.5, TANK_SIZE - 1, TANK_SIZE - 1);
   }
 
   // Shield ring (helmet bonus) — overlay on top of the sprite
