@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Maximize, Minimize, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { asset } from "@/lib/config";
 import { games } from "@/lib/games";
 import { useT } from "@/lib/i18n";
@@ -264,6 +264,7 @@ export function TankBattleGame() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const atlasRef  = useRef<HTMLImageElement | null>(null);
+  const wrapRef   = useRef<HTMLDivElement>(null);
 
   // Game state (mutable, lives in refs so rAF doesn't tear)
   const mapRef = useRef<TileKind[]>([]);
@@ -312,6 +313,7 @@ export function TankBattleGame() {
   const [muted, setMuted]               = useState(false);
   const [paused, setPaused]             = useState(false);
   const [mode, setMode]                 = useState<"normal" | "super-funny">("normal");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   // HUD-only mirrors of the player's progressive upgrades, sampled each frame
   // so the user can see what star count / boat status they currently have.
   const [playerStars, setPlayerStars]   = useState(0);
@@ -347,6 +349,30 @@ export function TankBattleGame() {
 
   const toggleMute = useCallback(() => {
     setMuted(sound.toggleMuted());
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (typeof document === "undefined") return;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if (wrapRef.current) {
+        await wrapRef.current.requestFullscreen();
+      }
+    } catch {
+      // Some browsers reject the request (Safari needs a user gesture in
+      // direct response, iOS doesn't allow it at all). Fail quietly — the
+      // game stays in its non-fullscreen layout.
+    }
+  }, []);
+
+  // Sync the local state with the browser's fullscreenElement so the icon
+  // flips when the user presses Esc / F11 / the system gesture.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const sync = () => setIsFullscreen(document.fullscreenElement === wrapRef.current);
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
   }, []);
 
   // ──────────────── stage loading ────────────────
@@ -1170,6 +1196,14 @@ export function TankBattleGame() {
 
   return (
     <GameShell game={game}>
+      <div
+        ref={wrapRef}
+        className={
+          isFullscreen
+            ? "fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-3 p-4 overflow-auto"
+            : ""
+        }
+      >
       <div className="flex items-center justify-between gap-2 text-sm font-mono flex-wrap">
         <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5">
           <span className="text-white/45">Stage: </span>
@@ -1228,6 +1262,15 @@ export function TankBattleGame() {
         >
           {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
         </button>
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          className="rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors"
+        >
+          {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+        </button>
       </div>
 
       <div className="relative mt-4 flex justify-center">
@@ -1235,7 +1278,12 @@ export function TankBattleGame() {
           ref={canvasRef}
           width={W}
           height={H}
-          className="rounded-2xl border border-white/10 bg-black/40 shadow-[0_20px_60px_rgba(0,0,0,0.55)] max-w-full touch-none"
+          className={
+            "rounded-2xl border border-white/10 bg-black/40 shadow-[0_20px_60px_rgba(0,0,0,0.55)] touch-none "
+            + (isFullscreen
+                ? "max-w-[min(95vmin,calc(100vh-140px))] max-h-[min(95vmin,calc(100vh-140px))] w-auto h-auto"
+                : "max-w-full")
+          }
           style={{ touchAction: "none", imageRendering: "pixelated" }}
         />
 
@@ -1332,6 +1380,7 @@ export function TankBattleGame() {
       <p className="mt-1 text-center text-[11px] text-white/30 font-mono">
         Flashing red tank drops a bonus · armored tanks need multiple hits · ⭐⭐⭐ bullets plow through bushes
       </p>
+      </div>
     </GameShell>
   );
 }
