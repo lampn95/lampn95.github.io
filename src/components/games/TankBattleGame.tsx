@@ -53,6 +53,10 @@ const BONUS_DROP_PROB          = 0.12;   // generateEnemyIfPossible — 12% bonu
 const TREAD_FRAME_MS = 60;            // tread animation period
 const SPAWN_ANIM_MS = 900;            // ST_CREATE: 10 frames × 100 ms (animation_time)
 const SPAWN_ANIM_FRAMES = 10;
+const STAGE_END_MS = 5_000;           // upstream Game::stage_end_time — auto
+                                      // advance to the next stage after this
+                                      // delay so the player sees the cleared
+                                      // map instead of waiting on a button.
 // Star progression (Player::changeStarCountBy):
 //   0 stars: base bullet, 1 in flight (NES feel; upstream lets you have 2)
 //   1 star : 1.3× faster bullet, still 1 in flight
@@ -314,6 +318,12 @@ export function TankBattleGame() {
   const [paused, setPaused]             = useState(false);
   const [mode, setMode]                 = useState<"normal" | "super-funny">("normal");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // Countdown shown on the "stage-clear" intermission so the player sees
+  // the auto-advance window tick down. Set on stage-clear, decremented to 0.
+  const [stageEndCountdown, setStageEndCountdown] = useState(0);
+  // Snapshot of the score at stage-start so the intermission can show "this
+  // stage" delta vs the run total.
+  const stageStartScoreRef = useRef(0);
   // HUD-only mirrors of the player's progressive upgrades, sampled each frame
   // so the user can see what star count / boat status they currently have.
   const [playerStars, setPlayerStars]   = useState(0);
@@ -407,6 +417,7 @@ export function TankBattleGame() {
     stageIdxRef.current = idx;
     setStageNum(idx + 1);
     setEnemiesLeft(ENEMIES_PER_STAGE);
+    stageStartScoreRef.current = scoreRef.current;
   }, []);
 
   const reset = useCallback(() => {
@@ -518,6 +529,28 @@ export function TankBattleGame() {
     setRunning(true);
     sound.play(TANK_SOUNDS.stageStart.id, TANK_SOUNDS.stageStart.vol);
   }, [loadStage]);
+
+  // Auto-advance from the "stage cleared" intermission after STAGE_END_MS
+  // — upstream Game::StageEndingState waits stage_end_time (5 s) then
+  // transitions out automatically. The user can still skip with the
+  // explicit "Next" button on the overlay if they're impatient.
+  useEffect(() => {
+    if (over !== "stage-clear") {
+      setStageEndCountdown(0);
+      return;
+    }
+    setStageEndCountdown(Math.ceil(STAGE_END_MS / 1000));
+    const interval = setInterval(() => {
+      setStageEndCountdown((c) => (c > 0 ? c - 1 : 0));
+    }, 1000);
+    const timer = setTimeout(() => {
+      handleNextStage();
+    }, STAGE_END_MS);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [over, handleNextStage]);
 
   // ──────────────── tank helpers ────────────────
   const tryFire = useCallback((tank: Tank, now: number) => {
@@ -1357,9 +1390,14 @@ export function TankBattleGame() {
           <Overlay>
             <div className="text-2xl">🏆</div>
             <p className="text-lg font-semibold text-white">{t("tank.win")} {stageNum}</p>
-            <p className="text-sm text-white/65">{t("tank.winHint")}</p>
+            <p className="text-sm font-mono text-white/65">
+              This stage: <span className="text-amber-300">+{score - stageStartScoreRef.current}</span>
+            </p>
             <FinalLine score={score} best={best} t={t} />
             {isNewBest && <p className="text-sm text-amber-300 font-medium">{t("game.newBest")}</p>}
+            <p className="text-xs text-white/45 mt-1">
+              Auto-advancing in {stageEndCountdown}s…
+            </p>
             <button onClick={handleNextStage} className={primaryBtn}>{t("tank.newMap")}</button>
           </Overlay>
         )}
