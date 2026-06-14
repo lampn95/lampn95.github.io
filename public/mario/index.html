@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Super Mario Bros — lampn portfolio</title>
+    <meta name="description" content="A JS clone of Super Mario Bros. (NES) by Garrett Johnson (MIT). Embedded on lampn95.github.io.">
+    <meta name="viewport" content="width=device-width">
+    <meta name="robots" content="noindex"><!-- the embedded standalone, real page is /play/mario/ -->
+
+    <link rel="stylesheet" href="css/game.css">
+    <style>
+      html, body { background: #000; }
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; }
+      canvas { background-color: #6b8cff; image-rendering: pixelated; max-width: 100%; height: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.55); border-radius: 8px; }
+      .info { color: #94a3b8; font-family: ui-monospace, monospace; font-size: 11px; text-align: center; padding: 0 12px; line-height: 1.5; }
+      .info a { color: #67e8f9; text-decoration: none; }
+      .info a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript" src="js/util.js"></script>
+    <script type="text/javascript" src="js/input.js"></script>
+    <script type="text/javascript" src="js/resources.js"></script>
+    <script type="text/javascript" src="js/sprite.js"></script>
+    <script type="text/javascript" src="js/entity.js"></script>
+    <script type="text/javascript" src="js/pipe.js"></script>
+    <script type="text/javascript" src="js/mushroom.js"></script>
+    <script type="text/javascript" src="js/fireflower.js"></script>
+    <script type="text/javascript" src="js/star.js"></script>
+    <script type="text/javascript" src="js/fireball.js"></script>
+    <script type="text/javascript" src="js/coin.js"></script>
+    <script type="text/javascript" src="js/bcoin.js"></script>
+    <script type="text/javascript" src="js/goomba.js"></script>
+    <script type="text/javascript" src="js/koopa.js"></script>
+    <script type="text/javascript" src="js/floor.js"></script>
+    <script type="text/javascript" src="js/block.js"></script>
+    <script type="text/javascript" src="js/rubble.js"></script>
+    <script type="text/javascript" src="js/prop.js"></script>
+    <script type="text/javascript" src="js/player.js"></script>
+    <script type="text/javascript" src="js/flag.js"></script>
+    <script type="text/javascript" src="js/levels/level.js"></script>
+    <script type="text/javascript" src="js/levels/11.js"></script>
+    <script type="text/javascript" src="js/levels/11tunnel.js"></script>
+    <script type="text/javascript" src="js/game.js"></script>
+
+    <div class="info">
+      Move: ← → ↑ ↓ · Jump: X · Run / Fireball: Z<br>
+      Clone of Super Mario Bros. by <a href="https://github.com/reruns/mario" target="_blank" rel="noopener">Garrett Johnson</a> (MIT). Mario, sprites &amp; sounds © Nintendo.
+    </div>
+  </body>
+</html>

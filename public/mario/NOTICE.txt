@@ -1,0 +1,17 @@
+All files in this folder are reused from the open-source project
+"mario" (gh-pages branch) by Garrett Johnson:
+
+    https://github.com/reruns/mario
+
+Licensed under the MIT License (Copyright (c) 2017 Garrett Johnson).
+See the upstream repository for the full LICENSE text.
+
+The graphics, sounds, and original design of Super Mario Bros. are
+all owned by Nintendo. This embed is for demonstration only.
+
+Files included:
+- index.html (lightly tweaked: layout, viewport, attribution credit)
+- js/*       (all source files, unchanged)
+- sprites/*  (all sprite sheets)
+- sounds/*   (all music & SFX)
+- css/*      (game.css)

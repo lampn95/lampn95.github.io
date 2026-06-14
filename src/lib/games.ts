@@ -92,6 +92,22 @@ export const games: Game[] = [
     highScoreLabel: { en: "tanks busted",           vi: "tank đã hạ" },
     accent: "from-orange-400 via-red-400 to-rose-400",
   },
+  {
+    slug: "mario",
+    emoji: "🍄",
+    title: { en: "Super Mario Bros 1-1",            vi: "Super Mario Bros 1-1" },
+    blurb: {
+      en: "An MIT-licensed JS clone of the NES classic by Garrett Johnson. World 1-1 + the underground tunnel — embedded here as a tribute.",
+      vi: "Bản port JS (MIT) game NES huyền thoại của Garrett Johnson. World 1-1 + hầm — nhúng vào đây như một lời tri ân.",
+    },
+    controls: {
+      en: "Arrow keys to move · X to jump · Z to run / shoot fireballs",
+      vi: "Phím mũi tên để chạy · X để nhảy · Z để chạy nhanh / bắn fireball",
+    },
+    highScoreKey: "lampham-mario-best",      // unused — upstream has no score persistence
+    highScoreLabel: { en: "score",            vi: "điểm" },
+    accent: "from-rose-500 via-amber-400 to-emerald-400",
+  },
 ];
 
 export function getGameBySlug(slug: string): Game | undefined {
