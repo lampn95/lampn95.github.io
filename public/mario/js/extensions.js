@@ -121,21 +121,48 @@
       this.blocks[y][x] = block;
     };
 
-    // World 1-2 — remix of 1-1: same geometry, extra enemies + a star.
-    // Loader is patched per-level by the watcher below so the cycle is
-    //   1-1 → 1-2 → 1-1 → 1-2 → …
+    // World 1-2 — remix of 1-1: same geometry + extra enemies + a star.
+    // The upstream only ships ONE level layout (11.js), so each "new
+    // world" reuses it with more pressure layered on top.
     Mario.onetwo = function () {
-      Mario.oneone();          // build the base 1-1 level
-      level._world = '1-2';    // tag so the HUD can see it
-      level.loader = Mario.oneone; // backstop — overridden below anyway
-      // More goombas in the gaps where 1-1 was lonely.
+      Mario.oneone();
+      level._world = '1-2';
+      level.loader = Mario.onethree;
       [30, 45, 60, 80, 135, 155, 180].forEach(function (x) {
         level.putGoomba(x, x === 80 ? 4 : 12);
       });
       level.putKoopa(70, 11);
       level.putKoopa(140, 11);
-      // A star up top — gives ~11 s of invincibility.
       level.putQBlock(40, 5, new Mario.Star([40 * 16, 5 * 16]));
+    };
+
+    // World 1-3 — even more enemies, fewer power-ups, koopa heavy.
+    Mario.onethree = function () {
+      Mario.oneone();
+      level._world = '1-3';
+      level.loader = Mario.onefour;
+      [25, 38, 55, 90, 105, 130, 165, 185].forEach(function (x) {
+        level.putGoomba(x, 12);
+      });
+      [60, 85, 120, 150, 175].forEach(function (x) {
+        level.putKoopa(x, 11);
+      });
+    };
+
+    // World 1-4 — boss-rush feel: enemies clustered near the flag.
+    Mario.onefour = function () {
+      Mario.oneone();
+      level._world = '1-4';
+      level.loader = Mario.oneone;        // → cycle back to 1-1
+      // Pack the final approach with goombas + koopas.
+      for (var x = 140; x <= 195; x += 4) level.putGoomba(x, 12);
+      [150, 160, 170, 180, 190].forEach(function (x) {
+        level.putKoopa(x, 11);
+      });
+      // Compensate with a star, fire flower, and an extra 1-up.
+      level.putQBlock(30, 5, new Mario.Star([30 * 16, 5 * 16]));
+      level.putQBlock(60, 5, new Mario.Fireflower([60 * 16, 5 * 16]));
+      level.putHiddenBlock(110, 5, new Mario.OneUp([110 * 16, 5 * 16]));
     };
 
     return true;
@@ -144,7 +171,8 @@
   // ─── Level-loaded watcher ───────────────────────────────────────────
   // Re-runs whenever the level object is replaced so we can:
   //   - inject the hidden 1-up on World 1-1
-  //   - patch level.loader to advance to the next world on win
+  //   - patch level.loader so the first-load 1-1 advances to 1-2 (the
+  //     later worlds set their own loader pointer when they build).
   var lastLevel = null;
   var injectedFor = null;
   var watcher = setInterval(function () {
@@ -155,19 +183,23 @@
 
     updateHUD();
 
-    // Patch loader to advance worlds.
+    // First-load 1-1 (no `_world` tag) → its built-in loader is
+    // Mario.oneone (loops to itself). Patch to Mario.onetwo so the
+    // chain becomes 1-1 → 1-2 → 1-3 → 1-4 → 1-1 → …
     if (level.loader === Mario.oneone && !level._world) {
-      // Standalone 1-1 (not via onetwo) → winning advances to 1-2.
+      level._world = '1-1';
       level.loader = Mario.onetwo;
-    } else if (level._world === '1-2') {
-      // 1-2 → cycle back to 1-1 (rely on default loader Mario.oneone).
-      level.loader = Mario.oneone;
     }
+
+    console.info('[mario] World', worldLabel(), '— loader →',
+      level.loader === Mario.oneone   ? 'Mario.oneone' :
+      level.loader === Mario.onetwo   ? 'Mario.onetwo' :
+      level.loader === Mario.onethree ? 'Mario.onethree' :
+      level.loader === Mario.onefour  ? 'Mario.onefour' : '?');
 
     // Inject the hidden 1-up at the classic SMB 1-1 location once per
     // visit to that level (tile 94, 5 — above the 4-pipe section).
-    var worldId = level._world || (level.exit === 204 && level.loader === Mario.onetwo ? '1-1' : null);
-    if (worldId === '1-1' && injectedFor !== level) {
+    if (level._world === '1-1' && injectedFor !== level) {
       try {
         level.putHiddenBlock(94, 5, new Mario.OneUp([94 * 16, 5 * 16]));
         injectedFor = level;
