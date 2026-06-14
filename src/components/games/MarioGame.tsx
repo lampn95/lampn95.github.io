@@ -38,9 +38,37 @@ export function MarioGame() {
     return () => document.removeEventListener("fullscreenchange", sync);
   }, []);
 
+  // Refocus the iframe so keys land in the game window. Called after every
+  // HUD button click (clicking a button moves focus to it) and on the very
+  // first load so the player doesn't have to click the canvas before keys
+  // work.
+  const refocusGame = useCallback(() => {
+    try { iframeRef.current?.contentWindow?.focus(); } catch { /* same-origin only */ }
+  }, []);
+
   const restart = useCallback(() => {
-    // Quickest way to restart this kind of vanilla-JS game: reload the iframe.
+    // Quickest way to restart this vanilla-JS game: reload the iframe.
     if (iframeRef.current) iframeRef.current.src = iframeRef.current.src;
+    // The onLoad handler below will refocus once the new document is ready.
+  }, []);
+
+  // The upstream input handler doesn't call preventDefault on arrow keys.
+  // While the iframe has focus that's fine (the iframe document captures
+  // them), but the moment focus drifts to my HUD button or the Next.js
+  // shell, the next ↑/↓ scrolls the page. Swallow those keys in the
+  // wrapper while the game is active.
+  useEffect(() => {
+    const swallow = (e: KeyboardEvent) => {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+        // Don't preventDefault if the active element is in our HUD buttons
+        // — let the user tab around the controls if they want.
+        const ae = document.activeElement as HTMLElement | null;
+        if (ae && ae.tagName === "BUTTON") return;
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", swallow);
+    return () => window.removeEventListener("keydown", swallow);
   }, []);
 
   return (
@@ -66,7 +94,7 @@ export function MarioGame() {
           </div>
           <button
             type="button"
-            onClick={restart}
+            onClick={() => { restart(); /* iframe onLoad refocuses */ }}
             aria-label="Restart"
             title="Restart"
             className="rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors"
@@ -75,7 +103,7 @@ export function MarioGame() {
           </button>
           <button
             type="button"
-            onClick={toggleFullscreen}
+            onClick={async () => { await toggleFullscreen(); refocusGame(); }}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             className="rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors"
@@ -84,37 +112,33 @@ export function MarioGame() {
           </button>
         </div>
 
-        <div className="relative mt-4 flex justify-center">
-          {/* The iframe loads the upstream's index.html verbatim. Aspect-ratio
-             keeps the 762:720 (~1.058) canvas shape under any width. */}
+        {/* Sized box around the iframe — aspect-ratio + viewport-based caps
+            keep the 762:720 canvas snug in both normal and fullscreen modes
+            without relying on hand-calculated heights. */}
+        <div
+          className="relative mt-4 mx-auto rounded-2xl border border-white/10 bg-black shadow-[0_20px_60px_rgba(0,0,0,0.55)] overflow-hidden"
+          style={
+            isFullscreen
+              ? {
+                  width: "min(calc(100vw - 32px), calc((100vh - 100px) * 762 / 720))",
+                  aspectRatio: "762 / 720",
+                }
+              : {
+                  width: "100%",
+                  maxWidth: "762px",
+                  aspectRatio: "762 / 720",
+                }
+          }
+          onClick={refocusGame}
+        >
           <iframe
             ref={iframeRef}
             src={asset("/mario/index.html")}
             title="Super Mario Bros 1-1"
-            className={
-              "rounded-2xl border border-white/10 bg-black shadow-[0_20px_60px_rgba(0,0,0,0.55)] " +
-              (isFullscreen ? "" : "w-full max-w-[min(95vmin,762px)]")
-            }
-            style={
-              isFullscreen
-                ? {
-                    width: "min(95vmin, calc(100vw - 32px))",
-                    height: "calc(min(95vmin, calc(100vw - 32px)) * 720 / 762)",
-                    maxHeight: "calc(100vh - 140px)",
-                  }
-                : {
-                    aspectRatio: "762 / 720",
-                    height: "auto",
-                  }
-            }
+            className="block w-full h-full bg-black"
             allow="autoplay; fullscreen"
             tabIndex={0}
-            onLoad={(e) => {
-              // Focus the iframe so the keyboard events land in the game
-              // window straight away — without this the player has to click
-              // the canvas first.
-              try { e.currentTarget.contentWindow?.focus(); } catch { /* cross-origin (n/a here) */ }
-            }}
+            onLoad={refocusGame}
           />
         </div>
 
