@@ -93,6 +93,22 @@ export const games: Game[] = [
     accent: "from-orange-400 via-red-400 to-rose-400",
   },
   {
+    slug: "flappy-bird",
+    emoji: "🐤",
+    title: { en: "Flappy Bird",                     vi: "Flappy Bird" },
+    blurb: {
+      en: "A clean-room tribute to the one-button classic. Tap to flap, thread the pipes — physics ported from the open-source JS-Flappy-Bird.",
+      vi: "Một bản tri ân clean-room cho huyền thoại một-nút. Chạm để vỗ cánh, luồn qua ống — physics port từ JS-Flappy-Bird mã nguồn mở.",
+    },
+    controls: {
+      en: "Tap / click · Space · ↑ · W to flap",
+      vi: "Chạm / click · Space · ↑ · W để vỗ cánh",
+    },
+    highScoreKey: "lampham-flappy-best",
+    highScoreLabel: { en: "pipes cleared",          vi: "ống đã qua" },
+    accent: "from-sky-400 via-cyan-300 to-emerald-300",
+  },
+  {
     slug: "mario",
     emoji: "🍄",
     title: { en: "Super Mario Bros 1-1",            vi: "Super Mario Bros 1-1" },
