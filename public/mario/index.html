@@ -9,12 +9,9 @@
 
     <link rel="stylesheet" href="css/game.css">
     <style>
-      html, body { background: #000; }
-      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; }
-      canvas { background-color: #6b8cff; image-rendering: pixelated; max-width: 100%; height: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.55); border-radius: 8px; }
-      .info { color: #94a3b8; font-family: ui-monospace, monospace; font-size: 11px; text-align: center; padding: 0 12px; line-height: 1.5; }
-      .info a { color: #67e8f9; text-decoration: none; }
-      .info a:hover { text-decoration: underline; }
+      html, body { background: #000; margin: 0; padding: 0; }
+      body { display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+      canvas { background-color: #6b8cff; image-rendering: pixelated; max-width: 100vw; max-height: 100vh; height: auto; }
     </style>
   </head>
   <body>
@@ -81,10 +78,5 @@
         }, 250);
       })();
     </script>
-
-    <div class="info">
-      Move: ← → ↑ ↓ · Jump: X · Run / Fireball: Z<br>
-      Clone of Super Mario Bros. by <a href="https://github.com/reruns/mario" target="_blank" rel="noopener">Garrett Johnson</a> (MIT). Mario, sprites &amp; sounds © Nintendo.
-    </div>
   </body>
 </html>
