@@ -43,6 +43,45 @@
     <script type="text/javascript" src="js/levels/11tunnel.js"></script>
     <script type="text/javascript" src="js/game.js"></script>
 
+    <!-- Two upstream UX papercuts patched here, without touching game.js: -->
+    <script>
+      // 1) Modern browsers block <audio>.play() without a user gesture.
+      //    The upstream calls music.overworld.play() at level-load time
+      //    which silently rejects and never retries — so the player never
+      //    hears music. Force a retry on the FIRST keydown or pointerdown.
+      (function () {
+        var start = function () {
+          try {
+            if (typeof music !== 'undefined' && music.overworld) {
+              var p = music.overworld.play();
+              if (p && p.catch) p.catch(function () { /* still blocked */ });
+            }
+          } catch (e) { /* not initialised yet */ }
+          window.removeEventListener('keydown', start, true);
+          window.removeEventListener('pointerdown', start, true);
+        };
+        window.addEventListener('keydown', start, true);
+        window.addEventListener('pointerdown', start, true);
+      })();
+
+      // 2) Upstream Player.die() plays the death sound and freezes the
+      //    sprite, but never auto-restarts the level — the player is just
+      //    stuck on a black screen forever. Watch `player.dying` and reload
+      //    the iframe after the death animation finishes.
+      (function () {
+        var scheduled = false;
+        var watcher = setInterval(function () {
+          try {
+            if (typeof player !== 'undefined' && player.dying && !scheduled) {
+              scheduled = true;
+              clearInterval(watcher);
+              setTimeout(function () { window.location.reload(); }, 2800);
+            }
+          } catch (e) { /* not ready yet */ }
+        }, 250);
+      })();
+    </script>
+
     <div class="info">
       Move: ← → ↑ ↓ · Jump: X · Run / Fireball: Z<br>
       Clone of Super Mario Bros. by <a href="https://github.com/reruns/mario" target="_blank" rel="noopener">Garrett Johnson</a> (MIT). Mario, sprites &amp; sounds © Nintendo.
